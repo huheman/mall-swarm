@@ -5,9 +5,6 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: root
-    password: root
     druid:
       initial-size: 5 #连接池初始化大小
       min-idle: 10 #最小空闲连接数
@@ -21,8 +18,6 @@ spring:
     elasticsearch:
       repositories:
         enabled: true
-  elasticsearch:
-    uris: localhost:9200
 mybatis:
   mapper-locations:
     - classpath:dao/*.xml

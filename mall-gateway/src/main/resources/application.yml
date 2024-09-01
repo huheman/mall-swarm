@@ -41,12 +41,6 @@ spring:
             - Path=/mall-demo/**
           filters:
             - StripPrefix=1
-  data:
-    redis:
-      database: 0
-      port: 6379
-      host: localhost
-      password:
 secure:
   ignore:
     urls: #配置白名单路径
