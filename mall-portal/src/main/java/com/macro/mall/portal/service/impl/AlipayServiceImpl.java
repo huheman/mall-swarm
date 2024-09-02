@@ -1,6 +1,7 @@
 package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
@@ -131,6 +132,7 @@ public class AlipayServiceImpl implements AlipayService {
 
     @Override
     public String webPay(AliPayParam aliPayParam) {
+        log.info("webPay请求{}", JSON.toJSON(aliPayParam));
         AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest ();
         if(StrUtil.isNotEmpty(alipayConfig.getNotifyUrl())){
             //异步接收地址，公网可访问
@@ -154,6 +156,7 @@ public class AlipayServiceImpl implements AlipayService {
         String formHtml = null;
         try {
             formHtml = alipayClient.pageExecute(request).getBody();
+            log.info("webPay成功{}", formHtml);
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
