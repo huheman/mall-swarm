@@ -18,7 +18,6 @@
         <module>mall-portal</module>
         <module>mall-monitor</module>
         <module>mall-gateway</module>
-        <module>mall-auth</module>
     </modules>
 
     <parent>
