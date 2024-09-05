@@ -1,9 +1,6 @@
 package com.macro.mall.portal.domain;
 
-import com.macro.mall.model.CmsSubject;
-import com.macro.mall.model.PmsBrand;
-import com.macro.mall.model.PmsProduct;
-import com.macro.mall.model.SmsHomeAdvertise;
+import com.macro.mall.model.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +15,8 @@ import java.util.List;
 public class HomeContentResult {
     //轮播广告
     private List<SmsHomeAdvertise> advertiseList;
+    // 用productCategory作为game
+    private List<PmsProductCategory> gameList;
     //推荐品牌
     private List<PmsBrand> brandList;
     //当前秒杀场次
