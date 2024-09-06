@@ -142,8 +142,8 @@ public class HomeServiceImpl implements HomeService {
 
     private List<SmsHomeAdvertise> getHomeAdvertiseList() {
         SmsHomeAdvertiseExample example = new SmsHomeAdvertiseExample();
-        example.createCriteria().andTypeEqualTo(1).andStatusEqualTo(1);
-        example.setOrderByClause("sort desc");
+        example.createCriteria().andStatusEqualTo(1);
+        example.setOrderByClause("sort desc ,id desc");
         return advertiseMapper.selectByExample(example);
     }
 
