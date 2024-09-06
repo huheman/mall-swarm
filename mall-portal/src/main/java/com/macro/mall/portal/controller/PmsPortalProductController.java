@@ -44,6 +44,13 @@ public class PmsPortalProductController {
         return CommonResult.success(CommonPage.restPage(productList));
     }
 
+    @GetMapping("detailByCategory/{categoryId}")
+    @ResponseBody
+    public CommonResult<List<PmsPortalProductDetail>> detailByCategory(@PathVariable Long categoryId) {
+        List<PmsPortalProductDetail> list = portalProductService.detailByCategory(categoryId);
+        return CommonResult.success(list);
+    }
+
     @Operation(summary = "以树形结构获取所有商品分类")
     @RequestMapping(value = "/categoryTreeList", method = RequestMethod.GET)
     @ResponseBody

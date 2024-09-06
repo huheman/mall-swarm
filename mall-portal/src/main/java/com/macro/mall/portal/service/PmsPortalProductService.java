@@ -25,4 +25,6 @@ public interface PmsPortalProductService {
      * 获取前台商品详情
      */
     PmsPortalProductDetail detail(Long id);
+
+    List<PmsPortalProductDetail> detailByCategory(Long categoryId);
 }
