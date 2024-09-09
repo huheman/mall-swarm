@@ -9,14 +9,14 @@ import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.domain.SmsCouponHistoryDetail;
 import com.macro.mall.portal.service.UmsMemberCouponService;
 import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.CouponReceiveBO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -116,7 +116,8 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         UmsMember currentMember = memberService.getCurrentMember();
         Date now = new Date();
         //获取该用户所有优惠券
-        List<SmsCouponHistoryDetail> allList = couponHistoryDao.getDetailList(currentMember.getId());
+        List<SmsCouponHistoryDetail> allList = couponHistoryDao.getDetailList(currentMember.getId())
+                .stream().filter(smsCouponHistoryDetail -> smsCouponHistoryDetail.getCoupon() != null).toList();
         //根据优惠券使用类型来判断优惠券是否可用
         List<SmsCouponHistoryDetail> enableList = new ArrayList<>();
         List<SmsCouponHistoryDetail> disableList = new ArrayList<>();
@@ -189,9 +190,9 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             List<Long> couponIds = cpcrList.stream().map(SmsCouponProductCategoryRelation::getCouponId).collect(Collectors.toList());
             allCouponIds.addAll(couponIds);
         }
-        if(CollUtil.isEmpty(allCouponIds)){
-            return new ArrayList<>();
-        }
+//        if(CollUtil.isEmpty(allCouponIds)){
+//            return new ArrayList<>();
+//        }
         //所有优惠券
         SmsCouponExample couponExample = new SmsCouponExample();
         couponExample.createCriteria().andEndTimeGreaterThan(new Date())
@@ -203,6 +204,28 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 .andUseTypeNotEqualTo(0)
                 .andIdIn(allCouponIds));
         return couponMapper.selectByExample(couponExample);
+    }
+
+    public List<SmsCoupon> listByMember(Long member){
+        if (member == null){
+            return Collections.emptyList();
+        }
+        SmsCouponExample couponExample = new SmsCouponExample();
+        couponExample.createCriteria().andEndTimeGreaterThan(new Date())
+                .andStartTimeLessThan(new Date())
+                .andCountGreaterThan(0)
+                .andEnableTimeLessThan(new Date());
+        List<SmsCoupon> smsCoupons = couponMapper.selectByExample(couponExample);
+        if (smsCoupons.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Long> couponIds = smsCoupons.stream().map(SmsCoupon::getId).distinct().toList();
+        List<CouponReceiveBO> receiveCount = couponHistoryDao.countHistory(couponIds, member);
+        Map<Long, Long> map = new HashMap<>();
+        for (CouponReceiveBO couponReceiveBO : receiveCount) {
+            map.put(couponReceiveBO.getCouponId(), couponReceiveBO.getReceiveCount());
+        }
+        return smsCoupons.stream().filter(smsCoupon -> smsCoupon.getPerLimit() > map.getOrDefault(smsCoupon.getId(),0L)).toList();
     }
 
     @Override

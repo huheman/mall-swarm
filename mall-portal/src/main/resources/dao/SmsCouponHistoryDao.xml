@@ -50,4 +50,14 @@
             AND NOW() > c.end_time
         </if>
     </select>
+    <select id="countHistory" resultType="com.macro.mall.portal.service.bo.CouponReceiveBO">
+        SELECT coupon_id AS couponId, COUNT(*) AS receiveCount
+        FROM sms_coupon_history
+        WHERE coupon_id IN
+        <foreach item="couponId" index="index" collection="couponIds" open="(" separator="," close=")">
+            #{couponId}
+        </foreach>
+        and member_id = #{memberId}
+        GROUP BY coupon_id
+    </select>
 </mapper>

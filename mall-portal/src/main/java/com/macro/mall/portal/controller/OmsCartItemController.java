@@ -7,6 +7,7 @@ import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.UmsMemberService;
 
+import com.macro.mall.portal.service.bo.CartAttributeBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,12 @@ public class OmsCartItemController {
     @Autowired
     private UmsMemberService memberService;
 
+    @PostMapping("/updateAttr/{cartId}")
+    @ResponseBody
+    public CommonResult updateAttr(@RequestBody List<CartAttributeBO> attributeBOS, @PathVariable Long cartId) {
+        int count = cartItemService.updateAttribute(cartId, attributeBOS);
+        return CommonResult.success(count);
+    }
     @Operation(summary = "添加商品到购物车")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody

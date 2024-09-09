@@ -1,6 +1,9 @@
 package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.mapper.OmsCartItemMapper;
 import com.macro.mall.model.OmsCartItem;
 import com.macro.mall.model.OmsCartItemExample;
@@ -11,6 +14,7 @@ import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.CartAttributeBO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,6 +22,9 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +41,35 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private OmsPromotionService promotionService;
     @Autowired
     private UmsMemberService memberService;
+
+    public int updateAttribute(Long cartId, List<CartAttributeBO> cartAttributeBOList) {
+        OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(cartId);
+        JSONArray jsonArray = JSON.parseArray(omsCartItem.getProductAttr());
+        Map<String, String> replaceMap = cartAttributeBOList.stream().collect(Collectors.toMap(CartAttributeBO::getKey, cartAttributeBO -> cartAttributeBO.getValue()));
+        JSONArray finalAttr = new JSONArray();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String attrKey = jsonObject.getString("key");
+            if (replaceMap.containsKey(attrKey)) {
+                JSONObject unit = new JSONObject();
+                unit.put("key", attrKey);
+                unit.put("value", replaceMap.get(attrKey));
+                finalAttr.add(unit);
+                replaceMap.remove(attrKey);
+            } else {
+                finalAttr.add(jsonObject);
+            }
+        }
+        for (Map.Entry<String, String> stringStringEntry : replaceMap.entrySet()) {
+            JSONObject unit = new JSONObject();
+            unit.put("key", stringStringEntry.getKey());
+            unit.put("value", stringStringEntry.getValue());
+            finalAttr.add(unit);
+        }
+        omsCartItem.setProductAttr(finalAttr.toString());
+        // 要对一些内容进行校验
+        return cartItemMapper.updateByPrimaryKeySelective(omsCartItem);
+    }
 
     @Override
     public int add(OmsCartItem cartItem) {

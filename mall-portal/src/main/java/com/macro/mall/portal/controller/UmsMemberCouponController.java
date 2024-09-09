@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -79,5 +80,15 @@ public class UmsMemberCouponController {
     public CommonResult<List<SmsCoupon>> listByProduct(@PathVariable Long productId) {
         List<SmsCoupon> couponHistoryList = memberCouponService.listByProduct(productId);
         return CommonResult.success(couponHistoryList);
+    }
+
+    @GetMapping("/listByMember")
+    @ResponseBody
+    public CommonResult<List<SmsCoupon>> listByMember() {
+        if (memberService.getCurrentMember()==null){
+            return CommonResult.success(Collections.EMPTY_LIST);
+        }
+        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(memberService.getCurrentMember().getId());
+        return CommonResult.success(smsCoupons);
     }
 }

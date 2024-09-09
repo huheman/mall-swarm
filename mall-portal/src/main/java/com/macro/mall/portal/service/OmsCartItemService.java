@@ -3,6 +3,7 @@ package com.macro.mall.portal.service;
 import com.macro.mall.model.OmsCartItem;
 import com.macro.mall.portal.domain.CartProduct;
 import com.macro.mall.portal.domain.CartPromotionItem;
+import com.macro.mall.portal.service.bo.CartAttributeBO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  * Created by macro on 2018/8/2.
  */
 public interface OmsCartItemService {
+    int updateAttribute(Long cartId, List<CartAttributeBO> cartAttributeBOList);
     /**
      * 查询购物车中是否包含该商品，有增加数量，无添加到购物车
      */

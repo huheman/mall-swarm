@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.macro.mall.dao.PmsSkuStockDao">
     <insert id="insertList">
-        INSERT INTO pms_sku_stock (product_id, sku_code, price, stock, low_stock, pic, sale, sp_data) VALUES
+        INSERT INTO pms_sku_stock (product_id, sku_code, price, promotion_price,stock, low_stock, pic, sale, sp_data) VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.productId,jdbcType=BIGINT},
             #{item.skuCode,jdbcType=VARCHAR},
             #{item.price,jdbcType=DECIMAL},
+            #{item.promotionPrice,jdbcType=DECIMAL},
             #{item.stock,jdbcType=INTEGER},
             #{item.lowStock,jdbcType=INTEGER},
             #{item.pic,jdbcType=VARCHAR},
@@ -15,12 +16,13 @@
         </foreach>
     </insert>
     <insert id="replaceList">
-        REPLACE INTO pms_sku_stock (id,product_id, sku_code, price, stock, low_stock,pic, sale, sp_data) VALUES
+        REPLACE INTO pms_sku_stock (id,product_id, sku_code, price, promotion_price,stock, low_stock,pic, sale, sp_data) VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id,jdbcType=BIGINT},
             #{item.productId,jdbcType=BIGINT},
             #{item.skuCode,jdbcType=VARCHAR},
             #{item.price,jdbcType=DECIMAL},
+            #{item.promotionPrice,jdbcType=DECIMAL},
             #{item.stock,jdbcType=INTEGER},
             #{item.lowStock,jdbcType=INTEGER},
             #{item.pic,jdbcType=VARCHAR},

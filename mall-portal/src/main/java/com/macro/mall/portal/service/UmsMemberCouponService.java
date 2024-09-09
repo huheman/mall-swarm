@@ -38,4 +38,6 @@ public interface UmsMemberCouponService {
      * 获取用户优惠券列表
      */
     List<SmsCoupon> list(Integer useStatus);
+
+    List<SmsCoupon> listByMember(Long user);
 }
