@@ -55,9 +55,7 @@ public class OmsPortalOrderController {
     @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult paySuccess(@RequestParam Long orderId, @RequestParam Integer payType) {
-        log.info("paySuccess,orderId{},payType{}", orderId, payType);
         Integer count = portalOrderService.paySuccess(orderId, payType);
-        directChargeService.directCharge(orderId);
         return CommonResult.success(count, "支付成功");
     }
 

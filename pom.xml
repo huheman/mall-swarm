@@ -240,6 +240,13 @@
                 <artifactId>sa-token-jwt</artifactId>
                 <version>${sa-token.version}</version>
             </dependency>
+            <!--okhttp调用外部接口-->
+            <!-- okhttp3 依赖 -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.9.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -53,6 +53,7 @@ secure:
       - "/mall-admin/admin/login"
       - "/mall-admin/admin/register"
       - "/mall-admin/minio/upload"
+      - "/mall-portal/directCharge/**"
 management:
   endpoints:
     web:

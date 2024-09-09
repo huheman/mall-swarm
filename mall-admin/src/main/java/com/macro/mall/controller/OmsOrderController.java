@@ -40,10 +40,7 @@ public class OmsOrderController {
     @ResponseBody
     public CommonResult delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList) {
         int count = orderService.delivery(deliveryParamList);
-        if (count > 0) {
-            return CommonResult.success(count);
-        }
-        return CommonResult.failed();
+        return CommonResult.success(count);
     }
 
     @Operation(summary = "批量关闭订单")

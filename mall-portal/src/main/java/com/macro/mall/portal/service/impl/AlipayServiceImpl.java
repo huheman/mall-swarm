@@ -14,6 +14,7 @@ import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.portal.config.AlipayConfig;
 import com.macro.mall.portal.domain.AliPayParam;
 import com.macro.mall.portal.service.AlipayService;
+import com.macro.mall.portal.service.DirectChargeService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class AlipayServiceImpl implements AlipayService {
     private OmsOrderMapper orderMapper;
     @Autowired
     private OmsPortalOrderService portalOrderService;
+    @Autowired
+    private DirectChargeService directChargeService;
     @Override
     public String pay(AliPayParam aliPayParam) {
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
@@ -87,6 +90,7 @@ public class AlipayServiceImpl implements AlipayService {
                 log.info("notify方法被调用了，tradeStatus:{}",tradeStatus);
                 String outTradeNo = params.get("out_trade_no");
                 portalOrderService.paySuccessByOrderSn(outTradeNo,1);
+                directChargeService.directCharge(outTradeNo);
             }else{
                 log.warn("订单未支付成功，trade_status:{}",tradeStatus);
             }
