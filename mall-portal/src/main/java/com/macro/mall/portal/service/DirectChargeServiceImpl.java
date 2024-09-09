@@ -109,23 +109,26 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             return;
         }
 
+        OmsOrderItemExample example = new OmsOrderItemExample();
+        example.createCriteria().andOrderSnEqualTo(orderSN);
+        List<OmsOrderItem> omsOrderItems = omsOrderItemMapper.selectByExample(example);
+        Assert.notEmpty(omsOrderItems, "直充时找到的项目为空");
+        OmsOrderItem omsOrderItem = omsOrderItems.get(0);
+        String productAttr = omsOrderItem.getProductAttr();
+        String productSkuCode = omsOrderItem.getProductSkuCode();
+        if (productSkuCode == null || !productSkuCode.startsWith("xhs-")) {
+            log.info("小海兽的充值接口，skuCode必须以xhs-开头，并接上小海兽的id");
+            return;
+        }
+        String[] split = productSkuCode.split("-");
+        if (split.length != 2) {
+            log.info("小海兽的充值接口，skuCode必须以xhs-开头，并接上小海兽的id");
+            return;
+        }
+        String commodityId = split[1];
         // 如果有多个orderItem只取第一个
         try {
-            OmsOrderItemExample example = new OmsOrderItemExample();
-            example.createCriteria().andOrderSnEqualTo(orderSN);
-            List<OmsOrderItem> omsOrderItems = omsOrderItemMapper.selectByExample(example);
-            Assert.notEmpty(omsOrderItems, "直充时找到的项目为空");
-            OmsOrderItem omsOrderItem = omsOrderItems.get(0);
-            String productAttr = omsOrderItem.getProductAttr();
-            String productSkuCode = omsOrderItem.getProductSkuCode();
-            if (productSkuCode == null || !productSkuCode.startsWith("xhs-")) {
-                throw new IllegalAccessException("小海兽的充值接口，skuCode必须以xhs-开头，并接上小海兽的id");
-            }
-            String[] split = productSkuCode.split("-");
-            if (split.length != 2) {
-                throw new IllegalAccessException("小海兽的充值接口，skuCode必须以xhs-开头，并接上小海兽的id");
-            }
-            String commodityId = split[1];
+
             Map<String, String> productAttrMap = new HashMap<>();
             JSONArray spData = JSON.parseArray(productAttr);
             for (int i = 0; i < spData.size(); i++) {
