@@ -3,16 +3,17 @@ package com.macro.mall.portal.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.portal.component.SmsSender;
+import com.macro.mall.portal.service.IdentityService;
 import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.IdentityInfoBO;
+import com.macro.mall.portal.service.bo.IdentityResultBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +27,29 @@ import java.util.Map;
 @RequestMapping("/sso")
 public class UmsMemberController {
     @Autowired
+    private SmsSender smsSender;
+    @Autowired
     private UmsMemberService memberService;
     @Value("${sa-token.token-prefix}")
     private String tokenHead;
+    @Autowired
+    private IdentityService identityService;
+
+    @GetMapping("/identityInfo")
+    @ResponseBody
+    public CommonResult<IdentityResultBO> identityInfo() {
+        IdentityResultBO identityResultBO = identityService.identityIdNumber(memberService.getCurrentMember().getId());
+        return CommonResult.success(identityResultBO);
+    }
+
+    /*实名认证*/
+    @PostMapping("/identity")
+    @ResponseBody
+    public CommonResult<Boolean> identity(@RequestBody IdentityInfoBO identityInfoBO) {
+        Boolean identity = identityService.identity(memberService.getCurrentMember().getId(), identityInfoBO.getRealName(), identityInfoBO.getIdNo());
+        return CommonResult.success(identity);
+    }
+
 
     @Operation(summary = "会员注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -92,8 +113,8 @@ public class UmsMemberController {
     @ResponseBody
     public CommonResult getAuthCode(@RequestParam String telephone) {
         String authCode = memberService.generateAuthCode(telephone);
-
-        return CommonResult.success(authCode, "获取验证码成功");
+        smsSender.sendAuthCode(telephone, authCode);
+        return CommonResult.success( "获取验证码成功");
     }
 
     @Operation(summary = "修改密码")
