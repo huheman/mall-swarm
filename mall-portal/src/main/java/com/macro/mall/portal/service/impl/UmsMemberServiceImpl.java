@@ -16,6 +16,7 @@ import com.macro.mall.model.UmsMemberLevelExample;
 import com.macro.mall.portal.service.UmsMemberCacheService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.util.StpMemberUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
-    public void register(String username, String password, String telephone, String authCode) {
+    public UmsMember register(String username, String password, String telephone, String authCode) {
         //验证验证码
         if(!verifyAuthCode(authCode,telephone)){
             Asserts.fail("验证码错误");
@@ -92,6 +93,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         }
         memberMapper.insert(umsMember);
         umsMember.setPassword(null);
+        return umsMember;
     }
 
     @Override
@@ -179,6 +181,43 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         memberCacheService.delMember(userDto.getId());
         //再调用sa-token的登出方法
         StpMemberUtil.logout();
+    }
+
+    @Override
+    public SaTokenInfo loginByPhone(String phone, String authCode) {
+        if (StrUtil.isEmpty(phone)||StrUtil.isEmpty(authCode)){
+            return null;
+        }
+        boolean b = verifyAuthCode(authCode, phone);
+        if (!b) {
+            return null;
+        }
+        UmsMember member = getByPhone(phone);
+        if(member==null){
+            member = register(RandomStringUtils.randomAlphabetic(10),"",phone,authCode);
+        }
+        if(member.getStatus()!=1){
+            Asserts.fail("该账号已被禁用！");
+        }
+        // 登录校验成功后，一行代码实现登录
+        StpMemberUtil.login(member.getId());
+        UserDto userDto = new UserDto();
+        userDto.setId(member.getId());
+        userDto.setUsername(member.getUsername());
+        userDto.setClientId(AuthConstant.PORTAL_CLIENT_ID);
+        // 将用户信息存储到Session中
+        StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO,userDto);
+        // 获取当前登录用户Token信息
+        return StpUtil.getTokenInfo();
+    }
+
+    private UmsMember getByPhone(String phone) {
+        if (StrUtil.isEmpty(phone)) {
+            Asserts.fail("请填入手机号");
+        }
+        UmsMemberExample umsMemberExample = new UmsMemberExample();
+        umsMemberExample.createCriteria().andPhoneEqualTo(phone);
+        return memberMapper.selectByExample(umsMemberExample).stream().findFirst().orElse(null);
     }
 
     //对输入的验证码进行校验
