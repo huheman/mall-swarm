@@ -3,6 +3,7 @@ package com.macro.mall.portal.dao;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProduct;
+import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.portal.domain.FlashPromotionProduct;
 import org.apache.ibatis.annotations.Param;
 
@@ -37,4 +38,6 @@ public interface HomeDao {
      * 获取推荐专题
      */
     List<CmsSubject> getRecommendSubjectList(@Param("offset") Integer offset, @Param("limit") Integer limit);
+
+    List<PmsProductCategory> findHistoryGame(@Param("memberId") Long userId, @Param("parentId") Long parentId);
 }

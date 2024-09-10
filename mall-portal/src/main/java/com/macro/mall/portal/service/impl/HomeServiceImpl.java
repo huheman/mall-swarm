@@ -8,13 +8,20 @@ import com.macro.mall.portal.domain.FlashPromotionProduct;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.domain.HomeFlashPromotion;
 import com.macro.mall.portal.service.HomeService;
+import com.macro.mall.portal.service.bo.MemberProductBO;
 import com.macro.mall.portal.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 首页内容管理Service实现类
@@ -36,6 +43,8 @@ public class HomeServiceImpl implements HomeService {
     private PmsProductCategoryMapper productCategoryMapper;
     @Autowired
     private CmsSubjectMapper subjectMapper;
+    @Value("${game.product.parent.id}")
+    private Long gameProductParentId;
 
     @Override
     public HomeContentResult content() {
@@ -43,7 +52,7 @@ public class HomeServiceImpl implements HomeService {
         //获取首页广告
         result.setAdvertiseList(getHomeAdvertiseList());
         // 获取游戏，目前所有游戏都在56这个一级目录下
-        result.setGameList(getProductCateList(56L));
+        result.setGameList(getProductCateList(gameProductParentId));
         //获取推荐品牌
         // result.setBrandList(homeDao.getRecommendBrandList(0,6));
         //获取秒杀信息
@@ -100,6 +109,29 @@ public class HomeServiceImpl implements HomeService {
     public List<PmsProduct> newProductList(Integer pageNum, Integer pageSize) {
         int offset = pageSize * (pageNum - 1);
         return homeDao.getNewProductList(offset, pageSize);
+    }
+
+    @Override
+    public MemberProductBO hotGameList(Long userId) {
+        MemberProductBO memberProductBO = new MemberProductBO();
+        PmsProductCategoryExample example = new PmsProductCategoryExample();
+        example.createCriteria()
+                .andNavStatusEqualTo(1)
+                .andParentIdEqualTo(gameProductParentId);
+        example.setOrderByClause("sort desc ,id desc limit 5");
+
+        List<PmsProductCategory> hotGames = productCategoryMapper.selectByExample(example);
+        memberProductBO.setHotGames(hotGames);
+        Map<String, List<PmsProductCategory>> allMap = getProductCateList(gameProductParentId)
+                .stream()
+                .filter(pmsProductCategory -> pmsProductCategory.getKeywords() != null && !pmsProductCategory.getKeywords().isEmpty())
+                .collect(Collectors.groupingBy(PmsProductCategory::getKeywords));
+        memberProductBO.setAllGames(new TreeMap<>(allMap));
+        if (userId!=null){
+            List<PmsProductCategory> historyGames = homeDao.findHistoryGame(userId, gameProductParentId);
+            memberProductBO.setHistoryGames(historyGames);
+        }
+        return memberProductBO;
     }
 
     private HomeFlashPromotion getHomeFlashPromotion() {

@@ -73,4 +73,34 @@
             hs.sort DESC
         LIMIT #{offset}, #{limit};
     </select>
+    <select id="findHistoryGame" resultType="com.macro.mall.model.PmsProductCategory">
+        select
+            ppc.*
+        from
+            pms_product_category ppc
+        where
+            parent_id = #{parentId}
+          and id in (
+            select
+                DISTINCT pp.product_category_id
+            from
+                pms_product pp
+            where
+                id in (
+                    select
+                        distinct ooi.product_id
+                    from
+                        oms_order_item ooi
+                            join oms_order oo on
+                            ooi.order_id = oo.id
+                    where
+                        oo.member_id = #{memberId}
+                      and oo.status in (1, 2, 3)
+                      and oo.create_time >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                    order by
+                        oo.create_time desc
+                )
+        )
+            limit 5
+    </select>
 </mapper>

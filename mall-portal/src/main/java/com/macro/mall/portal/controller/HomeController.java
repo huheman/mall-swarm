@@ -4,9 +4,11 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.service.HomeService;
-
+import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.MemberProductBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 首页内容管理Controller
@@ -25,6 +28,8 @@ import java.util.List;
 public class HomeController {
     @Autowired
     private HomeService homeService;
+    @Autowired
+    private UmsMemberService memberService;
 
     @Operation(summary = "首页内容页信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)
@@ -32,6 +37,16 @@ public class HomeController {
     public CommonResult<HomeContentResult> content() {
         HomeContentResult contentResult = homeService.content();
         return CommonResult.success(contentResult);
+    }
+
+    @GetMapping("/hotGameList")
+    @ResponseBody
+    public CommonResult<MemberProductBO> getHotGameList() {
+        UmsMember currentMember = memberService.getCurrentMember();
+        Long userId = Optional.ofNullable(currentMember)
+                .map(UmsMember::getId).orElse(null);
+        MemberProductBO memberProductBO = homeService.hotGameList(userId);
+        return CommonResult.success(memberProductBO);
     }
 
     @Operation(summary = "分页获取推荐商品")
@@ -57,7 +72,7 @@ public class HomeController {
     public CommonResult<List<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
                                                          @RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                          @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<CmsSubject> subjectList = homeService.getSubjectList(cateId,pageSize,pageNum);
+        List<CmsSubject> subjectList = homeService.getSubjectList(cateId, pageSize, pageNum);
         return CommonResult.success(subjectList);
     }
 
@@ -66,7 +81,7 @@ public class HomeController {
     @ResponseBody
     public CommonResult<List<PmsProduct>> hotProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                          @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
-        List<PmsProduct> productList = homeService.hotProductList(pageNum,pageSize);
+        List<PmsProduct> productList = homeService.hotProductList(pageNum, pageSize);
         return CommonResult.success(productList);
     }
 
@@ -75,7 +90,7 @@ public class HomeController {
     @ResponseBody
     public CommonResult<List<PmsProduct>> newProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                          @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
-        List<PmsProduct> productList = homeService.newProductList(pageNum,pageSize);
+        List<PmsProduct> productList = homeService.newProductList(pageNum, pageSize);
         return CommonResult.success(productList);
     }
 }

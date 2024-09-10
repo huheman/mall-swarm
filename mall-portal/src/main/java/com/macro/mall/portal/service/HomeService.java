@@ -1,9 +1,11 @@
 package com.macro.mall.portal.service;
 
+import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.portal.domain.HomeContentResult;
+import com.macro.mall.portal.service.bo.MemberProductBO;
 
 import java.util.List;
 
@@ -44,4 +46,6 @@ public interface HomeService {
      * 分页获取新品推荐商品
      */
     List<PmsProduct> newProductList(Integer pageNum, Integer pageSize);
+
+    MemberProductBO hotGameList(Long userId);
 }
