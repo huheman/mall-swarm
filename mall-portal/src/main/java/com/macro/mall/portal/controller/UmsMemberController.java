@@ -35,6 +35,7 @@ public class UmsMemberController {
     @Autowired
     private IdentityService identityService;
 
+    @Operation(summary = "实名认证信息")
     @GetMapping("/identityInfo")
     @ResponseBody
     public CommonResult<IdentityResultBO> identityInfo() {
@@ -43,6 +44,7 @@ public class UmsMemberController {
     }
 
     /*实名认证*/
+    @Operation(summary = "实名认证")
     @PostMapping("/identity")
     @ResponseBody
     public CommonResult<Boolean> identity(@RequestBody IdentityInfoBO identityInfoBO) {
@@ -114,7 +116,7 @@ public class UmsMemberController {
     public CommonResult getAuthCode(@RequestParam String telephone) {
         String authCode = memberService.generateAuthCode(telephone);
         smsSender.sendAuthCode(telephone, authCode);
-        return CommonResult.success( "获取验证码成功");
+        return CommonResult.success(authCode, "获取验证码成功");
     }
 
     @Operation(summary = "修改密码")
