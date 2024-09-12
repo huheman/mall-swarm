@@ -116,7 +116,7 @@ public class UmsMemberController {
     public CommonResult getAuthCode(@RequestParam String telephone) {
         String authCode = memberService.generateAuthCode(telephone);
         smsSender.sendAuthCode(telephone, authCode);
-        return CommonResult.success(authCode, "获取验证码成功");
+        return CommonResult.success( "获取验证码成功");
     }
 
     @Operation(summary = "修改密码")

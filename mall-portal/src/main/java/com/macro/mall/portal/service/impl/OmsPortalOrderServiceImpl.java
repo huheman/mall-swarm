@@ -352,11 +352,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     public void confirmReceiveOrder(Long orderId) {
-        UmsMember member = memberService.getCurrentMember();
+        // UmsMember member = memberService.getCurrentMember();
         OmsOrder order = orderMapper.selectByPrimaryKey(orderId);
-        if (!member.getId().equals(order.getMemberId())) {
-            Asserts.fail("不能确认他人订单！");
-        }
+//        if (!member.getId().equals(order.getMemberId())) {
+//            Asserts.fail("不能确认他人订单！");
+//        }
         if (order.getStatus() != 2) {
             Asserts.fail("该订单还未发货！");
         }

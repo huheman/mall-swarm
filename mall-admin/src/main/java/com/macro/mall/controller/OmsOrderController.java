@@ -6,6 +6,7 @@ import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.service.OmsOrderService;
 
+import com.macro.mall.service.PortalOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ import java.util.List;
 public class OmsOrderController {
     @Autowired
     private OmsOrderService orderService;
+    @Autowired
+    private PortalOrderService portalOrderService;
 
     @Operation(summary = "查询订单")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
@@ -40,6 +43,9 @@ public class OmsOrderController {
     @ResponseBody
     public CommonResult delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList) {
         int count = orderService.delivery(deliveryParamList);
+        for (OmsOrderDeliveryParam omsOrderDeliveryParam : deliveryParamList) {
+            portalOrderService.confirmReceiveOrder(omsOrderDeliveryParam.getOrderId());
+        }
         return CommonResult.success(count);
     }
 

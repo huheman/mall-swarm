@@ -87,7 +87,6 @@ public class AlipayServiceImpl implements AlipayService {
             String tradeStatus = params.get("trade_status");
             if("TRADE_SUCCESS".equals(tradeStatus)){
                 result = "success";
-                log.info("notify方法被调用了，tradeStatus:{}",tradeStatus);
                 String outTradeNo = params.get("out_trade_no");
                 portalOrderService.paySuccessByOrderSn(outTradeNo,1);
                 directChargeService.directCharge(outTradeNo);

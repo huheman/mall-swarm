@@ -62,7 +62,7 @@ public class SmsSender {
             // 返回的resp是一个SendSmsResponse的实例，与请求对象对应
             SendSmsResponse resp = smsClient.SendSms(req);
             // 输出json格式的字符串回包
-            System.out.println(AbstractModel.toJsonString(resp));
+            log.info(AbstractModel.toJsonString(resp));
             return 1;
         } catch (Exception e) {
             log.error("发送短信失败", e);

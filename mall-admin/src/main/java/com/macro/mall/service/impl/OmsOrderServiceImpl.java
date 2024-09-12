@@ -39,6 +39,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    /*因为即氪发货就可以认为已经确认收货了*/
     public int delivery(List<OmsOrderDeliveryParam> deliveryParamList) {
         //批量发货
         int count = orderDao.delivery(deliveryParamList);

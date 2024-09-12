@@ -52,6 +52,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     private OmsOrderMapper orderMapper;
     @Autowired
     private FeignAdminService feignAdminService;
+    @Autowired
+    private OmsPortalOrderServiceImpl portalOrderService;
 
 
     private static final byte[] DIGITS = new byte[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -221,6 +223,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             }
             chargeDomain.success();
             directChargeDao.update(chargeDomain);
+            // 直接确认收货
+            portalOrderService.confirmReceiveOrder(chargeDomain.getOrderId());
         } else {
             log.error("直充接口失败，失败原因是" + body.getString("failReason"));
         }
