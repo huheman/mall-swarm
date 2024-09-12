@@ -23,5 +23,5 @@ public class AliPayParam {
     /**
      * 订单总金额，单位为元，精确到小数点后两位
      */
-    private BigDecimal totalAmount;
+    private Long orderId;
 }

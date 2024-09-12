@@ -74,11 +74,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         List<CartPromotionItem> cartPromotionItemList = cartItemService.listPromotion(currentMember.getId(), cartIds);
         result.setCartPromotionItemList(cartPromotionItemList);
         //获取用户收货地址列表
-        List<UmsMemberReceiveAddress> memberReceiveAddressList = memberReceiveAddressService.list();
+        List<UmsMemberReceiveAddress> memberReceiveAddressList = Collections.emptyList();
         result.setMemberReceiveAddressList(memberReceiveAddressList);
         //获取用户可用优惠券列表
-        List<SmsCouponHistoryDetail> couponHistoryDetailList = memberCouponService.listCart(cartPromotionItemList, 1);
-        result.setCouponHistoryDetailList(couponHistoryDetailList);
+        Map<Boolean, List<SmsCouponHistoryDetail>> booleanListMap = memberCouponService.listCartAll(cartPromotionItemList);
+        result.setCouponHistoryDetailList(booleanListMap.get(true));
+        result.setDisableCouponHistoryDetailList(booleanListMap.get(false));
         //获取用户积分
         result.setMemberIntegration(currentMember.getIntegration());
         //获取积分使用规则

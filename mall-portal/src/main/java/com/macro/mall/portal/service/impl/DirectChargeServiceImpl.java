@@ -95,11 +95,12 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             log.error("orderSN is null or empty");
             return;
         }
-        OmsOrderExample omsOrderExample = new OmsOrderExample();
-        omsOrderExample.createCriteria().andOrderSnEqualTo(orderSN);
+
         DirectChargeDomain chargeDomain = directChargeDao.selectByOrderSN(orderSN);
         // 如果充值记录已经存在了，并且充值状态不是充值失败，那么就不要处理了
         if (chargeDomain == null) {
+            OmsOrderExample omsOrderExample = new OmsOrderExample();
+            omsOrderExample.createCriteria().andOrderSnEqualTo(orderSN);
             List<OmsOrder> omsOrders = orderMapper.selectByExample(omsOrderExample);
             if (CollectionUtils.isEmpty(omsOrders)) {
                 log.error(orderSN + "orderSN对应的订单为空");

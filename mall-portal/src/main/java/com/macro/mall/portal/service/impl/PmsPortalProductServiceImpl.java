@@ -9,6 +9,7 @@ import com.macro.mall.portal.dao.PortalProductDao;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
 import com.macro.mall.portal.service.PmsPortalProductService;
+import com.macro.mall.portal.service.bo.ProductSkuBO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -122,19 +123,49 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
             result.setProductFullReductionList(productFullReductionList);
         }
         //商品可用优惠券
-        result.setCouponList(portalProductDao.getAvailableCouponList(product.getId(), product.getProductCategoryId()));
+//        result.setCouponList(portalProductDao.getAvailableCouponList(product.getId(), product.getProductCategoryId()));
         return result;
     }
 
     @Override
-    public List<PmsPortalProductDetail> detailByCategory(Long categoryId) {
+    public List<ProductSkuBO> detailByCategory(Long categoryId) {
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
+        criteria.andPublishStatusEqualTo(1);
         criteria.andProductCategoryIdEqualTo(categoryId);
         List<PmsProduct> pmsProducts = productMapper.selectByExample(productExample);
         return pmsProducts.parallelStream()
-                .map(pmsProduct -> detail(pmsProduct.getId())).toList();
+                .map(this::asSkuBO).toList();
+    }
+
+    private ProductSkuBO asSkuBO(PmsProduct pmsProduct) {
+        PmsSkuStockExample pmsSkuStockExample = new PmsSkuStockExample();
+        pmsSkuStockExample.createCriteria().andProductIdEqualTo(pmsProduct.getId())
+                .andStockGreaterThan(10);
+        List<PmsSkuStock> pmsSkuStocks = skuStockMapper.selectByExample(pmsSkuStockExample);
+        List<ProductSkuBO.SkuBO> list = pmsSkuStocks.parallelStream()
+                .map(pmsSkuStock -> {
+                    ProductSkuBO.SkuBO skuBO = new ProductSkuBO.SkuBO();
+                    skuBO.setProductId(pmsProduct.getId());
+                    skuBO.setSkuCode(pmsSkuStock.getSkuCode());
+                    skuBO.setPrice(pmsSkuStock.getPrice());
+                    skuBO.setId(pmsSkuStock.getId());
+                    skuBO.setSpData(pmsSkuStock.getSpData());
+                    // 如果处于促销时间段内，则显示促销
+                    if (pmsProduct.inQuickPromotion()) {
+                        skuBO.setPromotionPrice(pmsSkuStock.getPromotionPrice());
+                    }
+                    return skuBO;
+                }).toList();
+        ProductSkuBO productSkuBO = new ProductSkuBO();
+        productSkuBO.setProductId(pmsProduct.getId());
+        productSkuBO.setPic(pmsProduct.getPic());
+        productSkuBO.setSubTitle(pmsProduct.getSubTitle());
+        productSkuBO.setBrandName(pmsProduct.getBrandName());
+        productSkuBO.setName(pmsProduct.getName());
+        productSkuBO.setSkuStockList(list);
+        return productSkuBO;
     }
 
 

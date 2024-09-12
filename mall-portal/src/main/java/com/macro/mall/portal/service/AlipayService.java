@@ -12,10 +12,6 @@ import java.util.Map;
  * @github https://github.com/macrozheng
  */
 public interface AlipayService {
-    /**
-     * 根据提交参数生成电脑支付页面
-     */
-    String pay(AliPayParam aliPayParam);
 
     /**
      * 支付宝异步回调处理

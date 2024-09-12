@@ -38,12 +38,9 @@ public class OmsCartItemController {
     @Operation(summary = "添加商品到购物车")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult add(@RequestBody OmsCartItem cartItem) {
-        int count = cartItemService.add(cartItem);
-        if (count > 0) {
-            return CommonResult.success(count);
-        }
-        return CommonResult.failed();
+    public CommonResult<Long> add(@RequestBody OmsCartItem cartItem) {
+        Long cartItemId = cartItemService.add(cartItem);
+        return CommonResult.success(cartItemId);
     }
 
     @Operation(summary = "获取某个会员的购物车列表")
@@ -82,16 +79,6 @@ public class OmsCartItemController {
         return CommonResult.success(cartProduct);
     }
 
-    @Operation(summary = "修改购物车中商品的规格")
-    @RequestMapping(value = "/update/attr", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult updateAttr(@RequestBody OmsCartItem cartItem) {
-        int count = cartItemService.updateAttr(cartItem);
-        if (count > 0) {
-            return CommonResult.success(count);
-        }
-        return CommonResult.failed();
-    }
 
     @Operation(summary = "删除购物车中的某个商品")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)

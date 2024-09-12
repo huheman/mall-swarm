@@ -1,6 +1,7 @@
 package com.macro.mall.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -510,4 +511,17 @@ public class PmsProduct implements Serializable {
         sb.append("]");
         return sb.toString();
     }
+
+    /**
+     * 在直接促销期间
+     *
+     * @return
+     */
+    public Boolean inQuickPromotion() {
+        return promotionType == 1
+                && (promotionEndTime == null || promotionStartTime == null
+                || (System.currentTimeMillis() >= promotionStartTime.getTime()
+                && System.currentTimeMillis() <= promotionEndTime.getTime()));
+    }
+
 }

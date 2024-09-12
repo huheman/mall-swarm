@@ -35,15 +35,6 @@ public class AlipayController {
     @Autowired
     private AlipayService alipayService;
 
-    @Operation(summary = "支付宝电脑网站支付")
-    @RequestMapping(value = "/pay", method = RequestMethod.GET)
-    public void pay(AliPayParam aliPayParam, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=" + alipayConfig.getCharset());
-        response.getWriter().write(alipayService.pay(aliPayParam));
-        response.getWriter().flush();
-        response.getWriter().close();
-    }
-
     @Operation(summary = "支付宝手机网站支付")
     @RequestMapping(value = "/webPay", method = RequestMethod.GET)
     public void webPay(AliPayParam aliPayParam, HttpServletResponse response) throws IOException {

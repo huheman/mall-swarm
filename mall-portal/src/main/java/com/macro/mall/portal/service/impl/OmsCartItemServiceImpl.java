@@ -15,6 +15,7 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
+import com.macro.mall.portal.service.bo.CartInfoBO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -72,22 +71,22 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     }
 
     @Override
-    public int add(OmsCartItem cartItem) {
-        int count;
-        UmsMember currentMember =memberService.getCurrentMember();
+    public Long add(OmsCartItem cartItem) {
+        UmsMember currentMember = memberService.getCurrentMember();
         cartItem.setMemberId(currentMember.getId());
         cartItem.setMemberNickname(currentMember.getNickname());
         cartItem.setDeleteStatus(0);
         OmsCartItem existCartItem = getCartItem(cartItem);
         if (existCartItem == null) {
             cartItem.setCreateDate(new Date());
-            count = cartItemMapper.insert(cartItem);
+            cartItemMapper.insert(cartItem);
+            existCartItem = cartItem;
         } else {
             cartItem.setModifyDate(new Date());
             existCartItem.setQuantity(existCartItem.getQuantity() + cartItem.getQuantity());
-            count = cartItemMapper.updateByPrimaryKey(existCartItem);
+            cartItemMapper.updateByPrimaryKey(existCartItem);
         }
-        return count;
+        return existCartItem.getId();
     }
 
     /**
@@ -95,11 +94,9 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
      */
     private OmsCartItem getCartItem(OmsCartItem cartItem) {
         OmsCartItemExample example = new OmsCartItemExample();
-        OmsCartItemExample.Criteria criteria = example.createCriteria().andMemberIdEqualTo(cartItem.getMemberId())
-                .andProductIdEqualTo(cartItem.getProductId()).andDeleteStatusEqualTo(0);
-        if (cartItem.getProductSkuId()!=null) {
-            criteria.andProductSkuIdEqualTo(cartItem.getProductSkuId());
-        }
+        example.createCriteria().andMemberIdEqualTo(cartItem.getMemberId())
+                .andProductIdEqualTo(cartItem.getProductId()).andDeleteStatusEqualTo(0)
+                .andProductSkuIdEqualTo(cartItem.getProductSkuId());
         List<OmsCartItem> cartItemList = cartItemMapper.selectByExample(example);
         if (!CollectionUtils.isEmpty(cartItemList)) {
             return cartItemList.get(0);
@@ -117,11 +114,11 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     @Override
     public List<CartPromotionItem> listPromotion(Long memberId, List<Long> cartIds) {
         List<OmsCartItem> cartItemList = list(memberId);
-        if(CollUtil.isNotEmpty(cartIds)){
-            cartItemList = cartItemList.stream().filter(item->cartIds.contains(item.getId())).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(cartIds)) {
+            cartItemList = cartItemList.stream().filter(item -> cartIds.contains(item.getId())).collect(Collectors.toList());
         }
         List<CartPromotionItem> cartPromotionItemList = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(cartItemList)){
+        if (!CollectionUtils.isEmpty(cartItemList)) {
             cartPromotionItemList = promotionService.calcCartPromotion(cartItemList);
         }
         return cartPromotionItemList;
@@ -151,18 +148,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         return productDao.getCartProduct(productId);
     }
 
-    @Override
-    public int updateAttr(OmsCartItem cartItem) {
-        //删除原购物车信息
-        OmsCartItem updateCart = new OmsCartItem();
-        updateCart.setId(cartItem.getId());
-        updateCart.setModifyDate(new Date());
-        updateCart.setDeleteStatus(1);
-        cartItemMapper.updateByPrimaryKeySelective(updateCart);
-        cartItem.setId(null);
-        add(cartItem);
-        return 1;
-    }
 
     @Override
     public int clear(Long memberId) {
@@ -170,6 +155,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         record.setDeleteStatus(1);
         OmsCartItemExample example = new OmsCartItemExample();
         example.createCriteria().andMemberIdEqualTo(memberId);
-        return cartItemMapper.updateByExampleSelective(record,example);
+        return cartItemMapper.updateByExampleSelective(record, example);
     }
 }

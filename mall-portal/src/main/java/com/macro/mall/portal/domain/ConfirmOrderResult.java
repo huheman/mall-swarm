@@ -17,6 +17,8 @@ public class ConfirmOrderResult {
     private List<UmsMemberReceiveAddress> memberReceiveAddressList;
     //用户可用优惠券列表
     private List<SmsCouponHistoryDetail> couponHistoryDetailList;
+    // 用户不可用的优惠券
+    private List<SmsCouponHistoryDetail> disableCouponHistoryDetailList;
     //积分使用规则
     private UmsIntegrationConsumeSetting integrationConsumeSetting;
     //会员持有的积分
@@ -70,6 +72,14 @@ public class ConfirmOrderResult {
 
     public void setCalcAmount(CalcAmount calcAmount) {
         this.calcAmount = calcAmount;
+    }
+
+    public List<SmsCouponHistoryDetail> getDisableCouponHistoryDetailList() {
+        return disableCouponHistoryDetailList;
+    }
+
+    public void setDisableCouponHistoryDetailList(List<SmsCouponHistoryDetail> distableCouponHistoryDetailList) {
+        this.disableCouponHistoryDetailList = distableCouponHistoryDetailList;
     }
 
     public static class CalcAmount{

@@ -111,13 +111,13 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         return couponHistoryMapper.selectByExample(couponHistoryExample);
     }
 
-    @Override
-    public List<SmsCouponHistoryDetail> listCart(List<CartPromotionItem> cartItemList, Integer type) {
+    public Map<Boolean, List<SmsCouponHistoryDetail>> listCartAll(List<CartPromotionItem> cartItemList) {
         UmsMember currentMember = memberService.getCurrentMember();
         Date now = new Date();
         //获取该用户所有优惠券
         List<SmsCouponHistoryDetail> allList = couponHistoryDao.getDetailList(currentMember.getId())
-                .stream().filter(smsCouponHistoryDetail -> smsCouponHistoryDetail.getCoupon() != null).toList();
+                .stream().filter(smsCouponHistoryDetail -> smsCouponHistoryDetail.getCoupon() != null)
+                .toList();
         //根据优惠券使用类型来判断优惠券是否可用
         List<SmsCouponHistoryDetail> enableList = new ArrayList<>();
         List<SmsCouponHistoryDetail> disableList = new ArrayList<>();
@@ -163,10 +163,19 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 }
             }
         }
+        Map<Boolean, List<SmsCouponHistoryDetail>> result = new HashMap<>();
+        result.put(true, enableList);
+        result.put(false, disableList);
+        return result;
+    }
+
+    @Override
+    public List<SmsCouponHistoryDetail> listCart(List<CartPromotionItem> cartItemList, Integer type) {
+        Map<Boolean, List<SmsCouponHistoryDetail>> booleanListMap = listCartAll(cartItemList);
         if(type.equals(1)){
-            return enableList;
+            return booleanListMap.get(true);
         }else{
-            return disableList;
+            return booleanListMap.get(false);
         }
     }
 

@@ -7,6 +7,7 @@ import com.macro.mall.portal.domain.SmsCouponHistoryDetail;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户优惠券管理Service
@@ -24,6 +25,7 @@ public interface UmsMemberCouponService {
      */
     List<SmsCouponHistory> listHistory(Integer useStatus);
 
+    Map<Boolean, List<SmsCouponHistoryDetail>> listCartAll(List<CartPromotionItem> cartItemList);
     /**
      * 根据购物车信息获取可用优惠券
      */

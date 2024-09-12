@@ -6,6 +6,7 @@ import com.macro.mall.model.PmsProduct;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
 import com.macro.mall.portal.service.PmsPortalProductService;
+import com.macro.mall.portal.service.bo.ProductSkuBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -31,7 +32,7 @@ public class PmsPortalProductController {
 
     @Operation(summary = "综合搜索、筛选、排序")
     @Parameter(name = "sort", description = "排序字段:0->按相关度；1->按新品；2->按销量；3->价格从低到高；4->价格从高到低",
-            in= ParameterIn.QUERY,schema = @Schema(type = "integer",defaultValue = "0",allowableValues = {"0","1","2","3","4"}))
+            in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0", allowableValues = {"0", "1", "2", "3", "4"}))
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<PmsProduct>> search(@RequestParam(required = false) String keyword,
@@ -46,8 +47,8 @@ public class PmsPortalProductController {
 
     @GetMapping("detailByCategory/{categoryId}")
     @ResponseBody
-    public CommonResult<List<PmsPortalProductDetail>> detailByCategory(@PathVariable Long categoryId) {
-        List<PmsPortalProductDetail> list = portalProductService.detailByCategory(categoryId);
+    public CommonResult<List<ProductSkuBO>> detailByCategory(@PathVariable Long categoryId) {
+        List<ProductSkuBO> list = portalProductService.detailByCategory(categoryId);
         return CommonResult.success(list);
     }
 
