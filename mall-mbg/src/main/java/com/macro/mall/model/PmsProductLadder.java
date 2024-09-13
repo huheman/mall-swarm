@@ -15,6 +15,8 @@ public class PmsProductLadder implements Serializable {
     @Schema(title = "折扣")
     private BigDecimal discount;
 
+    @Schema(title = "折后价格")
+    private BigDecimal price;
 
     private static final long serialVersionUID = 1L;
 
@@ -50,6 +52,13 @@ public class PmsProductLadder implements Serializable {
         this.discount = discount;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
     @Override
     public String toString() {
@@ -61,6 +70,7 @@ public class PmsProductLadder implements Serializable {
         sb.append(", productId=").append(productId);
         sb.append(", count=").append(count);
         sb.append(", discount=").append(discount);
+        sb.append(", price=").append(price);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
