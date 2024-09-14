@@ -42,7 +42,7 @@ public class HomeController {
     @GetMapping("/hotGameList")
     @ResponseBody
     public CommonResult<MemberProductBO> getHotGameList() {
-        Long userId;
+        Long userId = null;
         try {
             UmsMember currentMember = memberService.getCurrentMember();
             userId = Optional.ofNullable(currentMember)
