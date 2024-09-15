@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -133,12 +134,18 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         String commodityId = split[1];
         // 如果有多个orderItem只取第一个
         try {
-
             Map<String, String> productAttrMap = new HashMap<>();
             JSONArray spData = JSON.parseArray(productAttr);
             for (int i = 0; i < spData.size(); i++) {
                 JSONObject unit = spData.getJSONObject(i);
-                productAttrMap.put(unit.getString("key"), unit.getString("value"));
+                String value = unit.getString("value");
+                if (StringUtils.hasLength(value)) {
+                    int idx = value.indexOf('-');
+                    if (idx >0 &&value.length() - 1 > idx) {
+                        value = value.substring(idx + 1);
+                    }
+                    productAttrMap.put(unit.getString("key"), value);
+                }
             }
 
             TreeMap<String, String> sortedParams = new TreeMap<>();
@@ -220,7 +227,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             param.setDeliveryCompany("小海兽");
             CommonResult delivery = feignAdminService.delivery(Arrays.asList(param));
             if (delivery.getCode() != 200) {
-                throw new IllegalAccessException("发货失败"+delivery.getMessage());
+                throw new IllegalAccessException("发货失败" + delivery.getMessage());
             }
             chargeDomain.success();
             directChargeDao.update(chargeDomain);

@@ -15,7 +15,7 @@ public class DirectChargeController {
     @Autowired
     private DirectChargeService directChargeService;
 
-    @GetMapping("test")
+    @GetMapping("retry")
     public CommonResult<String> test(String orderSN) {
         directChargeService.directCharge(orderSN);
         return CommonResult.success("ok");
