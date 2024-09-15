@@ -1,6 +1,7 @@
 package com.macro.mall.portal.controller;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.hutool.json.JSONObject;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.component.SmsSender;
@@ -10,6 +11,10 @@ import com.macro.mall.portal.service.bo.IdentityInfoBO;
 import com.macro.mall.portal.service.bo.IdentityResultBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -34,6 +39,11 @@ public class UmsMemberController {
     private String tokenHead;
     @Autowired
     private IdentityService identityService;
+    @Autowired
+    private OkHttpClient okHttpClient;
+
+    private static final String APP_ID = "wxe26bc51aa1206df9";
+    private static final String APP_SECRET = "9cfe3edcea819785c8e355b540fdcffa";
 
     @Operation(summary = "实名认证信息")
     @GetMapping("/identityInfo")
@@ -127,5 +137,33 @@ public class UmsMemberController {
                                        @RequestParam String authCode) {
         memberService.updatePassword(telephone, password, authCode);
         return CommonResult.success(null, "密码修改成功");
+    }
+
+    @GetMapping("getOpenId")
+    @ResponseBody
+    @SneakyThrows
+    public CommonResult getOpenId(@RequestParam String code) {
+        // 拼接微信接口的 URL
+        String url = String.format(
+                "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
+                APP_ID, APP_SECRET, code
+        );
+
+        // 构建 OkHttp 请求
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        // 发送请求并获取响应
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalArgumentException("ok");
+            }
+
+            // 解析响应体
+            String responseBody = response.body().string();
+            JSONObject jsonResponse = new JSONObject(responseBody);
+            return CommonResult.success(jsonResponse);
+        }
     }
 }

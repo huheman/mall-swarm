@@ -44,6 +44,7 @@ secure:
       - "/mall-auth/**"
       - "/mall-search/**"
       - "/mall-portal/sso/login"
+      - "/mall-portal/sso/getOpenId"
       - "/mall-portal/sso/loginByPhone"
       - "/mall-portal/sso/register"
       - "/mall-portal/sso/getAuthCode"
