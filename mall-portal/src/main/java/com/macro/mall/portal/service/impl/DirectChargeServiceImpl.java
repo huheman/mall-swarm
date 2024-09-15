@@ -141,21 +141,28 @@ public class DirectChargeServiceImpl implements DirectChargeService {
                 String value = unit.getString("value");
                 if (StringUtils.hasLength(value)) {
                     int idx = value.indexOf('-');
-                    if (idx >0 &&value.length() - 1 > idx) {
+                    if (idx > 0 && value.length() - 1 > idx) {
                         value = value.substring(idx + 1);
                     }
-                    productAttrMap.put(unit.getString("key"), value);
+                    String key = unit.getString("key");
+                    int keyIdx = key.indexOf('-');
+                    if (keyIdx > 0 && key.length() - 1 > keyIdx) {
+                        productAttrMap.put(key.substring(0, keyIdx), value);
+                        productAttrMap.put(key.substring(keyIdx + 1), value);
+                    } else {
+                        productAttrMap.put(key, value);
+                    }
                 }
             }
 
             TreeMap<String, String> sortedParams = new TreeMap<>();
             MediaType mediaType = MediaType.parse("application/json");
             sortedParams.put("commodityId", commodityId);
-            sortedParams.put("nickname", productAttrMap.get("游戏昵称"));
-            sortedParams.put("username", productAttrMap.get("游戏账号"));
-            sortedParams.put("password", productAttrMap.get("游戏密码"));
-            sortedParams.put("server", productAttrMap.get("游戏服务器"));
-            sortedParams.put("areaServer", productAttrMap.get("区服"));
+            sortedParams.put("nickname", productAttrMap.get("nickname"));
+            sortedParams.put("username", productAttrMap.get("username"));
+            sortedParams.put("password", productAttrMap.get("password"));
+            sortedParams.put("server", productAttrMap.get("server"));
+            sortedParams.put("areaServer", productAttrMap.get("areaServer"));
             /*暂定平台库存，客户库存还没做*/
             sortedParams.put("inventoryType", "1");
             sortedParams.put("outOrderId", orderSN);
