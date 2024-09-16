@@ -1,11 +1,11 @@
 package com.macro.mall.portal.controller;
 
 import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.api.CommonResult;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.core.notification.Notification;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
@@ -13,6 +13,7 @@ import com.wechat.pay.java.service.payments.jsapi.model.Amount;
 import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
+import com.wechat.pay.java.service.payments.model.Transaction;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
@@ -23,8 +24,6 @@ import okhttp3.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
@@ -40,27 +39,27 @@ public class WxpayController {
      * 商户号
      */
     @Value("${wx.merchantId}")
-    public  String merchantId;
+    public String merchantId;
     /**
      * 商户API私钥路径
      */
     @Value("${wx.privateKey}")
-    public  String privateKey;
+    public String privateKey;
     /**
      * 商户证书序列号
      */
     @Value("${wx.merchantSerialNumber}")
-    public  String merchantSerialNumber ;
+    public String merchantSerialNumber;
     /**
      * 商户APIV3密钥
      */
     @Value("${wx.apiV3Key}")
-    public  String apiV3Key;
+    public String apiV3Key;
     @Value("${wx.appId}")
-    public  String appId ;
+    public String appId;
     //    private static String openId = "oZdSX7VaJfp6c_X-G0K2cpHCLebw";
     @Value("${wx.appSecret}")
-    private String appSecret ;
+    private String appSecret;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -125,7 +124,8 @@ public class WxpayController {
 
     @SneakyThrows
     @PostMapping("notify")
-    public ResponseEntity.BodyBuilder notify(HttpServletRequest request) {
+    @ResponseBody
+    public CommonResult<String> notify(HttpServletRequest request) {
         String signature = request.getHeader("Wechatpay-Signature");
         String serial = request.getHeader("Wechatpay-Serial");
         String nonc = request.getHeader("Wechatpay-Nonce");
@@ -150,16 +150,17 @@ public class WxpayController {
         NotificationParser parser = new NotificationParser(config);
         try {
             // 以支付通知回调为例，验签、解密并转换成 Transaction
-            Notification transaction = parser.parse(requestParam, Notification.class);
-            log.info("微信回调生效"+transaction);
+            Transaction transaction = parser.parse(requestParam, Transaction.class);
+            log.info("微信回调生效" + JSON.toJSONString(transaction));
+            log.info("微信回调生效,outTradeNo是" + transaction.getOutTradeNo());
         } catch (ValidationException e) {
             // 签名验证失败，返回 401 UNAUTHORIZED 状态码
             log.error("sign verification failed", e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED);
+            return CommonResult.failed(e.getMessage());
         }
 
         // 处理成功，返回 200 OK 状态码
-        return ResponseEntity.status(HttpStatus.OK);
+        return CommonResult.success("ok");
 
     }
 
