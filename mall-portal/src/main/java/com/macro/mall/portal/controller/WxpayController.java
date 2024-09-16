@@ -144,7 +144,7 @@ public class WxpayController {
         try {
             // 以支付通知回调为例，验签、解密并转换成 Transaction
             Notification transaction = parser.parse(requestParam, Notification.class);
-            log.info("微信回调生效");
+            log.info("微信回调生效"+transaction);
         } catch (ValidationException e) {
             // 签名验证失败，返回 401 UNAUTHORIZED 状态码
             log.error("sign verification failed", e);
