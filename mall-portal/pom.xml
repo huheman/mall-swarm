@@ -18,6 +18,11 @@
     </parent>
 
     <dependencies>
+        <!--微信支付sdk-->
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.tencentcloudapi</groupId>
             <artifactId>tencentcloud-sdk-java-sms</artifactId>
