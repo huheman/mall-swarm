@@ -64,11 +64,8 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
-    public UmsMember register(String username, String password, String telephone, String authCode) {
-        //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
-            Asserts.fail("验证码错误");
-        }
+    public UmsMember register(String username, String password, String telephone) {
+
         //查询是否已有该用户
         UmsMemberExample example = new UmsMemberExample();
         example.createCriteria().andUsernameEqualTo(username);
@@ -183,18 +180,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         StpMemberUtil.logout();
     }
 
-    @Override
-    public SaTokenInfo loginByPhone(String phone, String authCode) {
-        if (StrUtil.isEmpty(phone)||StrUtil.isEmpty(authCode)){
-            return null;
-        }
-        boolean b = verifyAuthCode(authCode, phone);
-        if (!b) {
-            return null;
-        }
+    public SaTokenInfo loginByPhone(String phone) {
         UmsMember member = getByPhone(phone);
         if(member==null){
-            member = register(RandomStringUtils.randomAlphabetic(10),"",phone,authCode);
+            member = register(RandomStringUtils.randomAlphabetic(10),"",phone);
         }
         if(member.getStatus()!=1){
             Asserts.fail("该账号已被禁用！");
@@ -209,6 +198,18 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO,userDto);
         // 获取当前登录用户Token信息
         return StpUtil.getTokenInfo();
+    }
+
+    @Override
+    public SaTokenInfo loginByPhone(String phone, String authCode) {
+        if (StrUtil.isEmpty(phone)||StrUtil.isEmpty(authCode)){
+            return null;
+        }
+        boolean b = verifyAuthCode(authCode, phone);
+        if (!b) {
+            return null;
+        }
+        return loginByPhone(phone);
     }
 
     private UmsMember getByPhone(String phone) {

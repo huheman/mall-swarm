@@ -1,8 +1,12 @@
 package com.macro.mall.portal.controller;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.service.RedisService;
+import com.macro.mall.common.service.impl.RedisServiceImpl;
+import com.macro.mall.portal.service.UmsMemberService;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
@@ -18,15 +22,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import okhttp3.RequestBody;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @Tag(name = "WxpayController", description = "微信支付相关接口")
@@ -60,6 +71,13 @@ public class WxpayController {
     //    private static String openId = "oZdSX7VaJfp6c_X-G0K2cpHCLebw";
     @Value("${wx.appSecret}")
     private String appSecret;
+
+    @Value("${sa-token.token-prefix}")
+    private String tokenHead;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private UmsMemberService umsMemberService;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -164,5 +182,57 @@ public class WxpayController {
 
     }
 
+    /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/user-info/phone-number/getPhoneNumber.html*/
+    @GetMapping("loginByWxPhoneCode")
+    @ResponseBody
+    public CommonResult getPhoneNum(String code) {
+        String accessToken = getAccessToken();
+        String url = String.format("https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=%s", accessToken);
+        String jsonBody = "{\"code\": \"" + code + "\"}";
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
+
+        // 构建请求
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            // 获取响应体内容
+            JSONObject entries = new JSONObject(response.body().string());
+            String phone = entries.getJSONObject("phone_info").getStr("purePhoneNumber");
+            SaTokenInfo saTokenInfo = umsMemberService.loginByPhone(phone);
+            Map<String, String> tokenMap = new HashMap<>();
+            tokenMap.put("token", saTokenInfo.getTokenValue());
+            tokenMap.put("tokenHead", tokenHead + " ");
+            return CommonResult.success(tokenMap);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return CommonResult.failed("请求失败: " + e.getMessage());
+        }
+
+    }
+
+
+    /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/mp-access-token/getAccessToken.html*/
+    @SneakyThrows
+    private String getAccessToken() {
+        String accessToken = (String) redisService.get("accessToken");
+        if (StringUtils.isEmpty(accessToken)) {
+            String url = String.format("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appId, appSecret);
+            Request request = new Request.Builder().url(url).build();
+            try (Response response = okHttpClient.newCall(request).execute()) {
+                JSONObject jsonObject = new JSONObject(response.body().string());
+                accessToken = jsonObject.getStr("access_token");
+                // 一个小时有效
+                redisService.set("accessToken", accessToken,60*60);
+                return accessToken;
+            }
+        }else {
+            return accessToken;
+        }
+    }
 
 }

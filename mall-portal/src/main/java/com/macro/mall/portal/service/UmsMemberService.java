@@ -23,7 +23,7 @@ public interface UmsMemberService {
      * 用户注册
      */
     @Transactional
-    UmsMember register(String username, String password, String telephone, String authCode);
+    UmsMember register(String username, String password, String telephone);
 
     /**
      * 生成验证码
@@ -57,4 +57,6 @@ public interface UmsMemberService {
     void logout();
 
     SaTokenInfo loginByPhone(String phone, String authCode);
+
+    SaTokenInfo loginByPhone(String phone);
 }

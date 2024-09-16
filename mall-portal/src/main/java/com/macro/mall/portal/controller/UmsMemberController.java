@@ -68,7 +68,7 @@ public class UmsMemberController {
                                  @RequestParam String password,
                                  @RequestParam String telephone,
                                  @RequestParam String authCode) {
-        memberService.register(username, password, telephone, authCode);
+        memberService.register(username, password, telephone);
         return CommonResult.success(null, "注册成功");
     }
 
