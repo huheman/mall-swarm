@@ -22,6 +22,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,22 +39,28 @@ public class WxpayController {
     /**
      * 商户号
      */
-    public static String merchantId = "1685896334";
+    @Value("${wx.merchantId}")
+    public  String merchantId;
     /**
      * 商户API私钥路径
      */
-    public static String privateKeyPath = "D:/env/cert/apiclient_key.pem";
+    @Value("${wx.privateKey}")
+    public  String privateKey;
     /**
      * 商户证书序列号
      */
-    public static String merchantSerialNumber = "12A2CC33B64631EFB1FC18E49126848CFF8B9D2D";
+    @Value("${wx.merchantSerialNumber}")
+    public  String merchantSerialNumber ;
     /**
      * 商户APIV3密钥
      */
-    public static String apiV3Key = "enjrxNAC2R9MdC92YpEJziJ3hgZmG7Yd";
-    public static String appId = "wxe26bc51aa1206df9";
+    @Value("${wx.apiV3Key}")
+    public  String apiV3Key;
+    @Value("${wx.appId}")
+    public  String appId ;
     //    private static String openId = "oZdSX7VaJfp6c_X-G0K2cpHCLebw";
-    private static final String APP_SECRET = "9cfe3edcea819785c8e355b540fdcffa";
+    @Value("${wx.appSecret}")
+    private String appSecret ;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -64,7 +71,7 @@ public class WxpayController {
         Config config =
                 new RSAAutoCertificateConfig.Builder()
                         .merchantId(merchantId)
-                        .privateKeyFromPath(privateKeyPath)
+                        .privateKey(privateKey)
                         .merchantSerialNumber(merchantSerialNumber)
                         .apiV3Key(apiV3Key)
                         .build();
@@ -95,7 +102,7 @@ public class WxpayController {
         // 拼接微信接口的 URL
         String url = String.format(
                 "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
-                appId, APP_SECRET, code
+                appId, appSecret, code
         );
 
         // 构建 OkHttp 请求
@@ -136,7 +143,7 @@ public class WxpayController {
                 .build();
         NotificationConfig config = new RSAAutoCertificateConfig.Builder()
                 .merchantId(merchantId)
-                .privateKeyFromPath(privateKeyPath)
+                .privateKey(privateKey)
                 .merchantSerialNumber(merchantSerialNumber)
                 .apiV3Key(apiV3Key)
                 .build();
