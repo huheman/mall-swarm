@@ -15,13 +15,13 @@ public class DirectChargeController {
     @Autowired
     private DirectChargeService directChargeService;
 
-    @GetMapping("retry")
+    @GetMapping("/retry")
     public CommonResult<String> test(String orderSN) {
         directChargeService.directCharge(orderSN);
         return CommonResult.success("ok");
     }
 
-    @PostMapping("notify")
+    @PostMapping("/notify")
     public JSONObject notify(HttpServletRequest request, @RequestBody JSONObject body) {
         String signer = request.getHeader("X-Signature");
         String timestampStr = request.getHeader("X-Timestamp");
