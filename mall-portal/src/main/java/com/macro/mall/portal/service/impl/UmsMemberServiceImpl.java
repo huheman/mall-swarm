@@ -221,6 +221,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         return memberMapper.selectByExample(umsMemberExample).stream().findFirst().orElse(null);
     }
 
+    /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/mp-access-token/getAccessToken.html*/
     //对输入的验证码进行校验
     private boolean verifyAuthCode(String authCode, String telephone){
         if(StringUtils.isEmpty(authCode)){
