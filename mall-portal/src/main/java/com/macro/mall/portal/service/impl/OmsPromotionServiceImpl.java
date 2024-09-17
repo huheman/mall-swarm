@@ -44,7 +44,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                 for (OmsCartItem item : itemList) {
                     CartPromotionItem cartPromotionItem = new CartPromotionItem();
                     BeanUtils.copyProperties(item, cartPromotionItem);
-                    cartPromotionItem.setPromotionMessage("单品促销");
+                    cartPromotionItem.setPromotionMessage("限时单品促销");
                     //商品原价-促销价
                     PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
                     BigDecimal originalPrice = skuStock.getPrice();
