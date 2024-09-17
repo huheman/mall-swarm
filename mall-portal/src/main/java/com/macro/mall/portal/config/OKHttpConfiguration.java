@@ -2,6 +2,7 @@ package com.macro.mall.portal.config;
 
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +42,13 @@ public class OKHttpConfiguration {
                 .readTimeout(readTimeout, TimeUnit.SECONDS)
                 .writeTimeout(writeTimeout,TimeUnit.SECONDS)
                 .hostnameVerifier((hostname, session) -> true)
+                .addInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    Request modifiedRequest = originalRequest.newBuilder()
+                            .header("Connection", "close")  // 统一设置短连接
+                            .build();
+                    return chain.proceed(modifiedRequest);
+                })
                 // 设置代理
                 // .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))
                 // 拦截器
