@@ -5,8 +5,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.mapper.OmsCartItemMapper;
+import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.OmsCartItem;
 import com.macro.mall.model.OmsCartItemExample;
+import com.macro.mall.model.PmsSkuStock;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.dao.PortalProductDao;
 import com.macro.mall.portal.domain.CartProduct;
@@ -40,6 +42,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private OmsPromotionService promotionService;
     @Autowired
     private UmsMemberService memberService;
+    @Autowired
+    private PmsSkuStockMapper skuStockMapper;
 
     public int updateAttribute(Long cartId, List<CartAttributeBO> cartAttributeBOList) {
         OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(cartId);
@@ -76,6 +80,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         cartItem.setMemberId(currentMember.getId());
         cartItem.setMemberNickname(currentMember.getNickname());
         cartItem.setDeleteStatus(0);
+        PmsSkuStock pmsSkuStock = skuStockMapper.selectByPrimaryKey(cartItem.getProductSkuId());
+        cartItem.setPrice(pmsSkuStock.getPrice());
         OmsCartItem existCartItem = getCartItem(cartItem);
         if (existCartItem == null) {
             cartItem.setCreateDate(new Date());
