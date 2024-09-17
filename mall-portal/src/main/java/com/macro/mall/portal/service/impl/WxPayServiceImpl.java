@@ -2,7 +2,6 @@ package com.macro.mall.portal.service.impl;
 
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
-import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.service.WxPayService;
@@ -138,10 +137,10 @@ public class WxPayServiceImpl implements WxPayService {
             log.info("微信回调生效" + JSON.toJSONString(transaction));
             if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
                 String outTradeNo = transaction.getOutTradeNo();
-                portalOrderService.paySuccessByOrderSn(outTradeNo, 1);
+                portalOrderService.paySuccessByOrderSn(outTradeNo, 2);
                 directChargeService.directCharge(outTradeNo);
-            }else {
-                log.error("收到付款失败信息:{}",transaction);
+            } else {
+                log.error("收到付款失败信息:{}", transaction);
             }
         } catch (ValidationException e) {
             log.error("解密微信回调失败", e);
@@ -170,7 +169,7 @@ public class WxPayServiceImpl implements WxPayService {
             JSONObject entries = new JSONObject(response.body().string());
             return entries.getJSONObject("phone_info").getStr("purePhoneNumber");
         } catch (IOException e) {
-            log.error("获取手机号失败",e);
+            log.error("获取手机号失败", e);
             return "";
         }
     }
