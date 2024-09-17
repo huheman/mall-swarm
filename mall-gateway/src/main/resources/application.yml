@@ -56,6 +56,7 @@ secure:
       - "/mall-admin/minio/upload"
       - "/mall-portal/directCharge/**"
       - "/mall-portal/wxpay/**"
+      - "/mall-portal/product/detail/**"
 management:
   endpoints:
     web:
