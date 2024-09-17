@@ -2,6 +2,9 @@ package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.exception.Asserts;
@@ -14,6 +17,7 @@ import com.macro.mall.portal.dao.PortalOrderItemDao;
 import com.macro.mall.portal.dao.SmsCouponHistoryDao;
 import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -405,6 +411,29 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             List<OmsOrderItem> relatedItemList = orderItemList.stream().filter(item -> item.getOrderId().equals(orderDetail.getId())).collect(Collectors.toList());
             orderDetail.setOrderItemList(relatedItemList);
             orderDetailList.add(orderDetail);
+        }
+        for (OmsOrderDetail omsOrderDetail : orderDetailList) {
+            omsOrderDetail.getOrderItemList().stream().forEach(new Consumer<OmsOrderItem>() {
+                @Override
+                public void accept(OmsOrderItem omsOrderItem) {
+                    String productAttr = omsOrderItem.getProductAttr();
+                    JSONArray array = JSON.parseArray(productAttr);
+                    for (int i = 0; i < array.size(); i++) {
+                        JSONObject jsonObject = array.getJSONObject(i);
+                        String value = jsonObject.getString("value");
+                        if (StringUtils.contains(value,'-')) {
+                            value = StringUtils.substring(value,0,StringUtils.indexOf(value,'-'));
+                        }
+                        jsonObject.put("value", value);
+                        String key = jsonObject.getString("key");
+                        if (StringUtils.contains(key,'-')) {
+                            key = StringUtils.substring(key,0,StringUtils.indexOf(key,'-'));
+                        }
+                        jsonObject.put("key", key);
+                    }
+                    omsOrderItem.setProductAttr(array.toJSONString());
+                }
+            });
         }
         resultPage.setList(orderDetailList);
         return resultPage;

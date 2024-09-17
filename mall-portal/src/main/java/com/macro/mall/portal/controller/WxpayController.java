@@ -212,7 +212,6 @@ public class WxpayController {
             e.printStackTrace();
             return CommonResult.failed("请求失败: " + e.getMessage());
         }
-
     }
 
 
