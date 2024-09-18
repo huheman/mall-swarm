@@ -23,4 +23,6 @@ public class OmsOrderQueryParam {
     private Integer sourceType;
     @Schema(title = "订单提交时间")
     private String createTime;
+    @Schema(title = "充值类型：直充，代充")
+    private String chargeType;
 }

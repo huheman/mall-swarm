@@ -22,10 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +47,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     public int updateAttribute(Long cartId, List<CartAttributeBO> cartAttributeBOList) {
         OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(cartId);
         JSONArray jsonArray = JSON.parseArray(omsCartItem.getProductAttr());
-        Map<String, String> replaceMap = cartAttributeBOList.stream().collect(Collectors.toMap(CartAttributeBO::getKey, cartAttributeBO -> cartAttributeBO.getValue()));
+        Map<String, String> replaceMap = cartAttributeBOList.stream()
+                .collect(Collectors.toMap(CartAttributeBO::getKey, cartAttributeBO -> cartAttributeBO.getValue(), (s, s2) -> s, (Supplier<Map<String, String>>) () -> new LinkedHashMap<>()));
         JSONArray finalAttr = new JSONArray();
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);

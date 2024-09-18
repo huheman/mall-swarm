@@ -204,30 +204,31 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setOrderType(0);
         //收货人信息：姓名、电话、邮编、地址
         String receiverName = "";
-        String receiverPhone = currentMember.getPhone();
         String receiverPostCode = "";
         String receiverRegion = "";
         String receiverProvince = "";
         String receiverCity = "";
-        String receiverDetailAddress = "";
         if (orderParam.getMemberReceiveAddressId() != null) {
             UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
             receiverName = address.getName();
-            receiverPhone = address.getPhoneNumber();
             receiverPostCode = address.getPostCode();
             receiverProvince = address.getProvince();
             receiverCity = address.getCity();
-            receiverDetailAddress = address.getDetailAddress();
             receiverRegion = address.getRegion();
 
         }
         order.setReceiverName(receiverName);
-        order.setReceiverPhone(receiverPhone);
+        order.setReceiverPhone(currentMember.getPhone());
         order.setReceiverPostCode(receiverPostCode);
         order.setReceiverProvince(receiverProvince);
         order.setReceiverCity(receiverCity);
         order.setReceiverRegion(receiverRegion);
-        order.setReceiverDetailAddress(receiverDetailAddress);
+        JSONArray attrArray = JSON.parseArray(cartPromotionItemList.get(0).getProductAttr());
+        List<String> attrValues = new ArrayList<>();
+        for (int i = 0; i < attrArray.size(); i++) {
+            attrValues.add(attrArray.getJSONObject(i).getString("value"));
+        }
+        order.setReceiverDetailAddress(String.join("-", attrValues));
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
         order.setDeleteStatus(0);

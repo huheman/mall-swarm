@@ -32,6 +32,9 @@
             OR receiver_phone LIKE concat("%",#{queryParam.receiverKeyword},"%")
             )
         </if>
+        <if test="queryParam.chargeType!=null and queryParam.chargeType!=''">
+            and receiver_detail_address like concat(#{queryParam.chargeType},'%')
+        </if>
         order by id desc
     </select>
     <update id="delivery">
