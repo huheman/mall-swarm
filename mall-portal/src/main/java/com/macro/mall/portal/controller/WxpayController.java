@@ -1,31 +1,19 @@
 package com.macro.mall.portal.controller;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
-import cn.hutool.json.JSONObject;
-import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.api.CommonResult;
-import com.macro.mall.common.service.RedisService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.WxPayService;
 import com.macro.mall.portal.service.bo.OpenIdBO;
-import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.core.notification.NotificationConfig;
-import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
-import com.wechat.pay.java.service.payments.model.Transaction;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.RequestBody;
-import okhttp3.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +48,12 @@ public class WxpayController {
         return CommonResult.success(openId);
     }
 
+    @GetMapping("/ship")
+    public CommonResult<Boolean> ship(Long orderId) {
+        wxPayService.uploadShipping(orderId);
+        return CommonResult.success(true);
+    }
+
     @SneakyThrows
     @PostMapping("notify")
     @ResponseBody
@@ -85,9 +79,6 @@ public class WxpayController {
         tokenMap.put("tokenHead", tokenHead + " ");
         return CommonResult.success(tokenMap);
     }
-
-
-
 
 
 }

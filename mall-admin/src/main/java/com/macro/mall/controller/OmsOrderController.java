@@ -5,7 +5,6 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.service.OmsOrderService;
-
 import com.macro.mall.service.PortalOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +42,9 @@ public class OmsOrderController {
     @ResponseBody
     public CommonResult delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList) {
         int count = orderService.delivery(deliveryParamList);
+        // 完成微信的发货
         for (OmsOrderDeliveryParam omsOrderDeliveryParam : deliveryParamList) {
+            portalOrderService.ship(omsOrderDeliveryParam.getOrderId());
             portalOrderService.confirmReceiveOrder(omsOrderDeliveryParam.getOrderId());
         }
         return CommonResult.success(count);

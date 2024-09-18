@@ -28,7 +28,6 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -421,13 +420,13 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                     for (int i = 0; i < array.size(); i++) {
                         JSONObject jsonObject = array.getJSONObject(i);
                         String value = jsonObject.getString("value");
-                        if (StringUtils.contains(value,'-')) {
-                            value = StringUtils.substring(value,0,StringUtils.indexOf(value,'-'));
+                        if (StringUtils.contains(value, '-')) {
+                            value = StringUtils.substring(value, 0, StringUtils.indexOf(value, '-'));
                         }
                         jsonObject.put("value", value);
                         String key = jsonObject.getString("key");
-                        if (StringUtils.contains(key,'-')) {
-                            key = StringUtils.substring(key,0,StringUtils.indexOf(key,'-'));
+                        if (StringUtils.contains(key, '-')) {
+                            key = StringUtils.substring(key, 0, StringUtils.indexOf(key, '-'));
                         }
                         jsonObject.put("key", key);
                     }
@@ -477,6 +476,21 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         if (CollUtil.isNotEmpty(orderList)) {
             OmsOrder order = orderList.get(0);
             paySuccess(order.getId(), payType);
+        }
+    }
+
+    @Override
+    public void updateNote(String orderSn, String note) {
+        OmsOrderExample example = new OmsOrderExample();
+        example.createCriteria()
+                .andOrderSnEqualTo(orderSn)
+                .andStatusEqualTo(0)
+                .andDeleteStatusEqualTo(0);
+        List<OmsOrder> orderList = orderMapper.selectByExample(example);
+        if (CollUtil.isNotEmpty(orderList)) {
+            OmsOrder order = orderList.get(0);
+            order.setNote(note);
+            orderMapper.updateByPrimaryKey(order);
         }
     }
 

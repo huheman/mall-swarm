@@ -843,6 +843,76 @@ public class PmsProductAttributeExample {
             addCriterion("type not between", value1, value2, "type");
             return (Criteria) this;
         }
+
+        public Criteria andShowConditionIsNull() {
+            addCriterion("show_condition is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionIsNotNull() {
+            addCriterion("show_condition is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionEqualTo(String value) {
+            addCriterion("show_condition =", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionNotEqualTo(String value) {
+            addCriterion("show_condition <>", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionGreaterThan(String value) {
+            addCriterion("show_condition >", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionGreaterThanOrEqualTo(String value) {
+            addCriterion("show_condition >=", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionLessThan(String value) {
+            addCriterion("show_condition <", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionLessThanOrEqualTo(String value) {
+            addCriterion("show_condition <=", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionLike(String value) {
+            addCriterion("show_condition like", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionNotLike(String value) {
+            addCriterion("show_condition not like", value, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionIn(List<String> values) {
+            addCriterion("show_condition in", values, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionNotIn(List<String> values) {
+            addCriterion("show_condition not in", values, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionBetween(String value1, String value2) {
+            addCriterion("show_condition between", value1, value2, "showCondition");
+            return (Criteria) this;
+        }
+
+        public Criteria andShowConditionNotBetween(String value1, String value2) {
+            addCriterion("show_condition not between", value1, value2, "showCondition");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

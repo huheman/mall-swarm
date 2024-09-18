@@ -14,6 +14,7 @@
     <result column="related_status" jdbcType="INTEGER" property="relatedStatus" />
     <result column="hand_add_status" jdbcType="INTEGER" property="handAddStatus" />
     <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="show_condition" jdbcType="VARCHAR" property="showCondition" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -75,7 +76,7 @@
   </sql>
   <sql id="Base_Column_List">
     id, product_attribute_category_id, name, select_type, input_type, input_list, sort, 
-    filter_type, search_type, related_status, hand_add_status, type
+    filter_type, search_type, related_status, hand_add_status, type, show_condition
   </sql>
   <select id="selectByExample" parameterType="com.macro.mall.model.PmsProductAttributeExample" resultMap="BaseResultMap">
     select
@@ -114,13 +115,13 @@
     insert into pms_product_attribute (product_attribute_category_id, name, 
       select_type, input_type, input_list, 
       sort, filter_type, search_type, 
-      related_status, hand_add_status, type
-      )
+      related_status, hand_add_status, type, 
+      show_condition)
     values (#{productAttributeCategoryId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
       #{selectType,jdbcType=INTEGER}, #{inputType,jdbcType=INTEGER}, #{inputList,jdbcType=VARCHAR}, 
       #{sort,jdbcType=INTEGER}, #{filterType,jdbcType=INTEGER}, #{searchType,jdbcType=INTEGER}, 
-      #{relatedStatus,jdbcType=INTEGER}, #{handAddStatus,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}
-      )
+      #{relatedStatus,jdbcType=INTEGER}, #{handAddStatus,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
+      #{showCondition,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.macro.mall.model.PmsProductAttribute">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
@@ -161,6 +162,9 @@
       <if test="type != null">
         type,
       </if>
+      <if test="showCondition != null">
+        show_condition,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="productAttributeCategoryId != null">
@@ -195,6 +199,9 @@
       </if>
       <if test="type != null">
         #{type,jdbcType=INTEGER},
+      </if>
+      <if test="showCondition != null">
+        #{showCondition,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -243,6 +250,9 @@
       <if test="row.type != null">
         type = #{row.type,jdbcType=INTEGER},
       </if>
+      <if test="row.showCondition != null">
+        show_condition = #{row.showCondition,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="example != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -261,7 +271,8 @@
       search_type = #{row.searchType,jdbcType=INTEGER},
       related_status = #{row.relatedStatus,jdbcType=INTEGER},
       hand_add_status = #{row.handAddStatus,jdbcType=INTEGER},
-      type = #{row.type,jdbcType=INTEGER}
+      type = #{row.type,jdbcType=INTEGER},
+      show_condition = #{row.showCondition,jdbcType=VARCHAR}
     <if test="example != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -302,6 +313,9 @@
       <if test="type != null">
         type = #{type,jdbcType=INTEGER},
       </if>
+      <if test="showCondition != null">
+        show_condition = #{showCondition,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -317,7 +331,8 @@
       search_type = #{searchType,jdbcType=INTEGER},
       related_status = #{relatedStatus,jdbcType=INTEGER},
       hand_add_status = #{handAddStatus,jdbcType=INTEGER},
-      type = #{type,jdbcType=INTEGER}
+      type = #{type,jdbcType=INTEGER},
+      show_condition = #{showCondition,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

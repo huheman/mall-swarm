@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 @Slf4j
@@ -119,6 +121,59 @@ public class WxPayServiceImpl implements WxPayService {
         }
     }
 
+    public void uploadShipping(Long orderId) {
+        String accessToken = getAccessToken();
+        OmsOrderDetail detail = orderService.detail(orderId);
+        if (detail.getPayType() != 2) {
+            // 如果不是微信支付，不用微信发货
+            return;
+        }
+        String url = String.format("https://api.weixin.qq.com/wxa/sec/order/upload_shipping_info?access_token=%s", accessToken);
+        // 获取当前时间
+        ZonedDateTime now = ZonedDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        String formattedDate = now.format(formatter);
+
+        String body = String.format("{\n" +
+                "    \"order_key\": {\n" +
+                "        \"order_number_type\": 1,\n" +
+                "        \"mchid\": \"%s\",\n" +
+                "        \"out_trade_no\": \"%s\"\n" +
+                "    },\n" +
+                "    \"delivery_mode\": 1,\n" +
+                "    \"logistics_type\": 3,\n" +
+                "    \"shipping_list\": [\n" +
+                "        {\n" +
+                "            \"tracking_no\": \"\",\n" +
+                "            \"express_company\": \"\",\n" +
+                "            \"item_desc\": \"虚拟商品\",\n" +
+                "            \"contact\": null\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"upload_time\": \"%s\",\n" +
+                "    \"payer\": {\n" +
+                "        \"openid\": \"%s\"\n" +
+                "    }\n" +
+                "}", merchantId, detail.getOrderSn(), formattedDate, detail.getNote());
+        RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json; charset=utf-8"));
+
+        // 构建请求
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            // 获取响应体内容
+            JSONObject entries = new JSONObject(response.body().string());
+            log.info("entries from ship:{}", entries);
+        } catch (IOException e) {
+            log.error("发货失败", e);
+        }
+    }
+
     @Override
     public void notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType) {
         com.wechat.pay.java.core.notification.RequestParam requestParam = new com.wechat.pay.java.core.notification.RequestParam.Builder()
@@ -137,6 +192,7 @@ public class WxPayServiceImpl implements WxPayService {
             log.info("微信回调生效" + JSON.toJSONString(transaction));
             if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
                 String outTradeNo = transaction.getOutTradeNo();
+                orderService.updateNote(outTradeNo, transaction.getPayer().getOpenid());
                 portalOrderService.paySuccessByOrderSn(outTradeNo, 2);
                 directChargeService.directCharge(outTradeNo);
             } else {

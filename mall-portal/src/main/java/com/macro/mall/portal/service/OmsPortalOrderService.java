@@ -73,4 +73,6 @@ public interface OmsPortalOrderService {
      */
     @Transactional
     void paySuccessByOrderSn(String orderSn, Integer payType);
+
+    void updateNote(String outTradeNo, String note);
 }

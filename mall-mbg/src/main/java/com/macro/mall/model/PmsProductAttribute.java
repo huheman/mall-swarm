@@ -37,6 +37,9 @@ public class PmsProductAttribute implements Serializable {
     @Schema(title = "属性的类型；0->规格；1->参数")
     private Integer type;
 
+    @Schema(title = "显示的条件，是给json列表，命中任意一个对象就可以显示")
+    private String showCondition;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -135,6 +138,14 @@ public class PmsProductAttribute implements Serializable {
         this.type = type;
     }
 
+    public String getShowCondition() {
+        return showCondition;
+    }
+
+    public void setShowCondition(String showCondition) {
+        this.showCondition = showCondition;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -153,6 +164,7 @@ public class PmsProductAttribute implements Serializable {
         sb.append(", relatedStatus=").append(relatedStatus);
         sb.append(", handAddStatus=").append(handAddStatus);
         sb.append(", type=").append(type);
+        sb.append(", showCondition=").append(showCondition);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

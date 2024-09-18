@@ -11,4 +11,6 @@ public interface WxPayService {
     void notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
 
     String getPhone(String phoneCode);
+
+    void uploadShipping(Long orderId);
 }

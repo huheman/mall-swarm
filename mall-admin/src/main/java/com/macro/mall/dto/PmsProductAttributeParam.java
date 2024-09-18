@@ -45,4 +45,6 @@ public class PmsProductAttributeParam {
     @FlagValidator({"0","1"})
     @Schema(title = "属性的类型；0->规格；1->参数")
     private Integer type;
+    @Schema(title = "显示的条件，逗号隔开，横杠区分规格内容")
+    private String showCondition;
 }
