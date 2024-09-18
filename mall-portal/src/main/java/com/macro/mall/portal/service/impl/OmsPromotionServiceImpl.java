@@ -200,7 +200,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
         sb.append(ladder.getCount());
         sb.append("件，");
         sb.append("打");
-        sb.append(ladder.getDiscount().multiply(new BigDecimal(10)));
+        sb.append(ladder.getDiscount().multiply(new BigDecimal(10)).stripTrailingZeros().toPlainString());
         sb.append("折");
         return sb.toString();
     }

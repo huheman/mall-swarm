@@ -5,6 +5,7 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
+import com.macro.mall.portal.domain.OrderParamWithAttribute;
 import com.macro.mall.portal.service.DirectChargeService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +51,15 @@ public class OmsPortalOrderController {
         Map<String, Object> result = portalOrderService.generateOrder(orderParam);
         return CommonResult.success(result, "下单成功");
     }
+
+    @Operation(summary = "根据购物车信息修改属性并生成订单")
+    @RequestMapping(value = "/generateOrderWithAttribute", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult generateOrderWithAttribute(@RequestBody OrderParamWithAttribute orderParam) {
+        Map<String, Object> result = portalOrderService.generateOrderWithAttribute(orderParam);
+        return CommonResult.success(result, "下单成功");
+    }
+
 
     @Operation(summary = "用户支付成功的回调")
     @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)

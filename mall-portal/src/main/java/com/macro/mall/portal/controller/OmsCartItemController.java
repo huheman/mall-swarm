@@ -29,12 +29,6 @@ public class OmsCartItemController {
     @Autowired
     private UmsMemberService memberService;
 
-    @PostMapping("/updateAttr/{cartId}")
-    @ResponseBody
-    public CommonResult updateAttr(@RequestBody List<CartAttributeBO> attributeBOS, @PathVariable Long cartId) {
-        int count = cartItemService.updateAttribute(cartId, attributeBOS);
-        return CommonResult.success(count);
-    }
     @Operation(summary = "添加商品到购物车")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody

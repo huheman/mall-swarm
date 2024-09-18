@@ -204,7 +204,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setOrderType(0);
         //收货人信息：姓名、电话、邮编、地址
         String receiverName = "";
-        String receiverPhone = "";
+        String receiverPhone = currentMember.getPhone();
         String receiverPostCode = "";
         String receiverRegion = "";
         String receiverProvince = "";
@@ -492,6 +492,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             order.setNote(note);
             orderMapper.updateByPrimaryKey(order);
         }
+    }
+
+    @Override
+    public Map<String, Object> generateOrderWithAttribute(OrderParamWithAttribute orderParam) {
+        cartItemService.updateAttribute(orderParam.getCartIds().get(0), orderParam.getAttributeBOS());
+        return generateOrder(orderParam);
     }
 
     /**
