@@ -505,6 +505,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             String moreInfo = order.getMoreInfo();
             JSONObject jsonObject = JSONObject.parseObject(moreInfo);
             jsonObject.put("openId", openId);
+            order.setMoreInfo(moreInfo.toString());
             orderMapper.updateByPrimaryKey(order);
         }
     }
