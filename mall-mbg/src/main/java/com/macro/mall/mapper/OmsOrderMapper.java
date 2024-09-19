@@ -16,21 +16,15 @@ public interface OmsOrderMapper {
 
     int insertSelective(OmsOrder row);
 
-    List<OmsOrder> selectByExampleWithBLOBs(OmsOrderExample example);
-
     List<OmsOrder> selectByExample(OmsOrderExample example);
 
     OmsOrder selectByPrimaryKey(Long id);
 
     int updateByExampleSelective(@Param("row") OmsOrder row, @Param("example") OmsOrderExample example);
 
-    int updateByExampleWithBLOBs(@Param("row") OmsOrder row, @Param("example") OmsOrderExample example);
-
     int updateByExample(@Param("row") OmsOrder row, @Param("example") OmsOrderExample example);
 
     int updateByPrimaryKeySelective(OmsOrder row);
-
-    int updateByPrimaryKeyWithBLOBs(OmsOrder row);
 
     int updateByPrimaryKey(OmsOrder row);
 }
