@@ -8,6 +8,7 @@ import com.macro.mall.service.OmsOrderService;
 import com.macro.mall.service.PortalOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.List;
  */
 @Controller
 @Tag(name = "OmsOrderController", description = "订单管理")
+@Slf4j
 @RequestMapping("/order")
 public class OmsOrderController {
     @Autowired
@@ -44,8 +46,12 @@ public class OmsOrderController {
         int count = orderService.delivery(deliveryParamList);
         // 完成微信的发货
         for (OmsOrderDeliveryParam omsOrderDeliveryParam : deliveryParamList) {
-            portalOrderService.ship(omsOrderDeliveryParam.getOrderId());
-            portalOrderService.confirmReceiveOrder(omsOrderDeliveryParam.getOrderId());
+            try {
+                portalOrderService.ship(omsOrderDeliveryParam.getOrderId());
+                portalOrderService.confirmReceiveOrder(omsOrderDeliveryParam.getOrderId());
+            } catch (Exception e) {
+                log.error(omsOrderDeliveryParam + "发货失败", e);
+            }
         }
         return CommonResult.success(count);
     }

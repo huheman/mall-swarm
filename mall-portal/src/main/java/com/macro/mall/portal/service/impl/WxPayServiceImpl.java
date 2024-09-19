@@ -1,5 +1,6 @@
 package com.macro.mall.portal.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.service.RedisService;
@@ -171,8 +172,11 @@ public class WxPayServiceImpl implements WxPayService {
             // 获取响应体内容
             JSONObject entries = new JSONObject(response.body().string());
             log.info("entries from ship:{}", entries);
+            Integer errcode = entries.getInt("errcode");
+            Assert.state(errcode == 0, "微信发货失败" + entries.getStr("errmsg"));
         } catch (IOException e) {
             log.error("发货失败", e);
+            throw new RuntimeException(e);
         }
     }
 
