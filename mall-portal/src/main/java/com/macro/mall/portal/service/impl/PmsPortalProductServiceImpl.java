@@ -5,14 +5,17 @@ import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
-import com.macro.mall.portal.dao.PortalProductDao;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
+import com.macro.mall.portal.service.HomeService;
 import com.macro.mall.portal.service.PmsPortalProductService;
+import com.macro.mall.portal.service.bo.HotGameBO;
+import com.macro.mall.portal.service.bo.MemberProductBO;
 import com.macro.mall.portal.service.bo.ProductSkuBO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +43,7 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     @Autowired
     private PmsProductFullReductionMapper productFullReductionMapper;
     @Autowired
-    private PortalProductDao portalProductDao;
+    private HomeService homeService;
 
     @Override
     public List<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
@@ -137,6 +140,31 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         List<PmsProduct> pmsProducts = productMapper.selectByExample(productExample);
         return pmsProducts.parallelStream()
                 .map(this::asSkuBO).toList();
+    }
+
+    @Override
+    public HotGameBO hotGame(Long memberId) {
+        MemberProductBO memberProductBO = homeService.hotGameList(memberId);
+        if (!CollectionUtils.isEmpty(memberProductBO.getHistoryGames())) {
+            return memberProductBO.getHistoryGames().stream()
+                    .limit(1).map(pmsProductCategory -> {
+                        HotGameBO hotGameBO = new HotGameBO();
+                        hotGameBO.setGameName(pmsProductCategory.getName());
+                        hotGameBO.setGamePic(pmsProductCategory.getIcon());
+                        hotGameBO.setSid(pmsProductCategory.getId());
+
+                        return hotGameBO;
+                    }).findFirst().orElse(null);
+        } else {
+            return memberProductBO.getHotGames().stream()
+                    .limit(1).map(pmsProductCategory -> {
+                        HotGameBO hotGameBO = new HotGameBO();
+                        hotGameBO.setGameName(pmsProductCategory.getName());
+                        hotGameBO.setGamePic(pmsProductCategory.getIcon());
+                        hotGameBO.setSid(pmsProductCategory.getId());
+                        return hotGameBO;
+                    }).findFirst().orElse(null);
+        }
     }
 
     private ProductSkuBO asSkuBO(PmsProduct pmsProduct) {

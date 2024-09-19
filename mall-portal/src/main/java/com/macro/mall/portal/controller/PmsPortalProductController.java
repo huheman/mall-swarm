@@ -6,6 +6,8 @@ import com.macro.mall.model.PmsProduct;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
 import com.macro.mall.portal.service.PmsPortalProductService;
+import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.HotGameBO;
 import com.macro.mall.portal.service.bo.ProductSkuBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +31,8 @@ public class PmsPortalProductController {
 
     @Autowired
     private PmsPortalProductService portalProductService;
+    @Autowired
+    private UmsMemberService memberService;
 
     @Operation(summary = "综合搜索、筛选、排序")
     @Parameter(name = "sort", description = "排序字段:0->按相关度；1->按新品；2->按销量；3->价格从低到高；4->价格从高到低",
@@ -66,5 +70,20 @@ public class PmsPortalProductController {
     public CommonResult<PmsPortalProductDetail> detail(@PathVariable Long id) {
         PmsPortalProductDetail productDetail = portalProductService.detail(id);
         return CommonResult.success(productDetail);
+    }
+
+    @Operation(summary = "获取热门商品")
+    @RequestMapping(value = "/hotGame", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<HotGameBO> hotGame() {
+        Long memberId = null;
+        try {
+            memberId = memberService.getCurrentMember().getId();
+        } catch (Exception e) {
+
+        }
+
+        HotGameBO hotGame = portalProductService.hotGame(memberId);
+        return CommonResult.success(hotGame);
     }
 }

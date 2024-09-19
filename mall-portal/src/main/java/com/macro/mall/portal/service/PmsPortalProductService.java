@@ -3,6 +3,7 @@ package com.macro.mall.portal.service;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
+import com.macro.mall.portal.service.bo.HotGameBO;
 import com.macro.mall.portal.service.bo.ProductSkuBO;
 
 import java.util.List;
@@ -28,4 +29,6 @@ public interface PmsPortalProductService {
     PmsPortalProductDetail detail(Long id);
 
     List<ProductSkuBO> detailByCategory(Long categoryId);
+
+    HotGameBO hotGame(Long memberId);
 }
