@@ -33,7 +33,10 @@
             )
         </if>
         <if test="queryParam.chargeType!=null and queryParam.chargeType!=''">
-            and receiver_detail_address like concat(#{queryParam.chargeType},'%')
+            and more_info->>'$.attr' like concat(#{queryParam.chargeType},'%')
+        </if>
+        <if test="queryParam.payerPhone != null and queryParam.payerPhone != ''">
+            and more_info->>'$.payerPhone' = #{queryParam.payerPhone}
         </if>
         order by id desc
     </select>

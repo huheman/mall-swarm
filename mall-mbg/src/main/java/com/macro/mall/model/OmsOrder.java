@@ -136,6 +136,8 @@ public class OmsOrder implements Serializable {
     @Schema(title = "修改时间")
     private Date modifyTime;
 
+    private String moreInfo;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -490,6 +492,14 @@ public class OmsOrder implements Serializable {
         this.modifyTime = modifyTime;
     }
 
+    public String getMoreInfo() {
+        return moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -540,6 +550,7 @@ public class OmsOrder implements Serializable {
         sb.append(", receiveTime=").append(receiveTime);
         sb.append(", commentTime=").append(commentTime);
         sb.append(", modifyTime=").append(modifyTime);
+        sb.append(", moreInfo=").append(moreInfo);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

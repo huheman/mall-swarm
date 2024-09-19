@@ -133,7 +133,8 @@ public class WxPayServiceImpl implements WxPayService {
         ZonedDateTime now = ZonedDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         String formattedDate = now.format(formatter);
-
+        JSONObject moreInfo = new JSONObject(detail.getMoreInfo());
+        String openId = moreInfo.getStr("openId");
         String body = String.format("{\n" +
                 "    \"order_key\": {\n" +
                 "        \"order_number_type\": 1,\n" +
@@ -146,7 +147,7 @@ public class WxPayServiceImpl implements WxPayService {
                 "        {\n" +
                 "            \"tracking_no\": \"\",\n" +
                 "            \"express_company\": \"\",\n" +
-                "            \"item_desc\": \"虚拟商品\",\n" +
+                "            \"item_desc\": \"%s\",\n" +
                 "            \"contact\": null\n" +
                 "        }\n" +
                 "    ],\n" +
@@ -154,7 +155,7 @@ public class WxPayServiceImpl implements WxPayService {
                 "    \"payer\": {\n" +
                 "        \"openid\": \"%s\"\n" +
                 "    }\n" +
-                "}", merchantId, detail.getOrderSn(), formattedDate, detail.getNote());
+                "}", merchantId, detail.getOrderSn(), formattedDate, openId, detail.getOrderSn());
         RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json; charset=utf-8"));
 
         // 构建请求

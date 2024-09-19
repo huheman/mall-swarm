@@ -212,7 +212,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         String receiverPostCode = "";
         String receiverRegion = "";
         String receiverProvince = "";
+        String receiverPhone = "";
         String receiverCity = "";
+        String receiverAddress = "";
         if (orderParam.getMemberReceiveAddressId() != null) {
             UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
             receiverName = address.getName();
@@ -220,20 +222,25 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             receiverProvince = address.getProvince();
             receiverCity = address.getCity();
             receiverRegion = address.getRegion();
-
+            receiverPhone = address.getPhoneNumber();
+            receiverAddress = address.getDetailAddress();
         }
         order.setReceiverName(receiverName);
-        order.setReceiverPhone(currentMember.getPhone());
+        order.setReceiverPhone(receiverPhone);
         order.setReceiverPostCode(receiverPostCode);
         order.setReceiverProvince(receiverProvince);
         order.setReceiverCity(receiverCity);
         order.setReceiverRegion(receiverRegion);
+        order.setReceiverDetailAddress(receiverAddress);
         JSONArray attrArray = JSON.parseArray(cartPromotionItemList.get(0).getProductAttr());
         List<String> attrValues = new ArrayList<>();
         for (int i = 0; i < attrArray.size(); i++) {
             attrValues.add(attrArray.getJSONObject(i).getString("value"));
         }
-        order.setReceiverDetailAddress(String.join("-", attrValues));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("payerPhone", currentMember.getPhone());
+        jsonObject.put("attr", String.join("-", attrValues));
+        order.setMoreInfo(jsonObject.toString());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
         order.setDeleteStatus(0);
@@ -486,7 +493,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     @Override
-    public void updateNote(String orderSn, String note) {
+    public void updateNote(String orderSn, String openId) {
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria()
                 .andOrderSnEqualTo(orderSn)
@@ -495,7 +502,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         List<OmsOrder> orderList = orderMapper.selectByExample(example);
         if (CollUtil.isNotEmpty(orderList)) {
             OmsOrder order = orderList.get(0);
-            order.setNote(note);
+            String moreInfo = order.getMoreInfo();
+            JSONObject jsonObject = JSONObject.parseObject(moreInfo);
+            jsonObject.put("openId", openId);
             orderMapper.updateByPrimaryKey(order);
         }
     }
