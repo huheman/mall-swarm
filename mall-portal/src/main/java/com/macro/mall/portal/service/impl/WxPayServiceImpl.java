@@ -155,7 +155,7 @@ public class WxPayServiceImpl implements WxPayService {
                 "    \"payer\": {\n" +
                 "        \"openid\": \"%s\"\n" +
                 "    }\n" +
-                "}", merchantId, detail.getOrderSn(), formattedDate, openId, detail.getOrderSn());
+                "}", merchantId, detail.getOrderSn(), detail.getOrderSn(), formattedDate, openId);
         log.info("ship body :{}", body);
         RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json; charset=utf-8"));
 
