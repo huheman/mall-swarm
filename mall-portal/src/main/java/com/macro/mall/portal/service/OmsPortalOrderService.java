@@ -79,4 +79,6 @@ public interface OmsPortalOrderService {
 
     @Transactional
     Map<String, Object> generateOrderWithAttribute(OrderParamWithAttribute orderParam);
+
+    String hint(Long orderId);
 }

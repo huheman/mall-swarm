@@ -70,6 +70,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private OmsOrderItemMapper orderItemMapper;
     @Autowired
     private CancelOrderSender cancelOrderSender;
+    /*订单预计完成时间*/
+    @Value("${order.hint.expectMinute}")
+    private Integer expectMinute;
+    @Value("${order.hint.more}")
+    private String moreHint;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -499,6 +504,22 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public Map<String, Object> generateOrderWithAttribute(OrderParamWithAttribute orderParam) {
         cartItemService.updateAttribute(orderParam.getCartIds().get(0), orderParam.getAttributeBOS());
         return generateOrder(orderParam);
+    }
+
+    @Override
+    public String hint(Long orderId) {
+        if (orderId == null) {
+            return "";
+        }
+        OmsOrder omsOrder = orderMapper.selectByPrimaryKey(orderId);
+        if (omsOrder.getStatus() >= 1 && omsOrder.getStatus() < 3) {
+            long time = omsOrder.getPaymentTime().getTime();
+            int escapeMinute = (int) ((System.currentTimeMillis() - time) / 1000 / 60);
+            int minuteLeft = Math.max(0, expectMinute - escapeMinute);
+            return StringUtils.trim(moreHint) + "预计还有" + minuteLeft + "分钟完成";
+        }
+
+        return "";
     }
 
     /**

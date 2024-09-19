@@ -77,6 +77,14 @@ public class OmsPortalOrderController {
         return CommonResult.success(null);
     }
 
+    @Operation(summary = "获取订单提示信息")
+    @GetMapping(value = "hint/{orderId}")
+    @ResponseBody
+    public CommonResult<String> hint(@PathVariable("orderId") Long orderId) {
+        String hint = portalOrderService.hint(orderId);
+        return CommonResult.success(hint);
+    }
+
     @Operation(summary = "取消单个超时订单")
     @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
     @ResponseBody
