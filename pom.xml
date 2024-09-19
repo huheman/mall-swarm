@@ -305,11 +305,11 @@
                                         <descriptorRef>artifact</descriptorRef>
                                     </assembly>
                                     <!--定义容器启动命令-->
-                                    <entryPoint>["java", "-jar","-Dspring.profiles.active=${deploy.env}","/${project.build.finalName}.jar"]</entryPoint>
-                                    <env>
+                                    <entryPoint>["java", "-jar","-Dspring.profiles.active=${deploy.env}", "-Duser.timezone=Asia/Shanghai","/${project.build.finalName}.jar"]</entryPoint>
+                                    <environment>
                                         <!-- 设置容器内的时区环境变量 -->
                                         <TZ>Asia/Shanghai</TZ>
-                                    </env>
+                                    </environment>
                                     <!--定义维护者-->
                                     <maintainer>macrozheng</maintainer>
                                 </build>
