@@ -1,5 +1,6 @@
 package com.macro.mall.portal.service.impl;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.Assert;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.portal.service.WYTDChargeService;
@@ -11,15 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.Mac;
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.GZIPInputStream;
 
 @Component
 @Slf4j
@@ -86,6 +88,56 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         }
     }
 
+    private byte[] decode(String base64EncodedString) throws Exception {
+        return Base64.decode(base64EncodedString);
+    }
+
+    private String base64UnCompress(String str) {
+
+        byte[] zippedData = Base64.decode(str);
+
+        return uncompressToString(zippedData);
+    }
+
+    private String uncompressToString(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        try {
+            GZIPInputStream ungzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[1024];
+            int n;
+            while ((n = ungzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+            return out.toString("UTF-8");
+        } catch (Exception e) {
+            log.error("解压卡密失败", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public String decript(String cards) {
+        if (org.springframework.util.StringUtils.isEmpty(cards)) {
+            return "";
+        }
+        try {
+            SecretKeySpec skeySpec = new SecretKeySpec(userKey.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+            String strTmp = new String(cipher.doFinal(decode(cards)));
+            // 拿到后解压
+            return base64UnCompress(strTmp);
+        } catch (Exception ex) {
+            log.error("解密cards失败", ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
     private String md5(String src, String charset) throws Exception {
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] bytes = md.digest(src.getBytes(charset));
@@ -111,6 +163,9 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("GoodsId", goodsId);
         jsonObject.put("BuyNum", buyNum);
+        if (StringUtils.isEmpty(chargeAccount)) {
+            chargeAccount = "kami";
+        }
         jsonObject.put("ChargeAccount", chargeAccount);
         jsonObject.put("UserOrderId", userOrderId);
         jsonObject.put("UserId", userId);

@@ -2,6 +2,7 @@ package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -530,6 +531,15 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
 
         return "";
+    }
+
+    @Override
+    public OmsOrderItem selectByOrderSN(String orderSN) {
+        OmsOrderItemExample example = new OmsOrderItemExample();
+        example.createCriteria().andOrderSnEqualTo(orderSN);
+        List<OmsOrderItem> omsOrderItems = orderItemMapper.selectByExample(example);
+        Assert.notEmpty(omsOrderItems, orderSN+"找到的项目为空");
+        return omsOrderItems.get(0);
     }
 
     /**

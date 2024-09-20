@@ -10,4 +10,6 @@ public interface WYTDChargeService {
     String generateSignature(JSONObject jsonObject);
 
     String status(String orderSN);
+
+    String decript(String cards);
 }
