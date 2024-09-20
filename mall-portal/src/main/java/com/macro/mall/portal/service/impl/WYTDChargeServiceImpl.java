@@ -2,12 +2,14 @@ package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.net.URLDecoder;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.portal.service.WYTDChargeService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -126,6 +129,7 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
             return "";
         }
         try {
+            cards = URLDecoder.decode(cards, StandardCharsets.UTF_8);
             SecretKeySpec skeySpec = new SecretKeySpec(userKey.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec);
