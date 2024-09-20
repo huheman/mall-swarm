@@ -104,6 +104,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     public void chargeSuccess(JSONObject callback) {
         log.info("直充回调接口被触发了{}", callback);
         String sign = (String) callback.remove("Sign");
+        callback.remove("StatusMsg");
+        callback.remove("Cards");
         String signature = wytdChargeService.generateSignature(callback);
         Assert.equals(signature, sign, "回调签名不正确");
         Integer status = callback.getInteger("Status");
