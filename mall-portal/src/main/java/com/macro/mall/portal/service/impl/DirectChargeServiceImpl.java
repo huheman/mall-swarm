@@ -43,7 +43,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     public void directCharge(String orderSN) {
         Assert.notEmpty(orderSN, "orderSN is null or empty");
 
-        OmsOrderItem omsOrderItem = omsPortalOrderService.selectByOrderSN(orderSN);
+        OmsOrderItem omsOrderItem = omsPortalOrderService.selectOrderItemByOrderSN(orderSN);
         String productSkuCode = omsOrderItem.getProductSkuCode();
         if (StringUtils.startsWithIgnoreCase(productSkuCode, PRE_FIX)) {
             doDirectCharge(productSkuCode.substring(PRE_FIX.length()), omsOrderItem);
@@ -115,11 +115,15 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             Assert.state(status == 1, callback + "充值回调状态不为成功");
 
             if (StringUtils.hasLength(cards)) {
+                String wytdOrderId = callback.getString("OrderId");
                 // 如果涉及卡密，就记录起卡密
-                cards = wytdChargeService.decript(cards);
-                log.info("卡密解密结果{}", cards);
+                cards = wytdChargeService.decryptCards(wytdOrderId, cards);
+                /*形如：卡a,卡密a,有效期a|卡b,卡密b,有效期b|卡c,卡密c,有效期c
+                有效期格式为 yyyy-MM-dd  ，2018-01-01
+                123,456,2020-01-01|321,654,2020-01-01|666,777,2021-01-01
+                */
                 Assert.notEmpty(cards, "卡密解密失败");
-                omsPortalOrderService.updateMoreInfo(orderSN, "cards", cards);
+                omsPortalOrderService.recordCards(orderSN, cards);
             }
 
             //发货

@@ -8,6 +8,7 @@ import com.macro.mall.portal.domain.OrderParam;
 import com.macro.mall.portal.domain.OrderParamWithAttribute;
 import com.macro.mall.portal.service.DirectChargeService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
+import com.macro.mall.portal.service.UmsMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -33,8 +34,15 @@ public class OmsPortalOrderController {
     @Autowired
     private OmsPortalOrderService portalOrderService;
     @Autowired
-    private DirectChargeService directChargeService;
+    private UmsMemberService memberService;
 
+
+    @GetMapping("/showCards/{orderId}")
+    @ResponseBody
+    public CommonResult<String> showCards(@PathVariable("orderId") Long orderId) {
+        String cards = portalOrderService.showCards(orderId, memberService.getCurrentMember().getId());
+        return CommonResult.success(cards);
+    }
 
     @Operation(summary = "根据购物车信息生成确认单信息")
     @RequestMapping(value = "/generateConfirmOrder", method = RequestMethod.POST)

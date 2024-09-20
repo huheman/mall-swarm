@@ -417,37 +417,37 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrderItemExample orderItemExample = new OmsOrderItemExample();
         orderItemExample.createCriteria().andOrderIdIn(orderIds);
         List<OmsOrderItem> orderItemList = orderItemMapper.selectByExample(orderItemExample);
-        List<OmsOrderDetail> orderDetailList = new ArrayList<>();
-        for (OmsOrder omsOrder : orderList) {
+
+        List<OmsOrderDetail> orderDetailList = orderList.parallelStream().map(omsOrder -> {
             OmsOrderDetail orderDetail = new OmsOrderDetail();
             BeanUtil.copyProperties(omsOrder, orderDetail);
             List<OmsOrderItem> relatedItemList = orderItemList.stream().filter(item -> item.getOrderId().equals(orderDetail.getId())).collect(Collectors.toList());
             orderDetail.setOrderItemList(relatedItemList);
-            orderDetailList.add(orderDetail);
-        }
-        for (OmsOrderDetail omsOrderDetail : orderDetailList) {
-            omsOrderDetail.getOrderItemList().stream().forEach(new Consumer<OmsOrderItem>() {
-                @Override
-                public void accept(OmsOrderItem omsOrderItem) {
-                    String productAttr = omsOrderItem.getProductAttr();
-                    JSONArray array = JSON.parseArray(productAttr);
-                    for (int i = 0; i < array.size(); i++) {
-                        JSONObject jsonObject = array.getJSONObject(i);
-                        String value = jsonObject.getString("value");
-                        if (StringUtils.contains(value, '-')) {
-                            value = StringUtils.substring(value, 0, StringUtils.indexOf(value, '-'));
-                        }
-                        jsonObject.put("value", value);
-                        String key = jsonObject.getString("key");
-                        if (StringUtils.contains(key, '-')) {
-                            key = StringUtils.substring(key, 0, StringUtils.indexOf(key, '-'));
-                        }
-                        jsonObject.put("key", key);
+            String moreInfo = omsOrder.getMoreInfo();
+            JSONObject jsonObject = JSONObject.parseObject(moreInfo);
+            orderDetail.setHasCardInfo(jsonObject != null && jsonObject.containsKey("cards"));
+            return orderDetail;
+        }).peek(omsOrderDetail -> omsOrderDetail.getOrderItemList().stream().forEach(new Consumer<OmsOrderItem>() {
+            @Override
+            public void accept(OmsOrderItem omsOrderItem) {
+                String productAttr = omsOrderItem.getProductAttr();
+                JSONArray array = JSON.parseArray(productAttr);
+                for (int i = 0; i < array.size(); i++) {
+                    JSONObject jsonObject = array.getJSONObject(i);
+                    String value = jsonObject.getString("value");
+                    if (StringUtils.contains(value, '-')) {
+                        value = StringUtils.substring(value, 0, StringUtils.indexOf(value, '-'));
                     }
-                    omsOrderItem.setProductAttr(array.toJSONString());
+                    jsonObject.put("value", value);
+                    String key = jsonObject.getString("key");
+                    if (StringUtils.contains(key, '-')) {
+                        key = StringUtils.substring(key, 0, StringUtils.indexOf(key, '-'));
+                    }
+                    jsonObject.put("key", key);
                 }
-            });
-        }
+                omsOrderItem.setProductAttr(array.toJSONString());
+            }
+        })).toList();
         resultPage.setList(orderDetailList);
         return resultPage;
     }
@@ -494,12 +494,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     @Override
-    public void updateMoreInfo(String orderSn, String key,String value) {
+    public void updateMoreInfo(String orderSn, String key, String value) {
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria()
-                .andOrderSnEqualTo(orderSn)
-                .andStatusEqualTo(0)
-                .andDeleteStatusEqualTo(0);
+                .andOrderSnEqualTo(orderSn);
         List<OmsOrder> orderList = orderMapper.selectByExample(example);
         if (CollUtil.isNotEmpty(orderList)) {
             OmsOrder order = orderList.get(0);
@@ -534,12 +532,28 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     @Override
-    public OmsOrderItem selectByOrderSN(String orderSN) {
+    public OmsOrderItem selectOrderItemByOrderSN(String orderSN) {
         OmsOrderItemExample example = new OmsOrderItemExample();
         example.createCriteria().andOrderSnEqualTo(orderSN);
         List<OmsOrderItem> omsOrderItems = orderItemMapper.selectByExample(example);
-        Assert.notEmpty(omsOrderItems, orderSN+"找到的项目为空");
+        Assert.notEmpty(omsOrderItems, orderSN + "找到的项目为空");
         return omsOrderItems.get(0);
+    }
+
+    @Override
+    public String showCards(Long orderId, Long memberId) {
+        OmsOrder omsOrder = orderMapper.selectByPrimaryKey(orderId);
+        Assert.state(omsOrder.getMemberId().equals(memberId), "只能查看自己的订单");
+        JSONObject jsonObject = JSON.parseObject(omsOrder.getMoreInfo());
+        if (jsonObject != null) {
+            return jsonObject.getString("cards");
+        }
+        return "";
+    }
+
+    @Override
+    public void recordCards(String orderSN, String cardInfo) {
+        updateMoreInfo(orderSN, "cards", cardInfo);
     }
 
     /**

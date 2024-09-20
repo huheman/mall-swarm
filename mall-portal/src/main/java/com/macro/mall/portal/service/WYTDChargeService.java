@@ -11,5 +11,5 @@ public interface WYTDChargeService {
 
     String status(String orderSN);
 
-    String decript(String cards);
+    String decryptCards(String wytdOrderId,String cards);
 }

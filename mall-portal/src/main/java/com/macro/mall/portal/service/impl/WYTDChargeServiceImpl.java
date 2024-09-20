@@ -1,15 +1,13 @@
 package com.macro.mall.portal.service.impl;
 
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.net.URLDecoder;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.portal.service.WYTDChargeService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -91,54 +89,62 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         }
     }
 
-    private byte[] decode(String base64EncodedString) throws Exception {
-        return Base64.decode(base64EncodedString);
-    }
 
-    private String base64UnCompress(String str) {
-
-        byte[] zippedData = Base64.decode(str);
-
-        return uncompressToString(zippedData);
-    }
-
-    private String uncompressToString(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
-            return null;
+    // 生成 encKey
+    private static String generateEncKey(String orderId, String key) throws Exception {
+        String srcKey = orderId + key;
+        // 使用 MD5 算法生成 32 位的 srcKey
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] srcKeyBytes = md.digest(srcKey.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : srcKeyBytes) {
+            sb.append(String.format("%02x", b));
         }
+        // 截取前16位作为 encKey
+        return sb.toString().substring(0, 16);
+    }
+
+    // AES 解密
+    private static String aesDecrypt(String str, String password) throws Exception {
+        SecretKeySpec skeySpec = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8), "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+        byte[] decoded = Base64.decodeBase64(str);
+        byte[] original = cipher.doFinal(decoded);
+        return new String(original, StandardCharsets.UTF_8);
+    }
+
+    // GZIP 解压缩
+    private static String gzipDecompress(String str) throws Exception {
+        byte[] compressed = Base64.decodeBase64(str);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        try {
-            GZIPInputStream ungzip = new GZIPInputStream(in);
-            byte[] buffer = new byte[1024];
-            int n;
-            while ((n = ungzip.read(buffer)) >= 0) {
-                out.write(buffer, 0, n);
-            }
-            return out.toString("UTF-8");
-        } catch (Exception e) {
-            log.error("解压卡密失败", e);
-            throw new RuntimeException(e);
+        ByteArrayInputStream in = new ByteArrayInputStream(compressed);
+        GZIPInputStream gzip = new GZIPInputStream(in);
+        byte[] buffer = new byte[1024];
+        int n;
+        while ((n = gzip.read(buffer)) >= 0) {
+            out.write(buffer, 0, n);
         }
+        return out.toString("UTF-8");
     }
 
-
-    @Override
-    public String decript(String cards) {
-        if (org.springframework.util.StringUtils.isEmpty(cards)) {
-            return "";
-        }
+    // 主解密方法
+    public String decryptCards(String wytdOrderId, String cardsStr) {
         try {
-            cards = URLDecoder.decode(cards, StandardCharsets.UTF_8);
-            SecretKeySpec skeySpec = new SecretKeySpec(userKey.getBytes(), "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-            String strTmp = new String(cipher.doFinal(decode(cards)));
-            // 拿到后解压
-            return base64UnCompress(strTmp);
-        } catch (Exception ex) {
-            log.error("解密cards失败", ex);
-            throw new RuntimeException(ex);
+            // 1. 生成解密密钥 encKey
+            String encKey = generateEncKey(wytdOrderId, userKey);
+
+            // 2. AES 解密得到压缩的卡信息
+            String compressCards = aesDecrypt(cardsStr, encKey);
+
+            // 3. 解压缩卡信息
+            String cardsInfo = gzipDecompress(compressCards);
+
+            // 4. 返回解密后的卡信息
+            return cardsInfo;
+        } catch (Exception e) {
+            log.error("解密失败", e);
+            return null;
         }
     }
 

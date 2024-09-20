@@ -83,5 +83,9 @@ public interface OmsPortalOrderService {
 
     String hint(Long orderId);
 
-    OmsOrderItem selectByOrderSN(String orderSN);
+    OmsOrderItem selectOrderItemByOrderSN(String orderSN);
+
+    String showCards(Long orderId,Long memberId);
+
+    void recordCards(String orderSN,String cardInfo);
 }
