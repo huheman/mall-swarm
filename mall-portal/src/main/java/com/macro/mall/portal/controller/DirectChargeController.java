@@ -26,7 +26,7 @@ public class DirectChargeController {
     @PostMapping("/notify")
     public String notify(@RequestParam Map<String, Object> params) throws Exception {
         directChargeService.chargeSuccess(new JSONObject(params));
-        return "ok";
+        return "OK";
     }
 
     @GetMapping("chargeStatus")
