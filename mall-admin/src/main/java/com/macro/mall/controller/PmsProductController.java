@@ -10,6 +10,8 @@ import com.macro.mall.service.PmsProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import java.util.List;
 @Tag(name = "PmsProductController", description = "商品管理")
 @RequestMapping("/product")
 public class PmsProductController {
+    private static final Logger log = LoggerFactory.getLogger(PmsProductController.class);
     @Autowired
     private PmsProductService productService;
 
@@ -31,11 +34,12 @@ public class PmsProductController {
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult create(@RequestBody PmsProductParam productParam) {
-        int count = productService.create(productParam);
-        if (count > 0) {
-            return CommonResult.success(count);
-        } else {
-            return CommonResult.failed();
+        try {
+            productService.create(productParam);
+            return CommonResult.success("ok");
+        } catch (Exception e) {
+            log.error("创建失败", e);
+            return CommonResult.failed(e.getMessage());
         }
     }
 
@@ -51,11 +55,12 @@ public class PmsProductController {
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult update(@PathVariable Long id, @RequestBody PmsProductParam productParam) {
-        int count = productService.update(id, productParam);
-        if (count > 0) {
+        try {
+            int count = productService.update(id, productParam);
             return CommonResult.success(count);
-        } else {
-            return CommonResult.failed();
+        } catch (Exception e) {
+            log.error("更新商品失败", e);
+            return CommonResult.failed(e.getMessage());
         }
     }
 
