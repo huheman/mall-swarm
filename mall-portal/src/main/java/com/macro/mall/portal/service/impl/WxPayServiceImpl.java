@@ -172,7 +172,7 @@ public class WxPayServiceImpl implements WxPayService {
             JSONObject entries = new JSONObject(response.body().string());
             log.info("entries from ship:{}", entries);
             Integer errcode = entries.getInt("errcode");
-            Assert.state(errcode == 0, "微信发货失败" + entries.getStr("errmsg"));
+            Assert.state(errcode == 0 || errcode.equals(10060023), "微信发货失败" + entries.getStr("errmsg"));
         } catch (IOException e) {
             log.error("发货失败", e);
             throw new RuntimeException(e);

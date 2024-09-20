@@ -30,8 +30,8 @@ public class DirectChargeController {
     }
 
     @GetMapping("chargeStatus")
-    public CommonResult<String> chargeStatus(String orderSN) {
+    public String chargeStatus(String orderSN) {
         String result = directChargeService.chargeStatus(orderSN);
-        return CommonResult.success(result);
+        return result;
     }
 }
