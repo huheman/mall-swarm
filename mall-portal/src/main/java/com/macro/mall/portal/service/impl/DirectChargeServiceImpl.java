@@ -105,12 +105,11 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         log.info("直充回调接口被触发了{}", callback);
         String sign = (String) callback.remove("Sign");
         callback.remove("StatusMsg");
-        callback.remove("Cards");
+        String cards = (String) callback.remove("Cards");
         String signature = wytdChargeService.generateSignature(callback);
         Assert.equals(signature, sign, "回调签名不正确");
         Integer status = callback.getInteger("Status");
         String orderSN = callback.getString("UserOrderId");
-        String cards = callback.getString("Cards");
         DirectChargeDomain chargeDomain = directChargeDao.selectByOrderSN(orderSN);
         try {
             Assert.state(status == 1, callback + "充值回调状态不为成功");
