@@ -29,6 +29,7 @@ public class DirectChargeDomain {
 
     public void success() {
         this.chargeStatus = 2;
+        this.failReason = "";
     }
 
     public void fail(String failReason) {

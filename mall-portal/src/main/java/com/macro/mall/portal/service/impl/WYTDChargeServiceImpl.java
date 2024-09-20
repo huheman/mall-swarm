@@ -15,7 +15,9 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -50,6 +52,38 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         // 4. 使用GBK编码进行MD5加密
         String src = srcBuilder.toString();
         return md5(src, "GBK");
+    }
+
+    @Override
+    public String status(String orderSN) {
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String timestamp = dateFormat.format(date);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("UserOrderId", orderSN);
+        jsonObject.put("UserId", userId);
+        jsonObject.put("TimeStamp", timestamp);
+        String signature = generateSignature(jsonObject);
+        jsonObject.put("Sign", signature);
+        String url = "http://open.greatnesss.com/api/Order/QueryChargeCardsResult";
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json; charset=utf-8"));
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        // 发送请求并获取响应
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalArgumentException("response code: " + response.code());
+            }
+            // 解析响应体
+            String responseBody = response.body().string();
+            return responseBody;
+        } catch (Exception e) {
+            log.error("查询失败", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private String md5(String src, String charset) throws Exception {
@@ -91,8 +125,6 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         String signature = generateSignature(jsonObject);
         jsonObject.put("Sign", signature);
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json; charset=utf-8"));
-
-
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)

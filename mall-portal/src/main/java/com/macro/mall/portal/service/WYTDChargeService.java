@@ -8,4 +8,6 @@ public interface WYTDChargeService {
     void createOrder(Long goodsId, Integer buyNum, String gameArea, String gameServer, String chargeAccount, String userOrderId) throws Exception;
 
     String generateSignature(JSONObject jsonObject);
+
+    String status(String orderSN);
 }

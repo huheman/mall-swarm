@@ -3,10 +3,11 @@ package com.macro.mall.portal.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.portal.service.DirectChargeService;
-import com.macro.mall.portal.service.WYTDChargeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/directCharge")
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class DirectChargeController {
     @Autowired
     private DirectChargeService directChargeService;
-    @Autowired
-    private WYTDChargeService wytdChargeService;
 
     @GetMapping("/retry")
     public CommonResult<String> retry(String orderSN) throws Exception {
@@ -25,8 +24,14 @@ public class DirectChargeController {
 
 
     @PostMapping("/notify")
-    public String notify(@RequestBody JSONObject body) throws Exception {
-        directChargeService.chargeSuccess(body);
+    public String notify(@RequestParam Map<String, Object> params) throws Exception {
+        directChargeService.chargeSuccess(new JSONObject(params));
         return "ok";
+    }
+
+    @GetMapping("chargeStatus")
+    public CommonResult<String> chargeStatus(String orderSN) {
+        String result = directChargeService.chargeStatus(orderSN);
+        return CommonResult.success(result);
     }
 }

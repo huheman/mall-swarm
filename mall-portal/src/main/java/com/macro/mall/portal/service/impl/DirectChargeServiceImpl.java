@@ -23,10 +23,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -136,5 +134,11 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             directChargeDao.update(chargeDomain);
         }
 
+    }
+
+    @Override
+    public String chargeStatus(String orderSN) {
+
+        return wytdChargeService.status(orderSN);
     }
 }
