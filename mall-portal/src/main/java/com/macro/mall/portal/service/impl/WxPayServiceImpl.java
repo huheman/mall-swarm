@@ -7,7 +7,6 @@ import com.macro.mall.common.service.RedisService;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.service.WxPayService;
 import com.macro.mall.portal.service.bo.OpenIdBO;
-import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
@@ -110,7 +109,7 @@ public class WxPayServiceImpl implements WxPayService {
         // 发送请求并获取响应
         try (Response response = okHttpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new IllegalArgumentException("ok");
+                throw new IOException("Unexpected code " + response);
             }
             // 解析响应体
             String responseBody = response.body().string();
@@ -192,21 +191,16 @@ public class WxPayServiceImpl implements WxPayService {
                 .build();
 
         NotificationParser parser = new NotificationParser(notificationConfig);
-        try {
-            // 以支付通知回调为例，验签、解密并转换成 Transaction
-            Transaction transaction = parser.parse(requestParam, Transaction.class);
-            log.info("微信回调生效" + JSON.toJSONString(transaction));
-            if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
-                String outTradeNo = transaction.getOutTradeNo();
-                orderService.updateNote(outTradeNo, transaction.getPayer().getOpenid());
-                portalOrderService.paySuccessByOrderSn(outTradeNo, 2);
-                directChargeService.directCharge(outTradeNo);
-            } else {
-                log.error("收到付款失败信息:{}", transaction);
-            }
-        } catch (ValidationException e) {
-            log.error("解密微信回调失败", e);
-            throw e;
+        // 以支付通知回调为例，验签、解密并转换成 Transaction
+        Transaction transaction = parser.parse(requestParam, Transaction.class);
+        log.info("微信回调生效" + JSON.toJSONString(transaction));
+        if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
+            String outTradeNo = transaction.getOutTradeNo();
+            orderService.updateMoreInfo(outTradeNo, "openId", transaction.getPayer().getOpenid());
+            portalOrderService.paySuccessByOrderSn(outTradeNo, 2);
+            directChargeService.directCharge(outTradeNo);
+        } else {
+            log.error("收到付款失败信息:{}", transaction);
         }
     }
 

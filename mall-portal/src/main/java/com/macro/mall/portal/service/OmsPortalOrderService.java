@@ -75,7 +75,7 @@ public interface OmsPortalOrderService {
     @Transactional
     void paySuccessByOrderSn(String orderSn, Integer payType);
 
-    void updateNote(String outTradeNo, String note);
+    void updateMoreInfo(String orderSn, String key,String value);
 
     @Transactional
     Map<String, Object> generateOrderWithAttribute(OrderParamWithAttribute orderParam);

@@ -2,21 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.macro.mall.portal.dao.DirectChargeDao">
     <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.macro.mall.portal.domain.DirectChargeDomain">
-        insert into direct_charge (order_sn,charge_status, create_time,order_id)
-        values (#{orderSN},#{chargeStatus},#{createTime},#{orderId})
+        insert into direct_charge (order_sn,charge_status, create_time,order_id,fail_reason)
+        values (#{orderSN},#{chargeStatus},#{createTime},#{orderId},#{failReason})
     </insert>
     <update id="update">
         update direct_charge
-        set charge_status = #{chargeStatus}
+        set charge_status = #{chargeStatus},
+            fail_reason = #{failReason}
         where id  = #{id}
     </update>
     <select id="selectByOrderSN" resultType="com.macro.mall.portal.domain.DirectChargeDomain">
-        select id ,order_sn orderSN,charge_status, create_time,order_id
+        select id ,order_sn orderSN,charge_status, create_time,order_id.fail_reason
         from direct_charge
         where order_sn = #{orderSN}
     </select>
     <select id="selectById" resultType="com.macro.mall.portal.domain.DirectChargeDomain">
-        select id ,order_sn orderSN,charge_status, create_time,order_id
+        select id ,order_sn orderSN,charge_status, create_time,order_id,fail_reason
         from direct_charge
         where id = #{id}
     </select>

@@ -2,6 +2,7 @@ package com.macro.mall.portal.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 
@@ -14,6 +15,7 @@ public class DirectChargeDomain {
     private Integer chargeStatus;
     private Timestamp createTime;
     private Long orderId;
+    private String failReason;
 
 
     public DirectChargeDomain(String orderSN, Long orderId) {
@@ -29,7 +31,8 @@ public class DirectChargeDomain {
         this.chargeStatus = 2;
     }
 
-    public void fail() {
+    public void fail(String failReason) {
         this.chargeStatus = 3;
+        this.failReason = StringUtils.substring(failReason,0, 300);
     }
 }

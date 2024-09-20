@@ -493,7 +493,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     @Override
-    public void updateNote(String orderSn, String openId) {
+    public void updateMoreInfo(String orderSn, String key,String value) {
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria()
                 .andOrderSnEqualTo(orderSn)
@@ -504,7 +504,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             OmsOrder order = orderList.get(0);
             String moreInfo = order.getMoreInfo();
             JSONObject jsonObject = JSONObject.parseObject(moreInfo);
-            jsonObject.put("openId", openId);
+            jsonObject.put(key, value);
             order.setMoreInfo(jsonObject.toString());
             orderMapper.updateByPrimaryKey(order);
         }
