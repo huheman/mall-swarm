@@ -23,11 +23,6 @@ public class DirectChargeController {
         return CommonResult.success("ok");
     }
 
-    @GetMapping("test")
-    public CommonResult<String> test2(String orderSN, String chargeAccount) throws Exception {
-        wytdChargeService.createOrder(8206L, 1, null, null, chargeAccount, orderSN);
-        return CommonResult.success("ok");
-    }
 
     @PostMapping("/notify")
     public String notify(@RequestBody JSONObject body) throws Exception {
