@@ -158,7 +158,6 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
         String url = "http://open.greatnesss.com/api/Order/CreateGameOrder";
         Assert.notNull(goodsId, "goodsId can not be null");
         Assert.notNull(buyNum, "buyNum can not be null");
-        Assert.notNull(chargeAccount, "chargeAccount can not be null");
         Assert.notNull(userOrderId, "userOrderId can not be null");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("GoodsId", goodsId);
