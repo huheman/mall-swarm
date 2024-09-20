@@ -90,9 +90,6 @@ public class OmsCartItemController {
     @ResponseBody
     public CommonResult clear() {
         int count = cartItemService.clear(memberService.getCurrentMember().getId());
-        if (count > 0) {
-            return CommonResult.success(count);
-        }
-        return CommonResult.failed();
+        return CommonResult.success(count);
     }
 }
