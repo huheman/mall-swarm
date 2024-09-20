@@ -17,13 +17,11 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
-import com.macro.mall.portal.service.bo.CartInfoBO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -157,10 +155,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
 
     @Override
     public int clear(Long memberId) {
-        OmsCartItem record = new OmsCartItem();
-        record.setDeleteStatus(1);
         OmsCartItemExample example = new OmsCartItemExample();
         example.createCriteria().andMemberIdEqualTo(memberId);
-        return cartItemMapper.updateByExampleSelective(record, example);
+        return cartItemMapper.deleteByExample(example);
     }
 }
