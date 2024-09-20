@@ -12,7 +12,7 @@
         where id  = #{id}
     </update>
     <select id="selectByOrderSN" resultType="com.macro.mall.portal.domain.DirectChargeDomain">
-        select id ,order_sn orderSN,charge_status, create_time,order_id，fail_reason
+        select id ,order_sn orderSN,charge_status, create_time,order_id,fail_reason
         from direct_charge
         where order_sn = #{orderSN}
     </select>
