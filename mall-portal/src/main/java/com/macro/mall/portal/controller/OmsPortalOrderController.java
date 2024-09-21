@@ -93,14 +93,6 @@ public class OmsPortalOrderController {
         return CommonResult.success(hint);
     }
 
-    @Operation(summary = "取消单个超时订单")
-    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult cancelOrder(Long orderId) {
-        portalOrderService.sendDelayMessageCancelOrder(orderId);
-        return CommonResult.success(null);
-    }
-
     @Operation(summary = "按状态分页获取用户订单列表")
     @Parameter(name = "status", description = "订单状态：-1->全部；0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭",
             in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "-1", allowableValues = {"-1", "0", "1", "2", "3", "4"}))

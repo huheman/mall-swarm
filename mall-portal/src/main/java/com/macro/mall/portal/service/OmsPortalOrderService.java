@@ -45,10 +45,6 @@ public interface OmsPortalOrderService {
     @Transactional
     void cancelOrder(Long orderId);
 
-    /**
-     * 发送延迟消息取消订单
-     */
-    void sendDelayMessageCancelOrder(Long orderId);
 
     /**
      * 确认收货
