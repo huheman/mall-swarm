@@ -1,8 +1,6 @@
 package com.macro.mall.portal.domain;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -10,15 +8,15 @@ import java.util.Date;
  * 会员关注的品牌
  * Created by macro on 2018/8/2.
  */
-@Document
+//@Document
 public class MemberBrandAttention {
     @Id
     private String id;
-    @Indexed
+//    @Indexed
     private Long memberId;
     private String memberNickname;
     private String memberIcon;
-    @Indexed
+//    @Indexed
     private Long brandId;
     private String brandName;
     private String brandLogo;
