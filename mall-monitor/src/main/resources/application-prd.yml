@@ -4,6 +4,3 @@ spring:
       discovery:
         server-addr: http://nacos-registry:8848
         namespace: prd
-logging:
-  level:
-    root: info
