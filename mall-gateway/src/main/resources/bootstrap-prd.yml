@@ -3,9 +3,11 @@ spring:
     nacos:
       discovery:
         server-addr: http://nacos-registry:8848
+        namespace: prd
       config:
         server-addr: http://nacos-registry:8848
         file-extension: yaml
+        namespace: prd
 logging:
   level:
     root: info
