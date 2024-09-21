@@ -13,6 +13,7 @@ import cn.hutool.core.convert.Convert;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.util.StpMemberUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,7 @@ import java.util.*;
  * @github https://github.com/macrozheng
  */
 @Configuration
+@Slf4j
 public class SaTokenConfig {
 
     @Autowired
@@ -72,7 +74,7 @@ public class SaTokenConfig {
                         }
                     }
                     // 接口需要权限时鉴权
-                    if(CollUtil.isNotEmpty(needPermissionList)){
+                    if (CollUtil.isNotEmpty(needPermissionList)) {
                         SaRouter.match(requestPath, r -> StpUtil.checkPermissionOr(Convert.toStrArray(needPermissionList)));
                     }
                 })
@@ -89,13 +91,14 @@ public class SaTokenConfig {
         HttpHeaders headers = exchange.getResponse().getHeaders();
         headers.set("Content-Type", "application/json; charset=utf-8");
         headers.set("Access-Control-Allow-Origin", "*");
-        headers.set("Cache-Control","no-cache");
+        headers.set("Cache-Control", "no-cache");
         CommonResult result = null;
-        if(e instanceof NotLoginException){
+        if (e instanceof NotLoginException) {
             result = CommonResult.unauthorized(null);
-        }else if(e instanceof NotPermissionException){
+        } else if (e instanceof NotPermissionException) {
+            log.error("not permission", e);
             result = CommonResult.forbidden(null);
-        }else{
+        } else {
             result = CommonResult.failed(e.getMessage());
         }
         return result;
