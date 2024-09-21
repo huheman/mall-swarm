@@ -15,9 +15,6 @@ public enum ResultCode implements IErrorCode {
 
     private ResultCode(long code, String message) {
         this.code = code;
-        if(code == 403) {
-            throw new IllegalArgumentException("不应该出现");
-        }
         this.message = message;
     }
 
