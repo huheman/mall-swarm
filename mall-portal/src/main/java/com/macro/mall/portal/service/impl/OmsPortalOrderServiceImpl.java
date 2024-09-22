@@ -238,6 +238,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("payerPhone", currentMember.getPhone());
         jsonObject.put("attr", String.join("-", attrValues));
+        jsonObject.put("title", StringUtils.trimToEmpty(orderParam.getTitle()));
         order.setMoreInfo(jsonObject.toString());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
@@ -406,14 +407,19 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         List<OmsOrderItem> orderItemList = orderItemMapper.selectByExample(orderItemExample);
 
         List<OmsOrderDetail> orderDetailList = orderList.parallelStream().map(omsOrder -> {
+
             OmsOrderDetail orderDetail = new OmsOrderDetail();
             BeanUtil.copyProperties(omsOrder, orderDetail);
             List<OmsOrderItem> relatedItemList = orderItemList.stream().filter(item -> item.getOrderId().equals(orderDetail.getId())).collect(Collectors.toList());
             orderDetail.setOrderItemList(relatedItemList);
             String moreInfo = omsOrder.getMoreInfo();
             JSONObject jsonObject = JSONObject.parseObject(moreInfo);
-            orderDetail.setHasCardInfo(jsonObject != null && jsonObject.containsKey("cards"));
+            if (jsonObject != null) {
+                orderDetail.setHasCardInfo(jsonObject != null && jsonObject.containsKey("cards"));
+                orderDetail.setTitle(jsonObject.getString("title"));
+            }
             return orderDetail;
+
         }).peek(omsOrderDetail -> omsOrderDetail.getOrderItemList().stream().forEach(new Consumer<OmsOrderItem>() {
             @Override
             public void accept(OmsOrderItem omsOrderItem) {
@@ -448,6 +454,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrderDetail orderDetail = new OmsOrderDetail();
         BeanUtil.copyProperties(omsOrder, orderDetail);
         orderDetail.setOrderItemList(orderItemList);
+        JSONObject moreInfo = JSON.parseObject(omsOrder.getMoreInfo());
+        if (moreInfo != null) {
+            orderDetail.setTitle(moreInfo.getString("title"));
+        }
         return orderDetail;
     }
 

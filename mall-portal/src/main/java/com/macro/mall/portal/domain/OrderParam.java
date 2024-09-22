@@ -23,4 +23,7 @@ public class OrderParam {
     private Integer payType;
     @Schema(title = "被选中的购物车商品ID")
     private List<Long> cartIds;
+    @Schema(title = "订单的标题")
+    private String title;
+
 }

@@ -12,6 +12,7 @@ import java.util.List;
 public class OmsOrderDetail extends OmsOrder {
     private List<OmsOrderItem> orderItemList;
     private Boolean hasCardInfo;
+    private String title;
     public List<OmsOrderItem> getOrderItemList() {
         return orderItemList;
     }
@@ -26,5 +27,13 @@ public class OmsOrderDetail extends OmsOrder {
 
     public void setHasCardInfo(Boolean hasCardInfo) {
         this.hasCardInfo = hasCardInfo;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
