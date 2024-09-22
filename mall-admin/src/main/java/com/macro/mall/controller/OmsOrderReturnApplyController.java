@@ -20,11 +20,11 @@ import java.util.List;
  * 订单退货申请管理 暂不允许退货，屏蔽入口
  * Created by macro on 2018/10/18.
  */
-// @Controller
+@Controller
 @Tag(name = "OmsOrderReturnApplyController", description = "订单退货申请管理")
 @RequestMapping("/returnApply")
 public class OmsOrderReturnApplyController {
-    // @Autowired
+     @Autowired
     private OmsOrderReturnApplyService returnApplyService;
 
     @Operation(summary = "分页查询退货申请")
