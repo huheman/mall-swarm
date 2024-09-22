@@ -96,7 +96,7 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
     public List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
         PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.setOrderByClause("sort desc");
+        example.setOrderByClause("sort desc,id desc");
         example.createCriteria().andParentIdEqualTo(parentId);
         return productCategoryMapper.selectByExample(example);
     }
