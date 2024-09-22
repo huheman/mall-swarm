@@ -51,7 +51,9 @@ public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttribu
     @Override
     public List<PmsProductAttributeCategory> getList(Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
-        return productAttributeCategoryMapper.selectByExample(new PmsProductAttributeCategoryExample());
+        PmsProductAttributeCategoryExample pmsProductAttributeCategoryExample = new PmsProductAttributeCategoryExample();
+        pmsProductAttributeCategoryExample.setOrderByClause("id desc");
+        return productAttributeCategoryMapper.selectByExample(pmsProductAttributeCategoryExample);
     }
 
     @Override
