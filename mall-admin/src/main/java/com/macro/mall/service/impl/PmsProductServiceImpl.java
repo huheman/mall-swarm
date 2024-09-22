@@ -2,7 +2,10 @@ package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.dao.*;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
@@ -10,8 +13,10 @@ import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
+import com.macro.mall.service.bo.PmsProductWithSKU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -22,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -230,8 +236,8 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
-    public List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+    public CommonPage<PmsProductWithSKU> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
@@ -254,7 +260,22 @@ public class PmsProductServiceImpl implements PmsProductService {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
         productExample.setOrderByClause("id DESC");
-        return productMapper.selectByExample(productExample);
+        Page<PmsProduct> objects = PageHelper.startPage(pageNum, pageSize).doSelectPage(new ISelect() {
+            @Override
+            public void doSelect() {
+                productMapper.selectByExample(productExample);
+            }
+        });
+        List<PmsProductWithSKU> list = objects.getResult().parallelStream().map(pmsProduct -> {
+            PmsProductWithSKU pmsProductWithSKU = new PmsProductWithSKU();
+            BeanUtils.copyProperties(pmsProduct, pmsProductWithSKU);
+            PmsSkuStockExample skuStockExample = new PmsSkuStockExample();
+            skuStockExample.createCriteria().andProductIdEqualTo(pmsProduct.getId());
+            List<PmsSkuStock> pmsSkuStocks = skuStockMapper.selectByExample(skuStockExample);
+            pmsProductWithSKU.setSkuInfo(pmsSkuStocks);
+            return pmsProductWithSKU;
+        }).toList();
+        return CommonPage.restPage(list, objects.getTotal());
     }
 
     @Override

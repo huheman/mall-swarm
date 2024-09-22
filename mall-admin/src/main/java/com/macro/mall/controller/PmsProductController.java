@@ -8,6 +8,7 @@ import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.service.PmsProductService;
 
+import com.macro.mall.service.bo.PmsProductWithSKU;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -67,11 +68,11 @@ public class PmsProductController {
     @Operation(summary = "查询商品")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<CommonPage<PmsProduct>> getList(PmsProductQueryParam productQueryParam,
-                                                        @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                                        @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProduct> productList = productService.list(productQueryParam, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(productList));
+    public CommonResult<CommonPage<PmsProductWithSKU>> getList(PmsProductQueryParam productQueryParam,
+                                                               @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+        CommonPage<PmsProductWithSKU> productList = productService.list(productQueryParam, pageSize, pageNum);
+        return CommonResult.success(productList);
     }
 
     @Operation(summary = "根据商品名称或货号模糊查询")
