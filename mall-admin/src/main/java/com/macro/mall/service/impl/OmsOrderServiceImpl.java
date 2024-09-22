@@ -1,20 +1,25 @@
 package com.macro.mall.service.impl;
 
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.dao.OmsOrderDao;
 import com.macro.mall.dao.OmsOrderOperateHistoryDao;
 import com.macro.mall.dto.*;
+import com.macro.mall.mapper.DirectChargeMapper;
 import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
-import com.macro.mall.model.OmsOrder;
-import com.macro.mall.model.OmsOrderExample;
-import com.macro.mall.model.OmsOrderOperateHistory;
+import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -31,11 +36,36 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryDao orderOperateHistoryDao;
     @Autowired
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
+    @Autowired
+    private DirectChargeMapper directChargeMapper;
 
     @Override
-    public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        return orderDao.getList(queryParam);
+    public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
+        Page<OmsOrder> objects = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPage(() -> orderDao.getList(queryParam));
+        List<Long> orderIds = objects.stream().map(new Function<OmsOrder, Long>() {
+            @Override
+            public Long apply(OmsOrder omsOrder) {
+                return omsOrder.getId();
+            }
+        }).collect(Collectors.toList());
+        DirectChargeExample directChargeExample = new DirectChargeExample();
+        directChargeExample.createCriteria().andOrderIdIn(orderIds);
+        Map<Long, DirectCharge> map = directChargeMapper.selectByExample(directChargeExample).stream().collect(Collectors.toMap(DirectCharge::getOrderId, directCharge -> directCharge));
+        List<OmsOrderWithDirectCharge> list = objects.parallelStream().map(new Function<OmsOrder, OmsOrderWithDirectCharge>() {
+            @Override
+            public OmsOrderWithDirectCharge apply(OmsOrder omsOrder) {
+                OmsOrderWithDirectCharge omsOrderWithDirectCharge = new OmsOrderWithDirectCharge();
+                BeanUtils.copyProperties(omsOrder, omsOrderWithDirectCharge);
+                DirectCharge directCharge = map.get(omsOrder.getId());
+                if (directCharge != null) {
+                    omsOrderWithDirectCharge.setDirectChargeStatus(directCharge.getChargeStatus());
+                    omsOrderWithDirectCharge.setDirectChargeFailReason(directCharge.getFailReason());
+                }
+                return omsOrderWithDirectCharge;
+            }
+        }).toList();
+        return CommonPage.restPage(list, objects.getTotal());
     }
 
     @Override
