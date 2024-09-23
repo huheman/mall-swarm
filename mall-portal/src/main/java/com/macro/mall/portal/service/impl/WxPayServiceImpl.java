@@ -192,6 +192,7 @@ public class WxPayServiceImpl implements WxPayService {
         amountReq.setRefund(payAmount);
         createRequest.setAmount(amountReq);
         Refund refund = refundService.create(createRequest);
+        Assert.state(refund.getStatus() == Status.SUCCESS || refund.getStatus() == Status.PROCESSING, "当前订单状态为" + refund.getStatus());
         log.info("退款发起成功,refund:{}", refund);
 
     }

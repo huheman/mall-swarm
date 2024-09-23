@@ -141,6 +141,6 @@ public class AlipayServiceImpl implements AlipayService {
 
         AlipayTradeRefundResponse response = alipayClient.execute(request);
         log.info(response.getBody());
-        Assert.state(response.isSuccess(), "支付宝退款失败" + response.getMsg());
+        Assert.state(response.isSuccess() &&response.getCode().equals("10000") , "支付宝退款失败" + response.getMsg());
     }
 }

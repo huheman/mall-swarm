@@ -19,6 +19,6 @@ public interface PortalOrderService {
     @GetMapping("/wxpay/ship")
     CommonResult<Boolean> ship(@RequestParam("orderId")Long orderId);
 
-    @PostMapping("/refund")
+    @PostMapping("/order/refund")
     CommonResult<String> refund(@RequestParam("orderId") Long id);
 }

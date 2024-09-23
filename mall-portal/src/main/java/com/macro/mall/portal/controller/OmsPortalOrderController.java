@@ -45,6 +45,7 @@ public class OmsPortalOrderController {
 
     @Operation(summary = "发起退款")
     @PostMapping("/refund")
+    @ResponseBody
     public CommonResult<String> refund(@RequestParam("orderId") Long id) {
         try {
             String hint = portalOrderService.refund(id);

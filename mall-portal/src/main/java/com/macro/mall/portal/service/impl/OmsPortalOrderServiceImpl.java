@@ -568,12 +568,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     @SneakyThrows
-    public String refund(Long id) {
-        OmsOrder omsOrder = orderMapper.selectByPrimaryKey(id);
+    public String refund(Long orderId) {
+        OmsOrder omsOrder = orderMapper.selectByPrimaryKey(orderId);
         Assert.notNull(omsOrder.getStatus() == 1, "只有待发货的订单可以发起退款");
-        DirectChargeDomain directCharge = directChargeDao.selectById(id);
+        DirectChargeDomain directCharge = directChargeDao.selectByOrderSN(omsOrder.getOrderSn());
         if (directCharge != null) {
-            Assert.state(directCharge.getChargeStatus() == 3, "只能直充失败的订单可以发起退款");
+             Assert.state(directCharge.getChargeStatus() == 3, "只有直充失败的订单可以发起退款");
         }
         // 如果是支付宝退款，就用支付宝退款方法
         if (omsOrder.getPayType() == 1) {
