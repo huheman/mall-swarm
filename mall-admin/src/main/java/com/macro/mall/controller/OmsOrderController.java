@@ -39,9 +39,9 @@ public class OmsOrderController {
     }
 
     @Operation(summary = "发起订单退款")
-    @PostMapping("refund")
+    @PostMapping("/refund/{orderId}")
     @ResponseBody
-    public CommonResult<String> refund(@RequestParam Long orderId) {
+    public CommonResult<String> refund(@PathVariable("orderId") Long orderId) {
         return portalOrderService.refund(orderId);
     }
 
