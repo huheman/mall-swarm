@@ -84,4 +84,9 @@ public interface OmsPortalOrderService {
     String showCards(Long orderId,Long memberId);
 
     void recordCards(String orderSN,String cardInfo);
+
+    @Transactional
+    String refund(Long id);
+
+    void refundSuccess(String orderSN);
 }

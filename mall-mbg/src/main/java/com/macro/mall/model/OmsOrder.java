@@ -49,7 +49,7 @@ public class OmsOrder implements Serializable {
     @Schema(title = "订单来源：0->PC订单；1->app订单")
     private Integer sourceType;
 
-    @Schema(title = "订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单")
+    @Schema(title = "订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单；6->退款中；7-> 已退款")
     private Integer status;
 
     @Schema(title = "订单类型：0->正常订单；1->秒杀订单")

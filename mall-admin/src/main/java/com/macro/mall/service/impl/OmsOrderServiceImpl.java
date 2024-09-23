@@ -1,6 +1,5 @@
 package com.macro.mall.service.impl;
 
-import com.github.pagehelper.ISelect;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.common.api.CommonPage;
@@ -52,18 +51,15 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         DirectChargeExample directChargeExample = new DirectChargeExample();
         directChargeExample.createCriteria().andOrderIdIn(orderIds);
         Map<Long, DirectCharge> map = directChargeMapper.selectByExample(directChargeExample).stream().collect(Collectors.toMap(DirectCharge::getOrderId, directCharge -> directCharge));
-        List<OmsOrderWithDirectCharge> list = objects.parallelStream().map(new Function<OmsOrder, OmsOrderWithDirectCharge>() {
-            @Override
-            public OmsOrderWithDirectCharge apply(OmsOrder omsOrder) {
-                OmsOrderWithDirectCharge omsOrderWithDirectCharge = new OmsOrderWithDirectCharge();
-                BeanUtils.copyProperties(omsOrder, omsOrderWithDirectCharge);
-                DirectCharge directCharge = map.get(omsOrder.getId());
-                if (directCharge != null) {
-                    omsOrderWithDirectCharge.setDirectChargeStatus(directCharge.getChargeStatus());
-                    omsOrderWithDirectCharge.setDirectChargeFailReason(directCharge.getFailReason());
-                }
-                return omsOrderWithDirectCharge;
+        List<OmsOrderWithDirectCharge> list = objects.parallelStream().map(omsOrder -> {
+            OmsOrderWithDirectCharge omsOrderWithDirectCharge = new OmsOrderWithDirectCharge();
+            BeanUtils.copyProperties(omsOrder, omsOrderWithDirectCharge);
+            DirectCharge directCharge = map.get(omsOrder.getId());
+            if (directCharge != null) {
+                omsOrderWithDirectCharge.setDirectChargeStatus(directCharge.getChargeStatus());
+                omsOrderWithDirectCharge.setDirectChargeFailReason(directCharge.getFailReason());
             }
+            return omsOrderWithDirectCharge;
         }).toList();
         return CommonPage.restPage(list, objects.getTotal());
     }
@@ -101,7 +97,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             history.setCreateTime(new Date());
             history.setOperateMan("后台管理员");
             history.setOrderStatus(4);
-            history.setNote("订单关闭:"+note);
+            history.setNote("订单关闭:" + note);
             return history;
         }).collect(Collectors.toList());
         orderOperateHistoryDao.insertList(historyList);
@@ -177,8 +173,10 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         history.setCreateTime(new Date());
         history.setOperateMan("后台管理员");
         history.setOrderStatus(status);
-        history.setNote("修改备注信息："+note);
+        history.setNote("修改备注信息：" + note);
         orderOperateHistoryMapper.insert(history);
         return count;
     }
+
+
 }

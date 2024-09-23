@@ -12,11 +12,13 @@ import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
+import com.macro.mall.portal.dao.DirectChargeDao;
 import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
 import com.macro.mall.portal.dao.SmsCouponHistoryDao;
 import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.*;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,6 +68,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private PortalOrderDao portalOrderDao;
     @Autowired
     private OmsOrderSettingMapper orderSettingMapper;
+    @Autowired
+    private DirectChargeDao directChargeDao;
+    @Autowired
+    private AlipayServiceImpl alipayClient;
+    @Autowired
+    private WxPayServiceImpl wxPayClient;
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
     /*订单预计完成时间*/
@@ -490,20 +498,25 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
     }
 
-    @Override
-    public void updateMoreInfo(String orderSn, String key, String value) {
+    private OmsOrder getByOrderSn(String orderSn) {
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria()
                 .andOrderSnEqualTo(orderSn);
         List<OmsOrder> orderList = orderMapper.selectByExample(example);
         if (CollUtil.isNotEmpty(orderList)) {
-            OmsOrder order = orderList.get(0);
-            String moreInfo = order.getMoreInfo();
-            JSONObject jsonObject = JSONObject.parseObject(moreInfo);
-            jsonObject.put(key, value);
-            order.setMoreInfo(jsonObject.toString());
-            orderMapper.updateByPrimaryKey(order);
+            return orderList.get(0);
         }
+        return null;
+    }
+
+    @Override
+    public void updateMoreInfo(String orderSn, String key, String value) {
+        OmsOrder order = getByOrderSn(orderSn);
+        String moreInfo = order.getMoreInfo();
+        JSONObject jsonObject = JSONObject.parseObject(moreInfo);
+        jsonObject.put(key, value);
+        order.setMoreInfo(jsonObject.toString());
+        orderMapper.updateByPrimaryKey(order);
     }
 
     @Override
@@ -551,6 +564,39 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     public void recordCards(String orderSN, String cardInfo) {
         updateMoreInfo(orderSN, "cards", cardInfo);
+    }
+
+    @Override
+    @SneakyThrows
+    public String refund(Long id) {
+        OmsOrder omsOrder = orderMapper.selectByPrimaryKey(id);
+        Assert.notNull(omsOrder.getStatus() == 1, "只有待发货的订单可以发起退款");
+        DirectChargeDomain directCharge = directChargeDao.selectById(id);
+        if (directCharge != null) {
+            Assert.state(directCharge.getChargeStatus() == 3, "只能直充失败的订单可以发起退款");
+        }
+        // 如果是支付宝退款，就用支付宝退款方法
+        if (omsOrder.getPayType() == 1) {
+            // 支付宝是同步退款的
+            alipayClient.refund(omsOrder);
+            omsOrder.setStatus(7);
+            orderMapper.updateByPrimaryKey(omsOrder);
+            return "支付宝退款成功";
+        } else if (omsOrder.getPayType() == 2) {
+            // 如果是微信支付，就用微信退款方法
+            wxPayClient.refund(omsOrder);
+            omsOrder.setStatus(6);
+            orderMapper.updateByPrimaryKey(omsOrder);
+            return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
+        }
+        throw new IllegalArgumentException("订单付款方式错误，请联系管理员");
+    }
+
+    @Override
+    public void refundSuccess(String orderSN) {
+        OmsOrder order = getByOrderSn(orderSN);
+        order.setStatus(7);
+        orderMapper.updateByPrimaryKey(order);
     }
 
     /**

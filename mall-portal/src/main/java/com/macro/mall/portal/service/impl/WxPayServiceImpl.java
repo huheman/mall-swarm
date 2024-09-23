@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.service.RedisService;
+import com.macro.mall.model.OmsOrder;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.service.WxPayService;
 import com.macro.mall.portal.service.bo.OpenIdBO;
@@ -15,6 +16,8 @@ import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import com.wechat.pay.java.service.payments.model.Transaction;
+import com.wechat.pay.java.service.refund.RefundService;
+import com.wechat.pay.java.service.refund.model.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -41,6 +44,8 @@ public class WxPayServiceImpl implements WxPayService {
      */
     @Value("${wx.privateKey}")
     public String privateKey;
+    @Value("${wx.refund.notifyUrl}")
+    private String refundNotifyUrl;
     /**
      * 商户证书序列号
      */
@@ -64,32 +69,27 @@ public class WxPayServiceImpl implements WxPayService {
     @Autowired
     private NotificationConfig notificationConfig;
     @Autowired
-    private OmsPortalOrderServiceImpl orderService;
-    @Autowired
-    private OmsPortalOrderServiceImpl portalOrderService;
-    @Autowired
-    private DirectChargeServiceImpl directChargeService;
-    @Autowired
     private RedisService redisService;
+    @Autowired
+    private RefundService refundService;
 
     @Override
-    public PrepayWithRequestPaymentResponse createOrder(String openId, Long orderId) {
+    public PrepayWithRequestPaymentResponse createOrder(String openId, OmsOrder omsOrder) {
         // request.setXxx(val)设置所需参数，具体参数可见Request定义
         // 跟之前下单示例一样，填充预下单参数
-        OmsOrderDetail detail = orderService.detail(orderId);
         PrepayRequest request = new PrepayRequest();
         Amount amount = new Amount();
-        int payAmount = detail.getPayAmount().multiply(new BigDecimal("100")).intValue();
+        int payAmount = omsOrder.getPayAmount().multiply(new BigDecimal("100")).intValue();
         amount.setTotal(payAmount);
         request.setAmount(amount);
         request.setAppid(appId);
         request.setMchid(merchantId);
-        request.setDescription(detail.getOrderSn());
+        request.setDescription(omsOrder.getOrderSn());
         request.setNotifyUrl(notifyUrl);
         Payer payer = new Payer();
         payer.setOpenid(openId);
         request.setPayer(payer);
-        request.setOutTradeNo(detail.getOrderSn());
+        request.setOutTradeNo(omsOrder.getOrderSn());
         return jsapiServiceExtension.prepayWithRequestPayment(request);
     }
 
@@ -121,10 +121,9 @@ public class WxPayServiceImpl implements WxPayService {
         }
     }
 
-    public void uploadShipping(Long orderId) {
+    public void uploadShipping(OmsOrder omsOrder) {
         String accessToken = getAccessToken();
-        OmsOrderDetail detail = orderService.detail(orderId);
-        if (detail.getPayType() != 2) {
+        if (omsOrder.getPayType() != 2) {
             // 如果不是微信支付，不用微信发货
             return;
         }
@@ -133,7 +132,7 @@ public class WxPayServiceImpl implements WxPayService {
         ZonedDateTime now = ZonedDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         String formattedDate = now.format(formatter);
-        JSONObject moreInfo = new JSONObject(detail.getMoreInfo());
+        JSONObject moreInfo = new JSONObject(omsOrder.getMoreInfo());
         String openId = moreInfo.getStr("openId");
         String body = String.format("{\n" +
                 "    \"order_key\": {\n" +
@@ -155,7 +154,7 @@ public class WxPayServiceImpl implements WxPayService {
                 "    \"payer\": {\n" +
                 "        \"openid\": \"%s\"\n" +
                 "    }\n" +
-                "}", merchantId, detail.getOrderSn(), detail.getOrderSn(), formattedDate, openId);
+                "}", merchantId, omsOrder.getOrderSn(), omsOrder.getOrderSn(), formattedDate, openId);
         log.info("ship body :{}", body);
         RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json; charset=utf-8"));
 
@@ -179,8 +178,26 @@ public class WxPayServiceImpl implements WxPayService {
         }
     }
 
+    /*https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_9.shtml*/
     @Override
-    public void notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType) {
+    public void refund(OmsOrder omsOrder) {
+        CreateRequest createRequest = new CreateRequest();
+        createRequest.setOutTradeNo(omsOrder.getOrderSn());
+        createRequest.setOutRefundNo(omsOrder.getOrderSn());
+        createRequest.setNotifyUrl(refundNotifyUrl);
+        long payAmount = omsOrder.getPayAmount().multiply(new BigDecimal("100")).longValue();
+        AmountReq amountReq = new AmountReq();
+        amountReq.setTotal(payAmount);
+        amountReq.setCurrency("CNY");
+        amountReq.setRefund(payAmount);
+        createRequest.setAmount(amountReq);
+        Refund refund = refundService.create(createRequest);
+        log.info("退款发起成功,refund:{}", refund);
+
+    }
+
+    @Override
+    public RefundNotification notifyRefund(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType) {
         com.wechat.pay.java.core.notification.RequestParam requestParam = new com.wechat.pay.java.core.notification.RequestParam.Builder()
                 .serialNumber(serial)
                 .nonce(nonc)
@@ -192,16 +209,30 @@ public class WxPayServiceImpl implements WxPayService {
 
         NotificationParser parser = new NotificationParser(notificationConfig);
         // 以支付通知回调为例，验签、解密并转换成 Transaction
+        // 退款是RefundNotification
+        RefundNotification transaction = parser.parse(requestParam, RefundNotification.class);
+        log.info("微信退款回调生效" + JSON.toJSONString(transaction));
+        return transaction;
+
+    }
+
+    @Override
+    public Transaction notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType) {
+        com.wechat.pay.java.core.notification.RequestParam requestParam = new com.wechat.pay.java.core.notification.RequestParam.Builder()
+                .serialNumber(serial)
+                .nonce(nonc)
+                .signature(signature)
+                .signType(signType)
+                .timestamp(wechatTimestamp)
+                .body(requestBody)
+                .build();
+
+        NotificationParser parser = new NotificationParser(notificationConfig);
+        // 以支付通知回调为例，验签、解密并转换成 Transaction
+        // 退款是RefundNotification
         Transaction transaction = parser.parse(requestParam, Transaction.class);
         log.info("微信回调生效" + JSON.toJSONString(transaction));
-        if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
-            String outTradeNo = transaction.getOutTradeNo();
-            orderService.updateMoreInfo(outTradeNo, "openId", transaction.getPayer().getOpenid());
-            portalOrderService.paySuccessByOrderSn(outTradeNo, 2);
-            directChargeService.directCharge(outTradeNo);
-        } else {
-            log.error("收到付款失败信息:{}", transaction);
-        }
+        return transaction;
     }
 
     /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/user-info/phone-number/getPhoneNumber.html*/

@@ -1,10 +1,8 @@
 package com.macro.mall.controller;
 
-import cn.hutool.json.JSONObject;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
-import com.macro.mall.model.OmsOrder;
 import com.macro.mall.service.OmsOrderService;
 import com.macro.mall.service.PortalOrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,10 +32,17 @@ public class OmsOrderController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<OmsOrderWithDirectCharge>> list(OmsOrderQueryParam queryParam,
-                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                                   @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+                                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                                   @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
         CommonPage<OmsOrderWithDirectCharge> orderList = orderService.list(queryParam, pageSize, pageNum);
         return CommonResult.success(orderList);
+    }
+
+    @Operation(summary = "发起订单退款")
+    @PostMapping("refund")
+    @ResponseBody
+    public CommonResult<String> refund(@RequestParam Long orderId) {
+        return portalOrderService.refund(orderId);
     }
 
     @Operation(summary = "批量发货")

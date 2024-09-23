@@ -1,16 +1,23 @@
 package com.macro.mall.portal.service;
 
+import com.macro.mall.model.OmsOrder;
 import com.macro.mall.portal.service.bo.OpenIdBO;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
+import com.wechat.pay.java.service.payments.model.Transaction;
+import com.wechat.pay.java.service.refund.model.RefundNotification;
 
 public interface WxPayService {
-    PrepayWithRequestPaymentResponse createOrder(String openId, Long orderId);
+    PrepayWithRequestPaymentResponse createOrder(String openId, OmsOrder omsOrder);
 
     OpenIdBO getOpenId(String code);
 
-    void notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
+    Transaction notifyPay(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
 
     String getPhone(String phoneCode);
 
-    void uploadShipping(Long orderId);
+    void uploadShipping(OmsOrder orderId);
+
+    void refund(OmsOrder omsOrder);
+
+    RefundNotification notifyRefund(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
 }

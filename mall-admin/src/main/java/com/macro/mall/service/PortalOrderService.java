@@ -2,6 +2,7 @@ package com.macro.mall.service;
 
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.OmsOrderDeliveryParam;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,4 +18,7 @@ public interface PortalOrderService {
 
     @GetMapping("/wxpay/ship")
     CommonResult<Boolean> ship(@RequestParam("orderId")Long orderId);
+
+    @PostMapping("/refund")
+    CommonResult<String> refund(@RequestParam("orderId") Long id);
 }

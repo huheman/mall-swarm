@@ -6,7 +6,6 @@ import com.macro.mall.portal.domain.ConfirmOrderResult;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
 import com.macro.mall.portal.domain.OrderParamWithAttribute;
-import com.macro.mall.portal.service.DirectChargeService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
 import com.macro.mall.portal.service.UmsMemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +41,18 @@ public class OmsPortalOrderController {
     public CommonResult<String> showCards(@PathVariable("orderId") Long orderId) {
         String cards = portalOrderService.showCards(orderId, memberService.getCurrentMember().getId());
         return CommonResult.success(cards);
+    }
+
+    @Operation(summary = "发起退款")
+    @PostMapping("/refund")
+    public CommonResult<String> refund(@RequestParam("orderId") Long id) {
+        try {
+            String hint = portalOrderService.refund(id);
+            return CommonResult.success(hint);
+        }catch (Exception e) {
+            log.error("refund error", e);
+            return CommonResult.failed(e.getMessage());
+        }
     }
 
     @Operation(summary = "根据购物车信息生成确认单信息")

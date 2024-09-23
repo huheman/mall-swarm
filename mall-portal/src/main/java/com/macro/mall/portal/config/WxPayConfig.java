@@ -2,8 +2,11 @@ package com.macro.mall.portal.config;
 
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
+import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
+import com.wechat.pay.java.core.http.HttpClient;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
+import com.wechat.pay.java.service.refund.RefundService;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,17 +39,34 @@ public class WxPayConfig {
 
 
     @Bean
-    public JsapiServiceExtension jsapiServiceExtension() {
-        // 使用自动更新平台证书的RSA配置
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config = new RSAAutoCertificateConfig.Builder()
+    public Config wxPayApiConfig() {
+        return new RSAAutoCertificateConfig.Builder()
                 .merchantId(merchantId)
                 .privateKey(privateKey)
                 .merchantSerialNumber(merchantSerialNumber)
                 .apiV3Key(apiV3Key)
                 .build();
+    }
+
+    @Bean
+    public HttpClient httpClient(Config config) {
+        // 开启双域名重试，并关闭 OkHttp 默认的连接失败后重试
+        return new DefaultHttpClientBuilder()
+                .config(config)
+                .disableRetryOnConnectionFailure()
+                .enableRetryMultiDomain()
+                .build();
+    }
+
+    @Bean
+    public JsapiServiceExtension jsapiServiceExtension(HttpClient httpClient,Config config) {
         // 构建service
-        return new JsapiServiceExtension.Builder().config(config).build();
+        return new JsapiServiceExtension.Builder().httpClient(httpClient).config(config).build();
+    }
+
+    @Bean
+    public RefundService refundService(HttpClient httpClient,Config config) {
+        return new RefundService.Builder().httpClient(httpClient).config(config).build();
     }
 
     @Bean
