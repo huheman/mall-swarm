@@ -1,5 +1,6 @@
 package com.macro.mall.portal.controller;
 
+import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.portal.config.AlipayConfig;
 import com.macro.mall.portal.domain.AliPayParam;
@@ -47,6 +48,7 @@ public class AlipayController {
     public void webPay(AliPayParam aliPayParam, HttpServletResponse response) throws Exception {
         response.setContentType("text/html;charset=" + alipayConfig.getCharset());
         OmsOrderDetail detail = omsPortalOrderService.detail(aliPayParam.getOrderId());
+        Assert.state(detail.getStatus() == 0, "该订单不处于未付款状态");
         response.getWriter().write(alipayService.webPay(aliPayParam, detail));
         response.getWriter().flush();
         response.getWriter().close();

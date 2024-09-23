@@ -1,6 +1,7 @@
 package com.macro.mall.portal.controller;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.portal.domain.OmsOrderDetail;
@@ -49,6 +50,7 @@ public class WxpayController {
     @GetMapping("/createOrder")
     public CommonResult<PrepayWithRequestPaymentResponse> createOrder(String openId, Long orderId) {
         OmsOrderDetail detail = omsPortalOrderService.detail(orderId);
+        Assert.state(detail.getStatus() == 0, "该订单不处于未支付状态");
         PrepayWithRequestPaymentResponse response = wxPayService.createOrder(openId, detail);
 
         return CommonResult.success(response);
@@ -106,7 +108,7 @@ public class WxpayController {
         byte[] bytes = request.getInputStream().readAllBytes();
         String requestBody = new String(bytes, StandardCharsets.UTF_8);
         Transaction transaction = wxPayService.notifyPay(requestBody, signature, serial, nonc, wechatTimestamp, signType);
-        if (transaction.getTradeState()== Transaction.TradeStateEnum.SUCCESS) {
+        if (transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
             String outTradeNo = transaction.getOutTradeNo();
             omsPortalOrderService.updateMoreInfo(outTradeNo, "openId", transaction.getPayer().getOpenid());
             omsPortalOrderService.paySuccessByOrderSn(outTradeNo, 2);
