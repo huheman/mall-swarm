@@ -23,6 +23,8 @@ public class PmsProductCategoryParam {
     private String name;
     @Schema(title = "分类单位")
     private String productUnit;
+    @Schema(title = "游戏对应的类型")
+    private Integer productCount;
     @FlagValidator(value = {"0","1"},message = "状态只能为0或1")
     @Schema(title = "是否在导航栏显示")
     private Integer navStatus;
