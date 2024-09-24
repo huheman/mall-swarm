@@ -65,6 +65,10 @@ public class IdentityServiceImpl implements IdentityService {
         if (memberId == null) {
             throw new IllegalArgumentException("人员编码不能为空");
         }
+        if (idNo == null || idNo.length() != 18) {
+            throw new IllegalArgumentException("身份证号格式不正确");
+        }
+
         UmsMember umsMember = memberMapper.selectByPrimaryKey(memberId);
         if (umsMember == null) {
             throw new IllegalArgumentException("未找到" + memberId + "的用户");

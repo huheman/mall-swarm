@@ -1,13 +1,17 @@
 package com.macro.mall.portal.controller;
 
+import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
 import com.macro.mall.portal.domain.OrderParamWithAttribute;
+import com.macro.mall.portal.service.IdentityService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
 import com.macro.mall.portal.service.UmsMemberService;
+import com.macro.mall.portal.service.bo.IdentityResultBO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -18,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -34,13 +41,53 @@ public class OmsPortalOrderController {
     private OmsPortalOrderService portalOrderService;
     @Autowired
     private UmsMemberService memberService;
+    @Autowired
+    private IdentityService identityService;
 
 
+    /*查看卡密*/
     @GetMapping("/showCards/{orderId}")
     @ResponseBody
     public CommonResult<String> showCards(@PathVariable("orderId") Long orderId) {
         String cards = portalOrderService.showCards(orderId, memberService.getCurrentMember().getId());
         return CommonResult.success(cards);
+    }
+
+    @GetMapping("/canPay/{orderId}")
+    @ResponseBody
+    public CommonResult<String> canPay(@PathVariable("orderId") Long orderId) {
+        String result = "ok";
+        OmsOrderDetail detail = portalOrderService.detail(orderId);
+        if (detail.getStatus() != 0) {
+            result = "该订单不处于可付款状态";
+        }
+        UmsMember currentMember = memberService.getCurrentMember();
+        IdentityResultBO identityResultBO = identityService.identityIdNumber(currentMember.getId());
+        if (!identityResultBO.getHasIdentity()) {
+            result = "请先实名认证";
+        }
+        String idNo = identityResultBO.getIdNo();
+        int ageFromIdCard = getAgeFromIdCard(idNo);
+        if (ageFromIdCard < 18) {
+            result = "未成年人无法充值";
+        }
+        return CommonResult.success(result);
+
+    }
+
+    private int getAgeFromIdCard(String idCard) {
+        if (idCard == null || idCard.length() != 18) {
+            throw new IllegalArgumentException("身份证号格式不正确");
+        }
+
+        // 从身份证号中截取出生日期
+        String birthDateStr = idCard.substring(6, 14);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate birthDate = LocalDate.parse(birthDateStr, formatter);
+
+        // 计算年龄
+        LocalDate currentDate = LocalDate.now();
+        return (int) ChronoUnit.YEARS.between(birthDate, currentDate);
     }
 
     @Operation(summary = "发起退款")
@@ -50,7 +97,7 @@ public class OmsPortalOrderController {
         try {
             String hint = portalOrderService.refund(id);
             return CommonResult.success(hint);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("refund error", e);
             return CommonResult.failed(e.getMessage());
         }
