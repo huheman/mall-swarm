@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,8 +66,10 @@ public class AlipayController {
         }
         try {
             String orderSN = alipayService.notifyPay(params);
-            omsPortalOrderService.paySuccessByOrderSn(orderSN, 1);
-            directChargeService.directCharge(orderSN);
+            if (StringUtils.isNoneEmpty(orderSN)) {
+                omsPortalOrderService.paySuccessByOrderSn(orderSN, 1);
+                directChargeService.directCharge(orderSN);
+            }
         } catch (Exception e) {
             log.error("支付宝支付回调失败", e);
             throw e;

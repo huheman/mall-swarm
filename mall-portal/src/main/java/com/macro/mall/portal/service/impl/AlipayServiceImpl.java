@@ -53,8 +53,14 @@ public class AlipayServiceImpl implements AlipayService {
         }
         Assert.state(signVerified, "支付宝回调签名验签失败");
         log.info("回调签名详情:{}", params);
-        Assert.state("TRADE_SUCCESS".equals(params.get("trade_status")), "订单未能支付成功");
-        return params.get("out_trade_no");
+        if ("TRADE_SUCCESS".equals(params.get("trade_status"))) {
+            return params.get("out_trade_no");
+        }else{
+            log.info("支付宝支付失败{}", params);
+            // 如果不是支付成功，就不返回了
+            return "";
+        }
+
     }
 
     @Override
