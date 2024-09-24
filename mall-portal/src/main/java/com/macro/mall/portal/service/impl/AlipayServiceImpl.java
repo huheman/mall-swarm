@@ -52,6 +52,7 @@ public class AlipayServiceImpl implements AlipayService {
             throw e;
         }
         Assert.state(signVerified, "支付宝回调签名验签失败");
+        log.info("回调签名详情:{}", params);
         Assert.state("TRADE_SUCCESS".equals(params.get("trade_status")), "订单未能支付成功");
         return params.get("out_trade_no");
     }
@@ -85,7 +86,7 @@ public class AlipayServiceImpl implements AlipayService {
 
     /*https://opendocs.alipay.com/open/02ivbs?scene=21*/
     @Override
-    public String webPay(AliPayParam aliPayParam,OmsOrder omsOrder) {
+    public String webPay(AliPayParam aliPayParam, OmsOrder omsOrder) {
         log.info("webPay请求{}", JSON.toJSON(aliPayParam));
         AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
         if (StrUtil.isNotEmpty(alipayConfig.getNotifyUrl())) {
@@ -141,6 +142,6 @@ public class AlipayServiceImpl implements AlipayService {
 
         AlipayTradeRefundResponse response = alipayClient.execute(request);
         log.info(response.getBody());
-        Assert.state(response.isSuccess() &&response.getCode().equals("10000") , "支付宝退款失败" + response.getMsg());
+        Assert.state(response.isSuccess() && response.getCode().equals("10000"), "支付宝退款失败" + response.getMsg());
     }
 }
