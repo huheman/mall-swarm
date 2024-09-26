@@ -17,7 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -138,8 +142,15 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         criteria.andPublishStatusEqualTo(1);
         criteria.andProductCategoryIdEqualTo(categoryId);
         List<PmsProduct> pmsProducts = productMapper.selectByExample(productExample);
+        List<Long> ids = pmsProducts.stream().map(pmsProduct -> pmsProduct.getId()).toList();
+        PmsSkuStockExample pmsSkuStockExample = new PmsSkuStockExample();
+        pmsSkuStockExample.createCriteria().andProductIdIn(ids)
+                .andStockGreaterThan(10);
+        List<PmsSkuStock> pmsSkuStocks = skuStockMapper.selectByExample(pmsSkuStockExample);
+        Map<Long, List<PmsSkuStock>> collect = pmsSkuStocks.stream()
+                .collect(Collectors.groupingBy(pmsSkuStock -> pmsSkuStock.getProductId()));
         return pmsProducts.parallelStream()
-                .map(this::asSkuBO).toList();
+                .map(pmsProduct -> asSkuBO(pmsProduct, collect.getOrDefault(pmsProduct.getId(), Collections.EMPTY_LIST))).toList();
     }
 
     @Override
@@ -167,11 +178,8 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         }
     }
 
-    private ProductSkuBO asSkuBO(PmsProduct pmsProduct) {
-        PmsSkuStockExample pmsSkuStockExample = new PmsSkuStockExample();
-        pmsSkuStockExample.createCriteria().andProductIdEqualTo(pmsProduct.getId())
-                .andStockGreaterThan(10);
-        List<PmsSkuStock> pmsSkuStocks = skuStockMapper.selectByExample(pmsSkuStockExample);
+    private ProductSkuBO asSkuBO(PmsProduct pmsProduct, List<PmsSkuStock> pmsSkuStocks) {
+
         List<ProductSkuBO.SkuBO> list = pmsSkuStocks.parallelStream()
                 .map(pmsSkuStock -> {
                     ProductSkuBO.SkuBO skuBO = new ProductSkuBO.SkuBO();
