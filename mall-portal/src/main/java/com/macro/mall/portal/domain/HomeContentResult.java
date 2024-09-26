@@ -46,12 +46,6 @@ public class HomeContentResult {
         if (orderCount.compareTo(10000L) >= 0) {
             result = result.divide(new BigDecimal("10000"), 2, BigDecimal.ROUND_HALF_UP);
             unit = "万";
-        } else if (orderCount.compareTo(1000L) >= 0) {
-            result = result.divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
-            unit = "千";
-        } else if (orderCount.compareTo(100L) >= 0) {
-            result = result.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
-            unit = "百";
         }
 
         return result.stripTrailingZeros().toPlainString() + unit;
@@ -67,12 +61,6 @@ public class HomeContentResult {
         if (userCount.compareTo(10000L) >= 0) {
             result = result.divide(new BigDecimal("10000"), 2, BigDecimal.ROUND_HALF_UP);
             unit = "万";
-        } else if (userCount.compareTo(1000L) >= 0) {
-            result = result.divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
-            unit = "千";
-        } else if (userCount.compareTo(100L) >= 0) {
-            result = result.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
-            unit = "百";
         }
 
         return result.stripTrailingZeros().toPlainString() + unit;

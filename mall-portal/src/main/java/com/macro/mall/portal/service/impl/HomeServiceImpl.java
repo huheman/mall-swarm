@@ -12,16 +12,16 @@ import com.macro.mall.portal.domain.HomeFlashPromotion;
 import com.macro.mall.portal.service.HomeService;
 import com.macro.mall.portal.service.bo.MemberProductBO;
 import com.macro.mall.portal.util.DateUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * 首页内容管理Service实现类
  * Created by macro on 2019/1/28.
  */
+@Slf4j
 @Service
 public class HomeServiceImpl implements HomeService {
     @Autowired
@@ -55,6 +56,15 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private OmsOrderMapper orderMapper;
 
+    @Value("${app.fake.order}")
+    private Long fakeOrderCount;
+
+    @Value("${app.fake.user}")
+    private Long fakeUserCount;
+
+    @Value("${app.fake.game}")
+    private String fakeGames;
+
 
     @Override
     public HomeContentResult content() {
@@ -80,11 +90,32 @@ public class HomeServiceImpl implements HomeService {
     }
 
     private List<HomeContentResult.ResultUnit> lastBuyList() {
+        List<HomeContentResult.ResultUnit> result = new ArrayList<>();
+
+        if (StringUtils.hasText(fakeGames)) {
+
+            try {
+                Random random = new Random();
+                for (String s : fakeGames.split(",")) {
+                    String gameName = s.split("-")[0].trim();
+                    String price = s.split("-")[1].trim();
+                    HomeContentResult.ResultUnit unit = new HomeContentResult.ResultUnit();
+                    unit.setUserName(RandomStringUtils.randomAlphabetic(10));
+                    unit.setGameName(gameName);
+                    int randomNumber = random.nextInt(1800 - 1000 + 1) + 1000;
+                    unit.setMoney(new BigDecimal(price));
+                    unit.setBuyTime(new Date(System.currentTimeMillis() - 1000 * randomNumber));
+                    result.add(unit);
+                }
+            } catch (Exception e) {
+                log.error("生成虚拟订单失败", e);
+            }
+        }
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria().andStatusEqualTo(3);
         example.setOrderByClause("id desc limit 9");
         List<OmsOrder> omsOrders = orderMapper.selectByExample(example);
-        return omsOrders.stream().map(new Function<OmsOrder, HomeContentResult.ResultUnit>() {
+        List<HomeContentResult.ResultUnit> list = omsOrders.stream().map(new Function<OmsOrder, HomeContentResult.ResultUnit>() {
             @Override
             public HomeContentResult.ResultUnit apply(OmsOrder omsOrder) {
                 HomeContentResult.ResultUnit unit = new HomeContentResult.ResultUnit();
@@ -100,14 +131,23 @@ public class HomeServiceImpl implements HomeService {
                 return unit;
             }
         }).toList();
+        result.addAll(list);
+        return result;
     }
 
     private Long getUserCount() {
+        if (fakeUserCount != null && fakeUserCount > 0) {
+            return fakeUserCount;
+        }
+
         UmsMemberExample umsMemberExample = new UmsMemberExample();
         return umsMemberMapper.countByExample(umsMemberExample);
     }
 
     private Long getOrderCount() {
+        if (fakeOrderCount != null && fakeOrderCount > 0) {
+            return fakeOrderCount;
+        }
         return portalOrderDao.count(3);
     }
 
