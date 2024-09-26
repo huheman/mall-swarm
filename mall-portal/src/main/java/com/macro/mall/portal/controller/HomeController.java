@@ -1,6 +1,8 @@
 package com.macro.mall.portal.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.service.RedisService;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,13 +33,24 @@ public class HomeController {
     private HomeService homeService;
     @Autowired
     private UmsMemberService memberService;
+    @Autowired
+    private RedisService redisService;
 
     @Operation(summary = "首页内容页信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<HomeContentResult> content() {
-        HomeContentResult contentResult = homeService.content();
-        return CommonResult.success(contentResult);
+        String homeContent =(String) redisService.get("homeContent");
+        HomeContentResult content;
+        if (!StringUtils.hasLength(homeContent)) {
+            content = homeService.content();
+            String jsonString = JSON.toJSONString(content);
+            redisService.set("homeContent", jsonString, 60);
+        }else{
+            content = JSON.parseObject(homeContent, HomeContentResult.class);
+        }
+
+        return CommonResult.success(content);
     }
 
     @GetMapping("/hotGameList")

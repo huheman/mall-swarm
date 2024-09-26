@@ -15,7 +15,6 @@ import com.macro.mall.model.*;
 import com.macro.mall.portal.dao.DirectChargeDao;
 import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
-import com.macro.mall.portal.dao.SmsCouponHistoryDao;
 import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.*;
 import lombok.SneakyThrows;
@@ -51,8 +50,6 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Autowired
     private PmsSkuStockMapper skuStockMapper;
     @Autowired
-    private SmsCouponHistoryDao couponHistoryDao;
-    @Autowired
     private OmsOrderMapper orderMapper;
     @Autowired
     private PortalOrderItemDao orderItemDao;
@@ -74,6 +71,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private AlipayServiceImpl alipayClient;
     @Autowired
     private WxPayServiceImpl wxPayClient;
+    @Autowired
+    private PmsProductCategoryMapper categoryMapper;
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
     /*订单预计完成时间*/
@@ -117,6 +116,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         //获取购物车及优惠信息
         UmsMember currentMember = memberService.getCurrentMember();
         List<CartPromotionItem> cartPromotionItemList = cartItemService.listPromotion(currentMember.getId(), orderParam.getCartIds());
+        Assert.state(cartPromotionItemList != null && cartPromotionItemList.size() == 1, "一单只能买一个商品");
+
         for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
             //生成下单商品信息
             OmsOrderItem orderItem = new OmsOrderItem();
@@ -247,6 +248,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         jsonObject.put("payerPhone", currentMember.getPhone());
         jsonObject.put("attr", String.join("-", attrValues));
         jsonObject.put("title", StringUtils.trimToEmpty(orderParam.getTitle()));
+
+        Long productCategoryId = cartPromotionItemList.get(0).getProductCategoryId();
+        PmsProductCategory pmsProductCategory = categoryMapper.selectByPrimaryKey(productCategoryId);
+        jsonObject.put("gameName", pmsProductCategory.getName());
+        jsonObject.put("userName", currentMember.getUsername());
         order.setMoreInfo(jsonObject.toString());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);

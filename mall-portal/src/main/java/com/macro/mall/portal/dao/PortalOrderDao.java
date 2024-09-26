@@ -37,4 +37,5 @@ public interface PortalOrderDao {
      */
     int releaseSkuStockLock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
+    Long count(@Param("status") Integer status);
 }

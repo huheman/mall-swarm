@@ -1,9 +1,11 @@
 package com.macro.mall.portal.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.portal.dao.HomeDao;
+import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.domain.FlashPromotionProduct;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.domain.HomeFlashPromotion;
@@ -14,13 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +47,14 @@ public class HomeServiceImpl implements HomeService {
     private CmsSubjectMapper subjectMapper;
     @Value("${game.product.parent.id}")
     private Long gameProductParentId;
+    @Autowired
+    private PortalOrderDao portalOrderDao;
+    @Autowired
+    private UmsMemberMapper umsMemberMapper;
+
+    @Autowired
+    private OmsOrderMapper orderMapper;
+
 
     @Override
     public HomeContentResult content() {
@@ -53,6 +63,9 @@ public class HomeServiceImpl implements HomeService {
         result.setAdvertiseList(getHomeAdvertiseList());
         // 获取游戏，目前所有游戏都在56这个一级目录下
         result.setGameList(getProductCateList(gameProductParentId));
+        result.setOrderCount(getOrderCount());
+        result.setUserCount(getUserCount());
+        result.setLastBuyList(lastBuyList());
         //获取推荐品牌
         // result.setBrandList(homeDao.getRecommendBrandList(0,6));
         //获取秒杀信息
@@ -66,10 +79,42 @@ public class HomeServiceImpl implements HomeService {
         return result;
     }
 
+    private List<HomeContentResult.ResultUnit> lastBuyList() {
+        OmsOrderExample example = new OmsOrderExample();
+        example.createCriteria().andStatusEqualTo(3);
+        example.setOrderByClause("id desc limit 9");
+        List<OmsOrder> omsOrders = orderMapper.selectByExample(example);
+        return omsOrders.stream().map(new Function<OmsOrder, HomeContentResult.ResultUnit>() {
+            @Override
+            public HomeContentResult.ResultUnit apply(OmsOrder omsOrder) {
+                HomeContentResult.ResultUnit unit = new HomeContentResult.ResultUnit();
+                String moreInfo = omsOrder.getMoreInfo();
+                if (StringUtils.hasText(moreInfo)) {
+                    JSONObject jsonObject = JSONObject.parseObject(moreInfo);
+                    unit.setUserName(jsonObject.getString("userName"));
+                    unit.setGameName(jsonObject.getString("gameName"));
+                }
+
+                unit.setMoney(omsOrder.getPayAmount());
+                unit.setBuyTime(omsOrder.getPaymentTime());
+                return unit;
+            }
+        }).toList();
+    }
+
+    private Long getUserCount() {
+        UmsMemberExample umsMemberExample = new UmsMemberExample();
+        return umsMemberMapper.countByExample(umsMemberExample);
+    }
+
+    private Long getOrderCount() {
+        return portalOrderDao.count(3);
+    }
+
     @Override
     public List<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum) {
         // TODO: 2019/1/29 暂时默认推荐所有商品
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum, pageSize);
         PmsProductExample example = new PmsProductExample();
         example.createCriteria()
                 .andDeleteStatusEqualTo(0)
@@ -89,11 +134,11 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<CmsSubject> getSubjectList(Long cateId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum, pageSize);
         CmsSubjectExample example = new CmsSubjectExample();
         CmsSubjectExample.Criteria criteria = example.createCriteria();
         criteria.andShowStatusEqualTo(1);
-        if(cateId!=null){
+        if (cateId != null) {
             criteria.andCategoryIdEqualTo(cateId);
         }
         return subjectMapper.selectByExample(example);
@@ -127,7 +172,7 @@ public class HomeServiceImpl implements HomeService {
                 .filter(pmsProductCategory -> pmsProductCategory.getKeywords() != null && !pmsProductCategory.getKeywords().isEmpty())
                 .collect(Collectors.groupingBy(PmsProductCategory::getKeywords));
         memberProductBO.setAllGames(new TreeMap<>(allMap));
-        if (userId!=null){
+        if (userId != null) {
             List<PmsProductCategory> historyGames = homeDao.findHistoryGame(userId, gameProductParentId);
             memberProductBO.setHistoryGames(historyGames);
         }
@@ -147,7 +192,7 @@ public class HomeServiceImpl implements HomeService {
                 homeFlashPromotion.setEndTime(flashPromotionSession.getEndTime());
                 //获取下一个秒杀场次
                 SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(homeFlashPromotion.getStartTime());
-                if(nextSession!=null){
+                if (nextSession != null) {
                     homeFlashPromotion.setNextStartTime(nextSession.getStartTime());
                     homeFlashPromotion.setNextEndTime(nextSession.getEndTime());
                 }

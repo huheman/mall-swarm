@@ -46,6 +46,10 @@
             o.status = 0
             AND o.create_time &lt; date_add(NOW(), INTERVAL -#{minute} MINUTE);
     </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(id) from oms_order
+        where status = #{status}
+    </select>
 
     <update id="updateSkuStock">
         UPDATE pms_sku_stock

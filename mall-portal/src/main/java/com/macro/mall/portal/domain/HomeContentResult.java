@@ -1,9 +1,13 @@
 package com.macro.mall.portal.domain;
 
 import com.macro.mall.model.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,4 +31,59 @@ public class HomeContentResult {
     private List<PmsProduct> hotProductList;
     //推荐专题
     private List<CmsSubject> subjectList;
+
+    private Long orderCount;
+    private Long userCount;
+    /*最近的9张订单*/
+    private List<ResultUnit> lastBuyList;
+
+    public String getOrderCountStr() {
+        if (orderCount == null) {
+            return "";
+        }
+        BigDecimal result = new BigDecimal(orderCount);
+        String unit = "";
+        if (orderCount.compareTo(10000L) >= 0) {
+            result = result.divide(new BigDecimal("10000"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "万";
+        } else if (orderCount.compareTo(1000L) >= 0) {
+            result = result.divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "千";
+        } else if (orderCount.compareTo(100L) >= 0) {
+            result = result.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "百";
+        }
+
+        return result.stripTrailingZeros().toPlainString() + unit;
+    }
+
+
+    public String getUserCountStr() {
+        if (userCount == null) {
+            return "";
+        }
+        BigDecimal result = new BigDecimal(userCount);
+        String unit = "";
+        if (userCount.compareTo(10000L) >= 0) {
+            result = result.divide(new BigDecimal("10000"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "万";
+        } else if (userCount.compareTo(1000L) >= 0) {
+            result = result.divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "千";
+        } else if (userCount.compareTo(100L) >= 0) {
+            result = result.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+            unit = "百";
+        }
+
+        return result.stripTrailingZeros().toPlainString() + unit;
+    }
+
+
+    @Data
+    public static class ResultUnit {
+        private String userName;
+        private String gameName;
+        private BigDecimal money;
+        private Date buyTime;
+    }
 }
