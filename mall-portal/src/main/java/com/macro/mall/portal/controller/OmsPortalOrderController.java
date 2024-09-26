@@ -63,7 +63,7 @@ public class OmsPortalOrderController {
         UmsMember currentMember = memberService.getCurrentMember();
         IdentityResultBO identityResultBO = identityService.identityIdNumber(currentMember.getId());
         if (!identityResultBO.getHasIdentity()) {
-            result = "请先实名认证";
+            result = "请先实名认证，请前往【我-实名认证】进行认证";
         } else {
             String idNo = identityResultBO.getIdNo();
             int ageFromIdCard = getAgeFromIdCard(idNo);
