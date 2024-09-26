@@ -136,19 +136,23 @@ public class HomeServiceImpl implements HomeService {
     }
 
     private Long getUserCount() {
-        if (fakeUserCount != null && fakeUserCount > 0) {
-            return fakeUserCount;
-        }
+
 
         UmsMemberExample umsMemberExample = new UmsMemberExample();
-        return umsMemberMapper.countByExample(umsMemberExample);
+        long count = umsMemberMapper.countByExample(umsMemberExample);
+        if (fakeUserCount != null && fakeUserCount > 0) {
+            count += fakeUserCount;
+        }
+        return count;
     }
 
     private Long getOrderCount() {
+
+        Long count = portalOrderDao.count(3);
         if (fakeOrderCount != null && fakeOrderCount > 0) {
-            return fakeOrderCount;
+            count += fakeOrderCount;
         }
-        return portalOrderDao.count(3);
+        return count;
     }
 
     @Override
