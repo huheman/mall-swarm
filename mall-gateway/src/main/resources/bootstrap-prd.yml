@@ -2,10 +2,10 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: http://nacos-registry:8848
+        server-addr: http://www.huhp.cc:8848
         namespace: prd
       config:
-        server-addr: http://nacos-registry:8848
+        server-addr: http://www.huhp.cc:8848
         file-extension: yaml
         namespace: prd
 logging:
