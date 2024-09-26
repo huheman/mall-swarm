@@ -1,6 +1,5 @@
 package com.macro.mall.portal.controller;
 
-import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
@@ -65,12 +64,14 @@ public class OmsPortalOrderController {
         IdentityResultBO identityResultBO = identityService.identityIdNumber(currentMember.getId());
         if (!identityResultBO.getHasIdentity()) {
             result = "请先实名认证";
+        } else {
+            String idNo = identityResultBO.getIdNo();
+            int ageFromIdCard = getAgeFromIdCard(idNo);
+            if (ageFromIdCard < 18) {
+                result = "未成年人无法充值";
+            }
         }
-        String idNo = identityResultBO.getIdNo();
-        int ageFromIdCard = getAgeFromIdCard(idNo);
-        if (ageFromIdCard < 18) {
-            result = "未成年人无法充值";
-        }
+
         return CommonResult.success(result);
 
     }
