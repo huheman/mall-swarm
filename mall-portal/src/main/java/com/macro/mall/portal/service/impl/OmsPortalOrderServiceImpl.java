@@ -568,13 +568,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     @SneakyThrows
-    public String refund(Long orderId) {
+    public String refund(Long orderId, String reason) {
         OmsOrder omsOrder = orderMapper.selectByPrimaryKey(orderId);
         Assert.notNull(omsOrder.getStatus() == 1, "只有待发货的订单可以发起退款");
         DirectChargeDomain directCharge = directChargeDao.selectByOrderSN(omsOrder.getOrderSn());
         if (directCharge != null) {
-             Assert.state(directCharge.getChargeStatus() == 3, "只有直充失败的订单可以发起退款");
+            Assert.state(directCharge.getChargeStatus() == 3, "只有直充失败的订单可以发起退款");
         }
+        omsOrder.setNote(reason);
         // 如果是支付宝退款，就用支付宝退款方法
         if (omsOrder.getPayType() == 1) {
             // 支付宝是同步退款的
@@ -586,6 +587,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             // 如果是微信支付，就用微信退款方法
             wxPayClient.refund(omsOrder);
             omsOrder.setStatus(6);
+
             orderMapper.updateByPrimaryKey(omsOrder);
             return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
         }

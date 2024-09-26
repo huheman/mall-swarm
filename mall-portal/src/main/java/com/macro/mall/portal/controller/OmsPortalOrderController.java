@@ -93,9 +93,9 @@ public class OmsPortalOrderController {
     @Operation(summary = "发起退款")
     @PostMapping("/refund")
     @ResponseBody
-    public CommonResult<String> refund(@RequestParam("orderId") Long id) {
+    public CommonResult<String> refund(@RequestParam("orderId") Long id, @RequestParam("reason") String reason) {
         try {
-            String hint = portalOrderService.refund(id);
+            String hint = portalOrderService.refund(id, reason);
             return CommonResult.success(hint);
         } catch (Exception e) {
             log.error("refund error", e);

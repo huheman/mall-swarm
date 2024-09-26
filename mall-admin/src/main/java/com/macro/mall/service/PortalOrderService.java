@@ -20,5 +20,5 @@ public interface PortalOrderService {
     CommonResult<Boolean> ship(@RequestParam("orderId")Long orderId);
 
     @PostMapping("/order/refund")
-    CommonResult<String> refund(@RequestParam("orderId") Long id);
+    CommonResult<String> refund(@RequestParam("orderId") Long id,@RequestParam("reason")String reason);
 }
