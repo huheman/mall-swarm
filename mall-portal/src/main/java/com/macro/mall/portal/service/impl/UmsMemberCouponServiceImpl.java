@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -41,12 +39,12 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private PmsProductMapper productMapper;
 
     @Override
-    public void add(Long couponId,Long userId) {
+    public void add(Long couponId, Long userId) {
         UmsMember currentMember;
         if (userId == null) {
             currentMember = memberService.getCurrentMember();
 
-        }else {
+        } else {
             currentMember = memberService.getById(userId);
         }
         //获取优惠券信息，判断数量
@@ -227,9 +225,9 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             return Collections.emptyList();
         }
         SmsCouponExample couponExample = new SmsCouponExample();
-        couponExample.createCriteria().andEndTimeGreaterThan(new Date())
+        couponExample.createCriteria()
                 .andStartTimeLessThan(new Date())
-                .andCountGreaterThan(0)
+                .andNoteNotEqualTo("已失效")
                 // 全场赠券
                 .andTypeEqualTo(type)
                 .andEnableTimeLessThan(new Date());

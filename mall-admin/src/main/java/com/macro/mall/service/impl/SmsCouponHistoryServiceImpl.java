@@ -57,7 +57,10 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
         return smsCouponHistories.stream().map(smsCouponHistory -> {
             SmsCouponHistoryDTO smsCouponHistoryDTO = new SmsCouponHistoryDTO();
             BeanUtils.copyProperties(smsCouponHistory, smsCouponHistoryDTO);
-            smsCouponHistoryDTO.setPhone(collect.get(smsCouponHistory.getMemberId()).getPhone());
+            UmsMember umsMember = collect.get(smsCouponHistory.getMemberId());
+            if (umsMember != null) {
+                smsCouponHistoryDTO.setPhone(umsMember.getPhone());
+            }
             return smsCouponHistoryDTO;
         }).toList();
     }
