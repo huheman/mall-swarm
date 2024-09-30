@@ -56,8 +56,13 @@ public class UmsMemberController {
     @PostMapping("/identity")
     @ResponseBody
     public CommonResult<Boolean> identity(@RequestBody IdentityInfoBO identityInfoBO) {
-        Boolean identity = identityService.identity(memberService.getCurrentMember().getId(), identityInfoBO.getRealName(), identityInfoBO.getIdNo());
-        return CommonResult.success(identity);
+        try {
+            Boolean identity = identityService.identity(memberService.getCurrentMember().getId(), identityInfoBO.getRealName(), identityInfoBO.getIdNo());
+            return CommonResult.success(identity);
+        } catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
+        }
+
     }
 
 
@@ -124,7 +129,7 @@ public class UmsMemberController {
     public CommonResult getAuthCode(@RequestParam String telephone) {
         String authCode = memberService.generateAuthCode(telephone);
         smsSender.sendAuthCode(telephone, authCode);
-        return CommonResult.success( "获取验证码成功");
+        return CommonResult.success("获取验证码成功");
     }
 
     @Operation(summary = "修改密码")

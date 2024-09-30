@@ -14,7 +14,9 @@ import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +50,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 return omsOrder.getId();
             }
         }).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(orderIds)) {
+            return CommonPage.restPage(new ArrayList<>(), 0L);
+        }
         DirectChargeExample directChargeExample = new DirectChargeExample();
         directChargeExample.createCriteria().andOrderIdIn(orderIds);
         Map<Long, DirectCharge> map = directChargeMapper.selectByExample(directChargeExample).stream().collect(Collectors.toMap(DirectCharge::getOrderId, directCharge -> directCharge));
