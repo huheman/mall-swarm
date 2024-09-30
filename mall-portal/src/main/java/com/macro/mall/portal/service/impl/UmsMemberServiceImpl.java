@@ -9,18 +9,17 @@ import com.macro.mall.common.dto.UserDto;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.mapper.UmsMemberLevelMapper;
 import com.macro.mall.mapper.UmsMemberMapper;
-import com.macro.mall.model.UmsMember;
-import com.macro.mall.model.UmsMemberExample;
-import com.macro.mall.model.UmsMemberLevel;
-import com.macro.mall.model.UmsMemberLevelExample;
+import com.macro.mall.model.*;
 import com.macro.mall.portal.service.UmsMemberCacheService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.util.StpMemberUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -34,6 +33,7 @@ import java.util.Random;
  * Created by macro on 2018/8/3.
  */
 @Service
+@Slf4j
 public class UmsMemberServiceImpl implements UmsMemberService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsMemberServiceImpl.class);
     @Autowired
@@ -46,6 +46,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     private String REDIS_KEY_PREFIX_AUTH_CODE;
     @Value("${redis.expire.authCode}")
     private Long AUTH_CODE_EXPIRE_SECONDS;
+    @Autowired
+    @Lazy
+    private UmsMemberCouponServiceImpl memberCouponService;
+
 
     @Override
     public UmsMember getByUsername(String username) {
@@ -90,6 +94,15 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         }
         memberMapper.insert(umsMember);
         umsMember.setPassword(null);
+        // 领取注册优惠券
+        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(umsMember.getId(), 3);
+        for (SmsCoupon smsCoupon : smsCoupons) {
+            try {
+                memberCouponService.add(smsCoupon.getId(),umsMember.getId());
+            } catch (Exception e) {
+                log.error("领券失败", e);
+            }
+        }
         return umsMember;
     }
 
@@ -97,10 +110,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public String generateAuthCode(String telephone) {
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
-        for(int i=0;i<6;i++){
+        for (int i = 0; i < 6; i++) {
             sb.append(random.nextInt(10));
         }
-        memberCacheService.setAuthCode(telephone,sb.toString());
+        memberCacheService.setAuthCode(telephone, sb.toString());
         return sb.toString();
     }
 
@@ -109,11 +122,11 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         UmsMemberExample example = new UmsMemberExample();
         example.createCriteria().andPhoneEqualTo(telephone);
         List<UmsMember> memberList = memberMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(memberList)){
+        if (CollectionUtils.isEmpty(memberList)) {
             Asserts.fail("该账号不存在");
         }
         //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
+        if (!verifyAuthCode(authCode, telephone)) {
             Asserts.fail("验证码错误");
         }
         UmsMember umsMember = memberList.get(0);
@@ -126,9 +139,9 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public UmsMember getCurrentMember() {
         UserDto userDto = (UserDto) StpMemberUtil.getSession().get(AuthConstant.STP_MEMBER_INFO);
         UmsMember member = memberCacheService.getMember(userDto.getId());
-        if(member!=null){
+        if (member != null) {
             return member;
-        }else{
+        } else {
             member = getById(userDto.getId());
             memberCacheService.setMember(member);
             return member;
@@ -137,7 +150,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     @Override
     public void updateIntegration(Long id, Integer integration) {
-        UmsMember record=new UmsMember();
+        UmsMember record = new UmsMember();
         record.setId(id);
         record.setIntegration(integration);
         memberMapper.updateByPrimaryKeySelective(record);
@@ -146,17 +159,17 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     @Override
     public SaTokenInfo login(String username, String password) {
-        if(StrUtil.isEmpty(username)||StrUtil.isEmpty(password)){
+        if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password)) {
             Asserts.fail("用户名或密码不能为空！");
         }
         UmsMember member = getByUsername(username);
-        if(member==null){
+        if (member == null) {
             Asserts.fail("找不到该用户！");
         }
         if (!BCrypt.checkpw(password, member.getPassword())) {
             Asserts.fail("密码不正确！");
         }
-        if(member.getStatus()!=1){
+        if (member.getStatus() != 1) {
             Asserts.fail("该账号已被禁用！");
         }
         // 登录校验成功后，一行代码实现登录
@@ -166,7 +179,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         userDto.setUsername(member.getUsername());
         userDto.setClientId(AuthConstant.PORTAL_CLIENT_ID);
         // 将用户信息存储到Session中
-        StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO,userDto);
+        StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO, userDto);
         // 获取当前登录用户Token信息
         return StpUtil.getTokenInfo();
     }
@@ -182,10 +195,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     public SaTokenInfo loginByPhone(String phone) {
         UmsMember member = getByPhone(phone);
-        if(member==null){
-            member = register(RandomStringUtils.randomAlphabetic(10),"",phone);
+        if (member == null) {
+            member = register(RandomStringUtils.randomAlphabetic(10), "", phone);
         }
-        if(member.getStatus()!=1){
+        if (member.getStatus() != 1) {
             Asserts.fail("该账号已被禁用！");
         }
         // 登录校验成功后，一行代码实现登录
@@ -195,14 +208,14 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         userDto.setUsername(member.getUsername());
         userDto.setClientId(AuthConstant.PORTAL_CLIENT_ID);
         // 将用户信息存储到Session中
-        StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO,userDto);
+        StpMemberUtil.getSession().set(AuthConstant.STP_MEMBER_INFO, userDto);
         // 获取当前登录用户Token信息
         return StpUtil.getTokenInfo();
     }
 
     @Override
     public SaTokenInfo loginByPhone(String phone, String authCode) {
-        if (StrUtil.isEmpty(phone)||StrUtil.isEmpty(authCode)){
+        if (StrUtil.isEmpty(phone) || StrUtil.isEmpty(authCode)) {
             return null;
         }
         boolean b = verifyAuthCode(authCode, phone);
@@ -223,8 +236,8 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/mp-access-token/getAccessToken.html*/
     //对输入的验证码进行校验
-    private boolean verifyAuthCode(String authCode, String telephone){
-        if(StringUtils.isEmpty(authCode)){
+    private boolean verifyAuthCode(String authCode, String telephone) {
+        if (StringUtils.isEmpty(authCode)) {
             return false;
         }
         String realAuthCode = memberCacheService.getAuthCode(telephone);

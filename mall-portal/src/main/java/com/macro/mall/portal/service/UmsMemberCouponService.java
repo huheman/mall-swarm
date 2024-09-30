@@ -18,7 +18,7 @@ public interface UmsMemberCouponService {
      * 会员添加优惠券
      */
     @Transactional
-    void add(Long couponId);
+    void add(Long couponId,Long userId);
 
     /**
      * 获取优惠券历史列表
@@ -41,5 +41,6 @@ public interface UmsMemberCouponService {
      */
     List<SmsCoupon> list(Integer useStatus);
 
-    List<SmsCoupon> listByMember(Long user);
+    List<SmsCoupon> listByMember(Long user,Integer couponType);
+
 }

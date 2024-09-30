@@ -39,13 +39,13 @@ public class UmsMemberCouponController {
     @RequestMapping(value = "/add/{couponId}", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult add(@PathVariable Long couponId) {
-        memberCouponService.add(couponId);
-        return CommonResult.success(null,"领取成功");
+        memberCouponService.add(couponId, memberService.getCurrentMember().getId());
+        return CommonResult.success(null, "领取成功");
     }
 
     @Operation(summary = "获取会员优惠券历史列表")
     @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",
-            in = ParameterIn.QUERY,schema = @Schema(type = "integer",allowableValues = {"0","1","2"}))
+            in = ParameterIn.QUERY, schema = @Schema(type = "integer", allowableValues = {"0", "1", "2"}))
     @RequestMapping(value = "/listHistory", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<List<SmsCouponHistory>> listHistory(@RequestParam(value = "useStatus", required = false) Integer useStatus) {
@@ -55,7 +55,7 @@ public class UmsMemberCouponController {
 
     @Operation(summary = "获取会员优惠券列表")
     @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",
-            in = ParameterIn.QUERY,schema = @Schema(type = "integer",allowableValues = {"0","1","2"}))
+            in = ParameterIn.QUERY, schema = @Schema(type = "integer", allowableValues = {"0", "1", "2"}))
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<List<SmsCoupon>> list(@RequestParam(value = "useStatus", required = false) Integer useStatus) {
@@ -65,7 +65,7 @@ public class UmsMemberCouponController {
 
     @Operation(summary = "获取登录会员购物车的相关优惠券")
     @Parameter(name = "type", description = "使用可用:0->不可用；1->可用",
-            in = ParameterIn.PATH,schema = @Schema(type = "integer",defaultValue = "1",allowableValues = {"0","1"}))
+            in = ParameterIn.PATH, schema = @Schema(type = "integer", defaultValue = "1", allowableValues = {"0", "1"}))
     @RequestMapping(value = "/list/cart/{type}", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<List<SmsCouponHistoryDetail>> listCart(@PathVariable Integer type) {
@@ -85,10 +85,10 @@ public class UmsMemberCouponController {
     @GetMapping("/listByMember")
     @ResponseBody
     public CommonResult<List<SmsCoupon>> listByMember() {
-        if (memberService.getCurrentMember()==null){
+        if (memberService.getCurrentMember() == null) {
             return CommonResult.success(Collections.EMPTY_LIST);
         }
-        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(memberService.getCurrentMember().getId());
+        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(memberService.getCurrentMember().getId(), 0);
         return CommonResult.success(smsCoupons);
     }
 }
