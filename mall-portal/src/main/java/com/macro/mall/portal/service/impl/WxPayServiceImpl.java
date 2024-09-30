@@ -253,6 +253,7 @@ public class WxPayServiceImpl implements WxPayService {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
+            log.info("get Phone response{}",response);
             // 获取响应体内容
             JSONObject entries = new JSONObject(response.body().string());
             return entries.getJSONObject("phone_info").getStr("purePhoneNumber");
