@@ -1,5 +1,6 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.common.api.CommonPage;
@@ -11,17 +12,20 @@ import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
+import jakarta.servlet.ServletOutputStream;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static cn.hutool.core.date.DateUtil.formatDateTime;
 
 /**
  * 订单管理Service实现类
@@ -39,6 +43,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
     @Autowired
     private DirectChargeMapper directChargeMapper;
+    private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间", "发货时间", "订单编号");
 
     @Override
     public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -176,6 +181,101 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         history.setNote("修改备注信息：" + note);
         orderOperateHistoryMapper.insert(history);
         return count;
+    }
+
+    @Override
+    @SneakyThrows
+    public void download(OmsOrderQueryParam queryParam, OutputStreamWriter outputStream) {
+        int currentPage = 1;
+        int pageSize = 100;
+        String head = String.join(",", csvHead) + "\n";
+        outputStream.write(head);
+        while (true) {
+            CommonPage<OmsOrderWithDirectCharge> list = this.list(queryParam, pageSize, currentPage);
+            for (OmsOrderWithDirectCharge omsOrderWithDirectCharge : list.getList()) {
+                List<String> tmp = new ArrayList<>();
+                tmp.add(omsOrderWithDirectCharge.getId() + "");
+                JSONObject moreInfo = new JSONObject(omsOrderWithDirectCharge.getMoreInfo());
+                String title = "";
+                String chargeType = "";
+                String payerPhone = "";
+                String payWay = formatPayWay(omsOrderWithDirectCharge.getPayType());
+                String orderStatus = formatStatus(omsOrderWithDirectCharge.getStatus());
+                if (moreInfo != null) {
+                    title = StringUtils.trimToEmpty(moreInfo.getStr("title"));
+                    String attr = moreInfo.getStr("attr");
+                    if (StringUtils.indexOf(attr, "直充") >= 0) {
+                        chargeType = "直充";
+                    }
+                    if (StringUtils.indexOf(attr, "代充") >= 0) {
+                        chargeType = "代充";
+                    }
+                    payerPhone = "=\"" + StringUtils.trimToEmpty(moreInfo.getStr("payerPhone")) + "\"";
+                }
+
+                tmp.add(title);
+                tmp.add(omsOrderWithDirectCharge.getPayAmount().stripTrailingZeros().toPlainString());
+                tmp.add(chargeType);
+                tmp.add(payWay);
+                tmp.add(orderStatus);
+                tmp.add(formatDirectChargeStatus(omsOrderWithDirectCharge));
+                tmp.add(payerPhone);
+                tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getCreateTime())));
+                tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getPaymentTime())));
+                tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getDeliveryTime())));
+                tmp.add("=\"" + (omsOrderWithDirectCharge.getOrderSn() + '"'));
+                outputStream.write(String.join(",", tmp) + "\n");
+            }
+            if (list.getTotal() <= (long) currentPage * pageSize) {
+                break;
+            } else {
+                currentPage++;
+            }
+        }
+    }
+
+    private String formatDirectChargeStatus(OmsOrderWithDirectCharge omsOrderWithDirectCharge) {
+        if (omsOrderWithDirectCharge.getDirectChargeStatus() == null) {
+            return "";
+        }
+        if (omsOrderWithDirectCharge.getDirectChargeStatus() == 1) {
+            return "充值中";
+        } else if (omsOrderWithDirectCharge.getDirectChargeStatus() == 3) {
+            return "充值失败：" + omsOrderWithDirectCharge.getDirectChargeFailReason();
+        } else if (omsOrderWithDirectCharge.getDirectChargeStatus() == 2) {
+            return "充值成功";
+        }
+        return "";
+    }
+
+    private String formatPayWay(Integer payType) {
+        if (payType == 1) {
+            return "支付宝";
+        } else if (payType == 2) {
+            return "微信";
+        }
+        return "";
+    }
+
+    private String formatStatus(Integer status) {
+        if (status == 1) {
+            return "代发货";
+        } else if (status == 2) {
+            return "已发货";
+        } else if (status == 3) {
+            return "已完成";
+        } else if (status == 4) {
+            return "已关闭";
+        } else if (status == 5) {
+            return "无效订单";
+        } else if (status == 6) {
+            return "退款中";
+        } else if (status == 7) {
+            return "已退款";
+        } else if (status == 0) {
+            return "待付款";
+        }
+        return "";
     }
 
 

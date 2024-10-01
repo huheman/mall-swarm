@@ -3,8 +3,10 @@ package com.macro.mall.service;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import jakarta.servlet.ServletOutputStream;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.OutputStreamWriter;
 import java.util.List;
 
 /**
@@ -57,4 +59,5 @@ public interface OmsOrderService {
     @Transactional
     int updateNote(Long id, String note, Integer status);
 
+    void download(OmsOrderQueryParam bean, OutputStreamWriter outputStream);
 }

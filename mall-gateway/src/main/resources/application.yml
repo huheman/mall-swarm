@@ -52,6 +52,7 @@ secure:
       - "/mall-portal/brand/**"
       - "/mall-portal/alipay/**"
       - "/mall-admin/admin/login"
+      - "/mall-admin/order/download"
       - "/mall-admin/admin/register"
       - "/mall-admin/minio/upload"
       - "/mall-portal/directCharge/**"
