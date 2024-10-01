@@ -44,12 +44,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
         Page<OmsOrder> objects = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPage(() -> orderDao.getList(queryParam));
-        List<Long> orderIds = objects.stream().map(new Function<OmsOrder, Long>() {
-            @Override
-            public Long apply(OmsOrder omsOrder) {
-                return omsOrder.getId();
-            }
-        }).collect(Collectors.toList());
+        List<Long> orderIds = objects.stream().map(omsOrder -> omsOrder.getId()).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(orderIds)) {
             return CommonPage.restPage(new ArrayList<>(), 0L);
         }

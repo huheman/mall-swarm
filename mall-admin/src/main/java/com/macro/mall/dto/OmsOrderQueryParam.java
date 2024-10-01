@@ -27,4 +27,6 @@ public class OmsOrderQueryParam {
     private String chargeType;
     @Schema(title = "下单人手机")
     private String payerPhone;
+    @Schema(title = "删除状态")
+    private Integer deleteStatus;
 }
