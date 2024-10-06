@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.model.OmsOrderItem;
+import com.macro.mall.portal.component.SmsSender;
 import com.macro.mall.portal.dao.DirectChargeDao;
 import com.macro.mall.portal.domain.DirectChargeDomain;
 import com.macro.mall.portal.service.DirectChargeService;
@@ -15,13 +16,12 @@ import com.macro.mall.portal.service.bo.OmsOrderDeliveryParam;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -34,6 +34,10 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     private FeignAdminService feignAdminService;
     @Autowired
     private WYTDChargeService wytdChargeService;
+    @Autowired
+    private SmsSender smsSender;
+    @Value("${app.admin.phones}")
+    private String adminPhones;
 
     private static final String PRE_FIX = "charge-";
 
@@ -49,6 +53,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             doDirectCharge(productSkuCode.substring(PRE_FIX.length()), omsOrderItem);
         } else {
             log.info("商品的skuCode是{}无需直充", productSkuCode);
+            // 发短信通知要代充
+            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, "2278472");
         }
     }
 
@@ -139,6 +145,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         } catch (Exception e) {
             chargeDomain.fail(e.getMessage());
             directChargeDao.update(chargeDomain);
+            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, "2278471");
         }
 
     }

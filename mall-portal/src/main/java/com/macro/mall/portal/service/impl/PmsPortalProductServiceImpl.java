@@ -141,7 +141,7 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         criteria.andDeleteStatusEqualTo(0);
         criteria.andPublishStatusEqualTo(1);
         criteria.andProductCategoryIdEqualTo(categoryId);
-        productExample.setOrderByClause("order by sort desc, id asc");
+        productExample.setOrderByClause("sort desc, id asc");
         List<PmsProduct> pmsProducts = productMapper.selectByExample(productExample);
         List<Long> ids = pmsProducts.stream().map(pmsProduct -> pmsProduct.getId()).toList();
         PmsSkuStockExample pmsSkuStockExample = new PmsSkuStockExample();

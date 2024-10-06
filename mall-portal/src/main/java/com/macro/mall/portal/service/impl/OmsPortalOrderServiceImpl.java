@@ -12,6 +12,7 @@ import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
+import com.macro.mall.portal.component.SmsSender;
 import com.macro.mall.portal.dao.DirectChargeDao;
 import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
@@ -80,6 +81,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private Integer expectMinute;
     @Value("${order.hint.more}")
     private String moreHint;
+    @Autowired
+    private SmsSender smsSender;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -588,12 +591,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             alipayClient.refund(omsOrder);
             omsOrder.setStatus(7);
             orderMapper.updateByPrimaryKey(omsOrder);
+            smsSender.send(Arrays.asList(omsOrder.getPayerPhone()), Arrays.asList(omsOrder.getTitle(), reason), "2278027");
             return "支付宝退款成功";
         } else if (omsOrder.getPayType() == 2) {
             // 如果是微信支付，就用微信退款方法
             wxPayClient.refund(omsOrder);
             omsOrder.setStatus(6);
-
             orderMapper.updateByPrimaryKey(omsOrder);
             return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
         }

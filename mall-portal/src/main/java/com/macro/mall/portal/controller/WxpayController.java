@@ -3,7 +3,7 @@ package com.macro.mall.portal.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonResult;
-import com.macro.mall.mapper.OmsOrderMapper;
+import com.macro.mall.portal.component.SmsSender;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.service.DirectChargeService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,8 @@ public class WxpayController {
     private OmsPortalOrderService omsPortalOrderService;
     @Autowired
     private DirectChargeService directChargeService;
+    @Autowired
+    private SmsSender smsSender;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -92,6 +95,7 @@ public class WxpayController {
     @GetMapping("/ship")
     public CommonResult<Boolean> ship(Long orderId) {
         OmsOrderDetail detail = omsPortalOrderService.detail(orderId);
+        smsSender.send(Arrays.asList(detail.getPayerPhone()), Arrays.asList(detail.getTitle()), "2278470");
         wxPayService.uploadShipping(detail);
         return CommonResult.success(true);
     }

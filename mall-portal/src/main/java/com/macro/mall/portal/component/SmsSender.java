@@ -2,25 +2,17 @@ package com.macro.mall.portal.component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencentcloudapi.common.AbstractModel;
-import com.tencentcloudapi.common.Credential;
-import com.tencentcloudapi.common.profile.ClientProfile;
-import com.tencentcloudapi.common.profile.HttpProfile;
+import com.tencentcloudapi.sms.v20210111.SmsClient;
+import com.tencentcloudapi.sms.v20210111.models.SendSmsRequest;
+import com.tencentcloudapi.sms.v20210111.models.SendSmsResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import com.tencentcloudapi.common.AbstractModel;
-
-import com.tencentcloudapi.common.Credential;
-import com.tencentcloudapi.common.profile.ClientProfile;
-import com.tencentcloudapi.common.profile.HttpProfile;
-import com.tencentcloudapi.common.exception.TencentCloudSDKException;
-import com.tencentcloudapi.sms.v20210111.SmsClient;
-import com.tencentcloudapi.sms.v20210111.models.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,12 +36,22 @@ public class SmsSender {
 
     @SneakyThrows
     public Integer send(Collection<String> receivePhone, List<String> param, String templateId) {
+        receivePhone = receivePhone.stream().filter(s -> StringUtils.hasText(s)).toList();
         if (CollectionUtils.isEmpty(receivePhone)) {
             return 0;
         }
         try {
             // 实例化一个请求对象,每个接口都会对应一个request对象
             SendSmsRequest req = new SendSmsRequest();
+            param = param.stream().map(s -> {
+                if (s.length() > 6) {
+                    // 截取前5个字符并拼接省略号
+                    return s.substring(0, 5) + "…";
+                } else {
+                    // 保留原文
+                    return s;
+                }
+            }).toList();
             String[] params = param.toArray(new String[param.size()]);
             req.setTemplateParamSet(params);
             req.setSignName(signName);

@@ -1,6 +1,9 @@
 package com.macro.mall.model;
 
+import cn.hutool.json.JSONObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -139,6 +142,22 @@ public class OmsOrder implements Serializable {
     private String moreInfo;
 
     private static final long serialVersionUID = 1L;
+
+
+    public String getTitle() {
+        if (StringUtils.isNoneEmpty(moreInfo)) {
+            JSONObject entries = new JSONObject(moreInfo);
+            return entries.getStr("title");
+        }
+        return "";
+    }
+    public String getPayerPhone() {
+        if (StringUtils.isNoneEmpty(moreInfo)) {
+            JSONObject entries = new JSONObject(moreInfo);
+            return entries.getStr("payerPhone");
+        }
+        return "";
+    }
 
     public Long getId() {
         return id;
