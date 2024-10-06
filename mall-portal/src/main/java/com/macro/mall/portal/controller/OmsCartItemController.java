@@ -58,11 +58,12 @@ public class OmsCartItemController {
     @ResponseBody
     public CommonResult updateQuantity(@RequestParam Long id,
                                        @RequestParam Integer quantity) {
-        int count = cartItemService.updateQuantity(id, memberService.getCurrentMember().getId(), quantity);
-        if (count > 0) {
+        try {
+            int count = cartItemService.updateQuantity(id, memberService.getCurrentMember().getId(), quantity);
             return CommonResult.success(count);
+        }catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
         }
-        return CommonResult.failed();
     }
 
     @Operation(summary = "获取购物车中某个商品的规格,用于重选规格")

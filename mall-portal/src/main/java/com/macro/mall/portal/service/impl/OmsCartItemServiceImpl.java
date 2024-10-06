@@ -1,9 +1,11 @@
 package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.mapper.OmsCartItemMapper;
 import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.OmsCartItem;
@@ -17,6 +19,7 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -130,6 +133,10 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
 
     @Override
     public int updateQuantity(Long id, Long memberId, Integer quantity) {
+        OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(id);
+        if (omsCartItem.getProductCategoryId()==57&&omsCartItem.getProductAttr().contains("直充")&&omsCartItem.getProductAttr().contains("UC")) {
+            Assert.state(quantity==1,"该商品暂时只支持购买单个，请分开多次购买");
+        }
         OmsCartItem cartItem = new OmsCartItem();
         cartItem.setQuantity(quantity);
         OmsCartItemExample example = new OmsCartItemExample();
