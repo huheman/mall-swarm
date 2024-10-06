@@ -12,7 +12,6 @@ import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
-import jakarta.servlet.ServletOutputStream;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -196,13 +194,12 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 List<String> tmp = new ArrayList<>();
                 tmp.add(omsOrderWithDirectCharge.getId() + "");
                 JSONObject moreInfo = new JSONObject(omsOrderWithDirectCharge.getMoreInfo());
-                String title = "";
+                String title = omsOrderWithDirectCharge.getTitle();
                 String chargeType = "";
-                String payerPhone = "";
+                String payerPhone = "=\"" + omsOrderWithDirectCharge.getPayerPhone() + "\"";
                 String payWay = formatPayWay(omsOrderWithDirectCharge.getPayType());
                 String orderStatus = formatStatus(omsOrderWithDirectCharge.getStatus());
                 if (moreInfo != null) {
-                    title = StringUtils.trimToEmpty(moreInfo.getStr("title"));
                     String attr = moreInfo.getStr("attr");
                     if (StringUtils.indexOf(attr, "直充") >= 0) {
                         chargeType = "直充";
@@ -210,7 +207,6 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                     if (StringUtils.indexOf(attr, "代充") >= 0) {
                         chargeType = "代充";
                     }
-                    payerPhone = "=\"" + StringUtils.trimToEmpty(moreInfo.getStr("payerPhone")) + "\"";
                 }
 
                 tmp.add(title);
@@ -241,7 +237,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         if (omsOrderWithDirectCharge.getDirectChargeStatus() == 1) {
             return "充值中";
         } else if (omsOrderWithDirectCharge.getDirectChargeStatus() == 3) {
-            return "充值失败：" + omsOrderWithDirectCharge.getDirectChargeFailReason();
+            return "充值失败" ;
         } else if (omsOrderWithDirectCharge.getDirectChargeStatus() == 2) {
             return "充值成功";
         }

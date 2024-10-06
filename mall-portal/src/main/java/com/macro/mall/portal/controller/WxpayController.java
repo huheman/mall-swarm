@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,8 @@ public class WxpayController {
     private DirectChargeService directChargeService;
     @Autowired
     private SmsSender smsSender;
+    @Value("${sms.shipId:}")
+    private String smsShipId;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -95,7 +98,9 @@ public class WxpayController {
     @GetMapping("/ship")
     public CommonResult<Boolean> ship(Long orderId) {
         OmsOrderDetail detail = omsPortalOrderService.detail(orderId);
-        smsSender.send(Arrays.asList(detail.getPayerPhone()), Arrays.asList(detail.getTitle()), "2278470");
+        if (StringUtils.isNoneEmpty(smsShipId)) {
+            smsSender.send(Arrays.asList(detail.getPayerPhone()), Arrays.asList(detail.getTitle()), smsShipId);
+        }
         wxPayService.uploadShipping(detail);
         return CommonResult.success(true);
     }
