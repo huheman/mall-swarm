@@ -608,6 +608,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrder order = getByOrderSn(orderSN);
         order.setStatus(7);
         orderMapper.updateByPrimaryKey(order);
+        smsSender.send(Arrays.asList(order.getPayerPhone()), Arrays.asList(order.getTitle(), order.getNote()), "2278027");
+
     }
 
     /**
