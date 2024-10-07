@@ -98,7 +98,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         List<SmsCoupon> smsCoupons = memberCouponService.listByMember(umsMember.getId(), 3);
         for (SmsCoupon smsCoupon : smsCoupons) {
             try {
-                memberCouponService.add(smsCoupon.getId(),umsMember.getId());
+                memberCouponService.add(smsCoupon.getId(), umsMember.getId(), 0);
             } catch (Exception e) {
                 log.error("领券失败", e);
             }
@@ -225,7 +225,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         return loginByPhone(phone);
     }
 
-    private UmsMember getByPhone(String phone) {
+    public UmsMember getByPhone(String phone) {
         if (StrUtil.isEmpty(phone)) {
             Asserts.fail("请填入手机号");
         }

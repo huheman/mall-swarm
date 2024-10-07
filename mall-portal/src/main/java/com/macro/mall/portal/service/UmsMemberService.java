@@ -59,4 +59,6 @@ public interface UmsMemberService {
     SaTokenInfo loginByPhone(String phone, String authCode);
 
     SaTokenInfo loginByPhone(String phone);
+
+    UmsMember getByPhone(String phone);
 }

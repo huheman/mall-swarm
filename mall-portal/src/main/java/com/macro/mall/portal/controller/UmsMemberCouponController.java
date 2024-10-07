@@ -1,8 +1,10 @@
 package com.macro.mall.portal.controller;
 
+import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.model.SmsCoupon;
-import com.macro.mall.model.SmsCouponHistory;
+import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.domain.SmsCouponHistoryDetail;
 import com.macro.mall.portal.service.OmsCartItemService;
@@ -39,7 +41,19 @@ public class UmsMemberCouponController {
     @RequestMapping(value = "/add/{couponId}", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult add(@PathVariable Long couponId) {
-        memberCouponService.add(couponId, memberService.getCurrentMember().getId());
+        memberCouponService.add(couponId, memberService.getCurrentMember().getId(), 1);
+        return CommonResult.success(null, "领取成功");
+    }
+
+    @Operation(summary = "暴露API使用的领券")
+    @RequestMapping(value = "/addByApi", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult addByApi(@RequestParam Long couponId, @RequestParam String phone) {
+        UmsMember member = memberService.getByPhone(phone);
+        if (member == null) {
+            throw new ApiException("未找到" + phone + "对应的用户");
+        }
+        memberCouponService.add(couponId, member.getId(), 0);
         return CommonResult.success(null, "领取成功");
     }
 

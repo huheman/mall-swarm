@@ -39,7 +39,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private PmsProductMapper productMapper;
 
     @Override
-    public void add(Long couponId, Long userId) {
+    public void add(Long couponId, Long userId,Integer addType) {
         UmsMember currentMember;
         if (userId == null) {
             currentMember = memberService.getCurrentMember();
@@ -74,7 +74,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         couponHistory.setMemberId(currentMember.getId());
         couponHistory.setMemberNickname(currentMember.getNickname());
         //主动领取
-        couponHistory.setGetType(1);
+        couponHistory.setGetType(addType);
         //未使用
         couponHistory.setUseStatus(0);
         couponHistoryMapper.insert(couponHistory);

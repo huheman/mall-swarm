@@ -18,7 +18,7 @@ public interface UmsMemberCouponService {
      * 会员添加优惠券
      */
     @Transactional
-    void add(Long couponId,Long userId);
+    void add(Long couponId,Long userId,Integer addType);
 
 
     Map<Boolean, List<SmsCouponHistoryDetail>> listCartAll(List<CartPromotionItem> cartItemList);

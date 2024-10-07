@@ -60,6 +60,7 @@ secure:
       - "/mall-portal/order/detail/**"
       - "/mall-portal/member/coupon/listByMember"
       - "/mall-portal/order/close"
+      - "/mall-portal/member/coupon/addByApi"
 management:
   endpoints:
     web:
