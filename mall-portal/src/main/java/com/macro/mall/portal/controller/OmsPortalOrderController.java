@@ -177,8 +177,15 @@ public class OmsPortalOrderController {
     @RequestMapping(value = "/cancelUserOrder", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult cancelUserOrder(Long orderId) {
-        portalOrderService.cancelOrder(orderId);
+        portalOrderService.cancelOrder(orderId, "用户id:" + memberService.getCurrentMember().getId(), "用户手动取消订单");
         return CommonResult.success(null);
+    }
+
+    @Operation(summary = "向外暴露的取消订单API")
+    @PostMapping("/close")
+    public CommonResult<Integer> closeOrder(@RequestParam("orderId") Long orderId, @RequestParam("operator") String operator, @RequestParam("reason") String reason) {
+        portalOrderService.cancelOrder(orderId, operator, reason);
+        return CommonResult.success(1);
     }
 
     @Operation(summary = "用户确认收货")

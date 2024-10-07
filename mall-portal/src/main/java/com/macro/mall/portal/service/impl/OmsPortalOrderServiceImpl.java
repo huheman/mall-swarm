@@ -20,6 +20,8 @@ import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.*;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
+    private static final Logger log = LoggerFactory.getLogger(OmsPortalOrderServiceImpl.class);
     @Autowired
     private UmsMemberService memberService;
     @Autowired
@@ -76,6 +79,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private PmsProductCategoryMapper categoryMapper;
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
+    @Autowired
+    private OmsOrderOperateHistoryMapper operateHistoryMapper;
     /*订单预计完成时间*/
     @Value("${order.hint.expectMinute}")
     private Integer expectMinute;
@@ -324,27 +329,18 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             return count;
         }
         //修改订单状态为交易取消
-        List<Long> ids = new ArrayList<>();
         for (OmsOrderDetail timeOutOrder : timeOutOrders) {
-            ids.add(timeOutOrder.getId());
-        }
-        portalOrderDao.updateOrderStatus(ids, 4);
-        for (OmsOrderDetail timeOutOrder : timeOutOrders) {
-            //解除订单商品库存锁定
-            portalOrderDao.releaseSkuStockLock(timeOutOrder.getOrderItemList());
-            //修改优惠券使用状态
-            updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0);
-            //返还使用积分
-            if (timeOutOrder.getUseIntegration() != null) {
-                UmsMember member = memberService.getById(timeOutOrder.getMemberId());
-                memberService.updateIntegration(timeOutOrder.getMemberId(), member.getIntegration() + timeOutOrder.getUseIntegration());
+            try {
+                cancelOrder(timeOutOrder.getId(), "定时任务", "订单超时关闭");
+            } catch (Exception e) {
+                log.error("关闭订单失败", e);
             }
         }
         return timeOutOrders.size();
     }
 
     @Override
-    public void cancelOrder(Long orderId) {
+    public void cancelOrder(Long orderId, String operator, String closeReason) {
         //查询未付款的取消订单
         OmsOrderExample example = new OmsOrderExample();
         example.createCriteria().andIdEqualTo(orderId).andStatusEqualTo(0).andDeleteStatusEqualTo(0);
@@ -371,6 +367,13 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 UmsMember member = memberService.getById(cancelOrder.getMemberId());
                 memberService.updateIntegration(cancelOrder.getMemberId(), member.getIntegration() + cancelOrder.getUseIntegration());
             }
+            OmsOrderOperateHistory history = new OmsOrderOperateHistory();
+            history.setOrderId(orderId);
+            history.setCreateTime(new Date());
+            history.setOperateMan(operator);
+            history.setOrderStatus(4);
+            history.setNote("订单关闭:" + closeReason);
+            operateHistoryMapper.insert(history);
         }
     }
 
@@ -585,19 +588,17 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             Assert.state(directCharge.getChargeStatus() == 3, "只有直充失败的订单可以发起退款");
         }
         omsOrder.setNote(reason);
+        orderMapper.updateByPrimaryKey(omsOrder);
+
         // 如果是支付宝退款，就用支付宝退款方法
         if (omsOrder.getPayType() == 1) {
             // 支付宝是同步退款的
             alipayClient.refund(omsOrder);
-            omsOrder.setStatus(7);
-            orderMapper.updateByPrimaryKey(omsOrder);
-            smsSender.send(Arrays.asList(omsOrder.getPayerPhone()), Arrays.asList(omsOrder.getTitle(), reason), "2278027");
+            refundSuccess(omsOrder.getOrderSn());
             return "支付宝退款成功";
         } else if (omsOrder.getPayType() == 2) {
             // 如果是微信支付，就用微信退款方法
             wxPayClient.refund(omsOrder);
-            omsOrder.setStatus(6);
-            orderMapper.updateByPrimaryKey(omsOrder);
             return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
         }
         throw new IllegalArgumentException("订单付款方式错误，请联系管理员");
@@ -606,10 +607,15 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     public void refundSuccess(String orderSN) {
         OmsOrder order = getByOrderSn(orderSN);
-        order.setStatus(7);
-        orderMapper.updateByPrimaryKey(order);
+        OmsOrderOperateHistory history = new OmsOrderOperateHistory();
+        history.setOrderId(order.getId());
+        history.setCreateTime(new Date());
+        history.setOperateMan("系统管理员");
+        history.setOrderStatus(order.getStatus());
+        history.setNote("退款");
+        operateHistoryMapper.insert(history);
+        cancelOrder(order.getId(), "系统管理员", "退款后关闭");
         smsSender.send(Arrays.asList(order.getPayerPhone()), Arrays.asList(order.getTitle(), order.getNote()), "2278027");
-
     }
 
     /**

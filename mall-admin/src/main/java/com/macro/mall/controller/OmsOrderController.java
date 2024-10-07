@@ -92,11 +92,14 @@ public class OmsOrderController {
     @RequestMapping(value = "/update/close", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult close(@RequestParam("ids") List<Long> ids, @RequestParam String note) {
-        int count = orderService.close(ids, note);
-        if (count > 0) {
-            return CommonResult.success(count);
+        for (Long id : ids) {
+            try {
+                portalOrderService.closeOrder(id, "后台管理员", note);
+            } catch (Exception e) {
+                log.error("关闭订单失败", e);
+            }
         }
-        return CommonResult.failed();
+        return CommonResult.success(true);
     }
 
     @Operation(summary = "批量删除订单")

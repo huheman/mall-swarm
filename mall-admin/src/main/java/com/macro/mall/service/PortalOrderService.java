@@ -21,4 +21,7 @@ public interface PortalOrderService {
 
     @PostMapping("/order/refund")
     CommonResult<String> refund(@RequestParam("orderId") Long id,@RequestParam("reason")String reason);
+
+    @PostMapping("/order/close")
+    CommonResult<Integer> closeOrder(@RequestParam("orderId") Long orderId, @RequestParam("operator") String operator, @RequestParam("reason") String reason);
 }

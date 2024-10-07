@@ -43,7 +43,7 @@ public interface OmsPortalOrderService {
      * 取消单个超时订单
      */
     @Transactional
-    void cancelOrder(Long orderId);
+    void cancelOrder(Long orderId,String operator,String closeReason);
 
 
     /**
