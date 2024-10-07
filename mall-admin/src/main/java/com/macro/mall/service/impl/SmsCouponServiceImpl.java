@@ -114,6 +114,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
         if(type!=null){
             criteria.andTypeEqualTo(type);
         }
+        example.setOrderByClause("id desc");
         PageHelper.startPage(pageNum,pageSize);
         return couponMapper.selectByExample(example);
     }
