@@ -43,15 +43,6 @@ public class UmsMemberCouponController {
         return CommonResult.success(null, "领取成功");
     }
 
-    @Operation(summary = "获取会员优惠券历史列表")
-    @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",
-            in = ParameterIn.QUERY, schema = @Schema(type = "integer", allowableValues = {"0", "1", "2"}))
-    @RequestMapping(value = "/listHistory", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult<List<SmsCouponHistory>> listHistory(@RequestParam(value = "useStatus", required = false) Integer useStatus) {
-        List<SmsCouponHistory> couponHistoryList = memberCouponService.listHistory(useStatus);
-        return CommonResult.success(couponHistoryList);
-    }
 
     @Operation(summary = "获取会员优惠券列表")
     @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",

@@ -20,10 +20,6 @@ public interface UmsMemberCouponService {
     @Transactional
     void add(Long couponId,Long userId);
 
-    /**
-     * 获取优惠券历史列表
-     */
-    List<SmsCouponHistory> listHistory(Integer useStatus);
 
     Map<Boolean, List<SmsCouponHistoryDetail>> listCartAll(List<CartPromotionItem> cartItemList);
     /**

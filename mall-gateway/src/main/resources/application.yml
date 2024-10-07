@@ -58,6 +58,8 @@ secure:
       - "/mall-portal/directCharge/**"
       - "/mall-portal/wxpay/**"
       - "/mall-portal/order/detail/**"
+      - "/mall-portal/member/coupon/listByMember"
+      - "/mall-portal/order/close"
 management:
   endpoints:
     web:

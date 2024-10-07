@@ -104,18 +104,6 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         return sb.toString();
     }
 
-    @Override
-    public List<SmsCouponHistory> listHistory(Integer useStatus) {
-        UmsMember currentMember = memberService.getCurrentMember();
-        SmsCouponHistoryExample couponHistoryExample = new SmsCouponHistoryExample();
-        SmsCouponHistoryExample.Criteria criteria = couponHistoryExample.createCriteria();
-        criteria.andMemberIdEqualTo(currentMember.getId());
-        if (useStatus != null) {
-            criteria.andUseStatusEqualTo(useStatus);
-        }
-        return couponHistoryMapper.selectByExample(couponHistoryExample);
-    }
-
     public Map<Boolean, List<SmsCouponHistoryDetail>> listCartAll(List<CartPromotionItem> cartItemList) {
         UmsMember currentMember = memberService.getCurrentMember();
         Date now = new Date();
