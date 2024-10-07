@@ -587,8 +587,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         if (directCharge != null) {
             Assert.state(directCharge.getChargeStatus() == 3, "只有直充失败的订单可以发起退款");
         }
+        // 记录退款原因
         omsOrder.setNote(reason);
+        // 变回待支付状态
+        omsOrder.setStatus(0);
         orderMapper.updateByPrimaryKey(omsOrder);
+        cancelOrder(orderId, "系统管理员", "关闭后退款");
 
         // 如果是支付宝退款，就用支付宝退款方法
         if (omsOrder.getPayType() == 1) {
@@ -607,14 +611,18 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     public void refundSuccess(String orderSN) {
         OmsOrder order = getByOrderSn(orderSN);
+        // 执行到已退款状态
+        order.setStatus(7);
+        orderMapper.updateByPrimaryKey(order);
+        // 插入退款行为
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
         history.setOrderId(order.getId());
         history.setCreateTime(new Date());
         history.setOperateMan("系统管理员");
-        history.setOrderStatus(0);
+        history.setOrderStatus(7);
         history.setNote("退款");
         operateHistoryMapper.insert(history);
-        cancelOrder(order.getId(), "系统管理员", "退款后关闭");
+        // 发送退款消息
         smsSender.send(Arrays.asList(order.getPayerPhone()), Arrays.asList(order.getTitle(), order.getNote()), "2278027");
     }
 
