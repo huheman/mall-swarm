@@ -611,7 +611,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         history.setOrderId(order.getId());
         history.setCreateTime(new Date());
         history.setOperateMan("系统管理员");
-        history.setOrderStatus(order.getStatus());
+        history.setOrderStatus(0);
         history.setNote("退款");
         operateHistoryMapper.insert(history);
         cancelOrder(order.getId(), "系统管理员", "退款后关闭");
