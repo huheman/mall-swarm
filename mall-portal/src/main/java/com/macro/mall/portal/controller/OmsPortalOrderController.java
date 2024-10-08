@@ -67,7 +67,7 @@ public class OmsPortalOrderController {
         } else {
             String idNo = identityResultBO.getIdNo();
             int ageFromIdCard = getAgeFromIdCard(idNo);
-            if (ageFromIdCard <= 8) {
+            if (ageFromIdCard < 8) {
                 result = "8岁以下未成年人无法充值";
             }
         }
