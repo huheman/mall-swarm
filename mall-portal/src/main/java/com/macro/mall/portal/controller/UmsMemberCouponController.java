@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ import java.util.List;
 @Tag(name = "UmsMemberCouponController", description = "用户优惠券管理")
 @RequestMapping("/member/coupon")
 public class UmsMemberCouponController {
+    private static final Logger log = LoggerFactory.getLogger(UmsMemberCouponController.class);
     @Autowired
     private UmsMemberCouponService memberCouponService;
     @Autowired
@@ -90,10 +93,16 @@ public class UmsMemberCouponController {
     @GetMapping("/listByMember")
     @ResponseBody
     public CommonResult<List<SmsCoupon>> listByMember() {
-        if (memberService.getCurrentMember() == null) {
+        UmsMember currentMember = null;
+        try {
+            currentMember = memberService.getCurrentMember();
+        } catch (Exception e) {
+            log.error("获取当前登陆人失败", e);
+        }
+        if (currentMember == null) {
             return CommonResult.success(Collections.EMPTY_LIST);
         }
-        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(memberService.getCurrentMember().getId(), 0);
+        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(currentMember.getId(), 0);
         return CommonResult.success(smsCoupons);
     }
 }

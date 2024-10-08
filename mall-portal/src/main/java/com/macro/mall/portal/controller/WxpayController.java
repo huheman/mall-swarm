@@ -47,7 +47,7 @@ public class WxpayController {
     private DirectChargeService directChargeService;
     @Autowired
     private SmsSender smsSender;
-    @Value("${sms.shipId:}")
+    @Value("${sms.shipId}")
     private String smsShipId;
 
 
@@ -98,10 +98,8 @@ public class WxpayController {
     @GetMapping("/ship")
     public CommonResult<Boolean> ship(Long orderId) {
         OmsOrderDetail detail = omsPortalOrderService.detail(orderId);
-        if (StringUtils.isNoneEmpty(smsShipId)) {
-            smsSender.send(Arrays.asList(detail.getPayerPhone()), Arrays.asList(detail.getTitle()), smsShipId);
-        }
         wxPayService.uploadShipping(detail);
+        smsSender.send(Arrays.asList(detail.getPayerPhone()), Arrays.asList(detail.getTitle()), smsShipId);
         return CommonResult.success(true);
     }
 

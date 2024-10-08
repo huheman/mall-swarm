@@ -41,9 +41,9 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     private SmsSender smsSender;
     @Value("${app.admin.phones}")
     private String adminPhones;
-    @Value("${sms.manualChargeId:}")
+    @Value("${sms.manualChargeId}")
     private String smsManualChargeId;
-    @Value("${sms.directChargeFailId:}")
+    @Value("${sms.directChargeFailId}")
     private String directChargeFailId;
 
     private static final String PRE_FIX = "charge-";
@@ -61,10 +61,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         } else {
             log.info("商品的skuCode是{}无需直充", productSkuCode);
             // 发短信通知要代充
-            if (StringUtils.hasLength(smsManualChargeId)) {
-
-                smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, smsManualChargeId);
-            }
+            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, smsManualChargeId);
         }
     }
 
@@ -155,9 +152,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         } catch (Exception e) {
             chargeDomain.fail(e.getMessage());
             directChargeDao.update(chargeDomain);
-            if (StringUtils.hasLength(directChargeFailId)) {
-                smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
-            }
+            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
         }
 
     }
