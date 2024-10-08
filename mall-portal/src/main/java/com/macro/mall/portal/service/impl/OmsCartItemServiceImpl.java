@@ -19,6 +19,7 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -92,9 +94,12 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
                             .url(url)
                             .get()
                             .build();
+                    Call call = httpClient.newCall(request);
+                    // 这个不能太久，只能1秒
+                    call.timeout().timeout(1, TimeUnit.SECONDS);
                     try {
                         // 执行请求并获取响应
-                        Response response = httpClient.newCall(request).execute();
+                        Response response = call.execute();
                         Assert.state(response.isSuccessful(), "responseCode" + response.code());
 
                         String responseBody = response.body().string();
