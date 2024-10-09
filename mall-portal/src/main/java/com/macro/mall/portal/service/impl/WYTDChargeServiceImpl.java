@@ -130,6 +130,9 @@ public class WYTDChargeServiceImpl implements WYTDChargeService {
 
     // 主解密方法
     public String decryptCards(String wytdOrderId, String cardsStr) {
+        if (StringUtils.isEmpty(cardsStr)) {
+            return "";
+        }
         try {
             // 1. 生成解密密钥 encKey
             String encKey = generateEncKey(wytdOrderId, userKey);

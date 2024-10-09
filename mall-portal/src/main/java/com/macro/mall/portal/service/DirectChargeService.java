@@ -9,4 +9,6 @@ public interface DirectChargeService {
     void chargeSuccess(JSONObject callback) throws Exception;
 
     String chargeStatus(String orderSN);
+
+    void yzjChargeSuccess(String data);
 }

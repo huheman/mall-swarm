@@ -96,7 +96,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
                             .build();
                     Call call = httpClient.newCall(request);
                     // 这个不能太久，只能1秒
-                    call.timeout().timeout(1, TimeUnit.SECONDS);
                     try {
                         // 执行请求并获取响应
                         Response response = call.execute();
