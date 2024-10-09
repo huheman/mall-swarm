@@ -71,11 +71,11 @@ public class YZJChargeServiceImpl implements YZJChargeService {
         log.info("咔之家直充结果{}", response);
         // 处理响应
         // 假设decryptData是解密方法，解析响应data
-        Map<String, Object> responseData = JSONObject.parseObject(response);
+        JSONObject responseData = JSONObject.parseObject(response);
 
         // 检查返回的状态
-        if (responseData.get("status").equals(1)) {
-            log.info("订单创建成功: " + responseData.get("data"));
+        if (responseData.getInteger("status").equals(1)) {
+            log.info("订单创建成功: " + decryptData(responseData.getString("data")));
         } else {
             throw new Exception("订单创建失败: " + responseData.get("message"));
         }
@@ -115,7 +115,6 @@ public class YZJChargeServiceImpl implements YZJChargeService {
         // 将整个加密的JSON对象再次Base64编码为最终的密文
         return Base64.getEncoder().encodeToString(encryptedJson.toString().getBytes(StandardCharsets.UTF_8));
     }
-
 
 
     private String sendPostRequest(String url, String postData) throws Exception {
