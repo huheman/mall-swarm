@@ -1,7 +1,7 @@
 package com.macro.mall.portal.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 
 public interface AttributeChecker {
-    boolean checkAttribute(Long gameId, JSONObject attributeValue);
+    String checkAttribute(Long gameId, JSONArray attributeValue);
 }

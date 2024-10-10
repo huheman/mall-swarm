@@ -49,9 +49,8 @@ public class OmsPortalOrderController {
 
     @PostMapping("/checkAttribute")
     @ResponseBody
-    public CommonResult<Boolean> checkAttribute(@RequestBody AttributeBO orderParam) {
-        boolean b = attributeChecker.checkAttribute(orderParam.getGameId(), orderParam.getCurrentAttribute());
-        return CommonResult.success(b);
+    public CommonResult<String> checkAttribute(@RequestBody AttributeBO orderParam) {
+        return CommonResult.success(attributeChecker.checkAttribute(orderParam.getGameId(), orderParam.getAttributeList()));
     }
 
 
