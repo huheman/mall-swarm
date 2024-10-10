@@ -3,10 +3,12 @@ package com.macro.mall.portal.controller;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.portal.controller.vo.AttributeBO;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
 import com.macro.mall.portal.domain.OrderParamWithAttribute;
+import com.macro.mall.portal.service.AttributeChecker;
 import com.macro.mall.portal.service.IdentityService;
 import com.macro.mall.portal.service.OmsPortalOrderService;
 import com.macro.mall.portal.service.UmsMemberService;
@@ -42,6 +44,15 @@ public class OmsPortalOrderController {
     private UmsMemberService memberService;
     @Autowired
     private IdentityService identityService;
+    @Autowired
+    private AttributeChecker attributeChecker;
+
+    @PostMapping("/checkAttribute")
+    @ResponseBody
+    public CommonResult<Boolean> checkAttribute(@RequestBody AttributeBO orderParam) {
+        boolean b = attributeChecker.checkAttribute(orderParam.getGameId(), orderParam.getCurrentAttribute());
+        return CommonResult.success(b);
+    }
 
 
     /*查看卡密*/

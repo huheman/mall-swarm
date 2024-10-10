@@ -5,7 +5,6 @@ import cn.hutool.core.lang.Assert;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.mapper.OmsCartItemMapper;
 import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.OmsCartItem;
@@ -19,11 +18,7 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -79,43 +73,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
             unit.put("key", stringStringEntry.getKey());
             unit.put("value", stringStringEntry.getValue());
             finalAttr.add(unit);
-        }
-        String isLegal = "ok";
-        if (omsCartItem.getProductCategoryId() == 57) {
-            for (int i = 0; i < finalAttr.size(); i++) {
-                JSONObject jsonObject = finalAttr.getJSONObject(i);
-                String key = jsonObject.getString("key");
-                if (StringUtils.contains(key, "username")) {
-                    String userName = jsonObject.getString("value");
-                    // 构建请求URL
-                    String url = "http://120.24.168.170:8080/midasbuy/getCharac?appid=1450015065&zoneid=1&playerId=" + userName;
-                    // 创建GET请求
-                    Request request = new Request.Builder()
-                            .url(url)
-                            .get()
-                            .build();
-                    Call call = httpClient.newCall(request);
-                    // 这个不能太久，只能1秒
-                    try {
-                        // 执行请求并获取响应
-                        Response response = call.execute();
-                        Assert.state(response.isSuccessful(), "responseCode" + response.code());
-
-                        String responseBody = response.body().string();
-                        JSONObject json = JSON.parseObject(responseBody);
-                        Integer status = json.getInteger("status");
-                        if (status != null && status != 0) {
-                            isLegal = "用户Id不存在，请核实后再提交";
-                        }
-                    } catch (Exception e) {
-                        log.error("查询username是否存在失败了", e);
-                    }
-                    break;
-                }
-            }
-        }
-        if (!isLegal.equals("ok")) {
-            throw new ApiException(isLegal);
         }
         omsCartItem.setProductAttr(finalAttr.toString());
         // 要对一些内容进行校验
