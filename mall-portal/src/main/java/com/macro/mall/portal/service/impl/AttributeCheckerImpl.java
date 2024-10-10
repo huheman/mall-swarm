@@ -46,7 +46,7 @@ public class AttributeCheckerImpl implements AttributeChecker {
                         JSONObject json = JSON.parseObject(responseBody);
                         Integer status = json.getInteger("status");
                         if (status != null && status != 0) {
-                            isLegal = String.format("【%s】未能通过校验。",key);
+                            isLegal = String.format("【%s】未能通过校验。", fitName(key));
                         }
                     } catch (Exception e) {
                         log.error("查询username是否存在失败了", e);
@@ -56,5 +56,16 @@ public class AttributeCheckerImpl implements AttributeChecker {
             }
         }
         return isLegal;
+    }
+
+    private String fitName(String item) {
+        // 检查字符串中是否存在'-'
+        if (item.indexOf('-') > 0) {
+            // 如果存在，使用split('-')，返回分割后的第一个部分
+            return item.split("-")[0];
+        } else {
+            // 如果不存在'-'，直接返回原字符串
+            return item;
+        }
     }
 }
