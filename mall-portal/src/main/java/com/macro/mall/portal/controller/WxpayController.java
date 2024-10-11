@@ -96,7 +96,7 @@ public class WxpayController {
     @GetMapping("qrcode")
     public CommonResult<String> qrcode(@RequestParam String kolId){
         Assert.notEmpty(kolId, "kolId不能为空");
-        byte[] bytes = wxPayService.qrCodePic("kol_id:"+kolId);
+        byte[] bytes = wxPayService.qrCodePic("kol_id="+kolId);
         CommonResult<String> upload = feignAdminService.upload(bytes);
         return CommonResult.success(upload.getData());
     }

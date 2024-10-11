@@ -256,7 +256,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         jsonObject.put("payerPhone", currentMember.getPhone());
         jsonObject.put("attr", String.join("-", attrValues));
         jsonObject.put("title", StringUtils.trimToEmpty(orderParam.getTitle()));
-
+        jsonObject.put("kolId",StringUtils.trimToEmpty(orderParam.getKolId()));
         Long productCategoryId = cartPromotionItemList.get(0).getProductCategoryId();
         PmsProductCategory pmsProductCategory = categoryMapper.selectByPrimaryKey(productCategoryId);
         jsonObject.put("gameName", pmsProductCategory.getName());

@@ -1,6 +1,5 @@
 package com.macro.mall.controller;
 
-import cn.hutool.core.util.URLUtil;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.exception.ApiException;
@@ -13,7 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URLEncoder;
 
 @RequestMapping("/kol")
 @RestController
@@ -31,7 +35,7 @@ public class SmsKokController {
     public CommonResult<SmsKolPromoConfig> create(@RequestBody KOLCreateDTO kolCreateDTO) {
         try {
             CommonResult<String> qrcode = portalOrderService.qrcode(kolCreateDTO.getKolId());
-            String htmlUrl = homeUrl + "?scene=" + URLUtil.encode("kol_id:" + kolCreateDTO.getKolId());
+            String htmlUrl = homeUrl + "?scene=" + URLEncoder.encode("kol_id=" + kolCreateDTO.getKolId());
             SmsKolPromoConfig smsKolPromoConfig = kolPromoService.create(kolCreateDTO.getKolName(), kolCreateDTO.getKolId(), qrcode.getData(), htmlUrl);
             return CommonResult.success(smsKolPromoConfig);
         } catch (Exception e) {
