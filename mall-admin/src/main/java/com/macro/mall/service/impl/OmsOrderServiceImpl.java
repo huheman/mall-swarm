@@ -41,7 +41,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
     @Autowired
     private DirectChargeMapper directChargeMapper;
-    private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间", "发货时间", "订单编号");
+    private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间", "发货时间", "订单编号","订单来源","订单kol");
 
     @Override
     public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -219,6 +219,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getCreateTime())));
                 tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getPaymentTime())));
                 tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getDeliveryTime())));
+                tmp.add(formatSourceType(omsOrderWithDirectCharge.getSourceType()));
+                tmp.add(omsOrderWithDirectCharge.getKolId());
                 tmp.add("=\"" + (omsOrderWithDirectCharge.getOrderSn() + '"'));
                 outputStream.write(String.join(",", tmp) + "\n");
             }
@@ -228,6 +230,19 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 currentPage++;
             }
         }
+    }
+
+    private String formatSourceType(Integer sourceType) {
+        if (sourceType == null) {
+            return "";
+        }
+        return switch (sourceType) {
+            case 0 -> "手机浏览器";
+            case 1 -> "微信小程序";
+            case 2 -> "微信H5";
+            case 3 -> "电脑浏览器";
+            default -> "未知来源";
+        };
     }
 
     private String formatDirectChargeStatus(OmsOrderWithDirectCharge omsOrderWithDirectCharge) {
