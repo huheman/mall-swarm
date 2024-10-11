@@ -141,6 +141,8 @@ public class OmsOrder implements Serializable {
 
     private String moreInfo;
 
+    private String kolId;
+
     private static final long serialVersionUID = 1L;
 
 
@@ -519,6 +521,14 @@ public class OmsOrder implements Serializable {
         this.moreInfo = moreInfo;
     }
 
+    public String getKolId() {
+        return kolId;
+    }
+
+    public void setKolId(String kolId) {
+        this.kolId = kolId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -570,6 +580,7 @@ public class OmsOrder implements Serializable {
         sb.append(", commentTime=").append(commentTime);
         sb.append(", modifyTime=").append(modifyTime);
         sb.append(", moreInfo=").append(moreInfo);
+        sb.append(", kolId=").append(kolId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

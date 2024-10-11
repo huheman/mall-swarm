@@ -4,6 +4,7 @@ import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.dto.KOLCreateDTO;
+import com.macro.mall.dto.KOLInfoDTO;
 import com.macro.mall.dto.KOLSearchDTO;
 import com.macro.mall.model.SmsKolPromoConfig;
 import com.macro.mall.service.KOLPromoService;
@@ -45,8 +46,8 @@ public class SmsKokController {
     }
 
     @PostMapping("list")
-    public CommonResult<CommonPage<SmsKolPromoConfig>> list(@RequestBody KOLSearchDTO kolSearchDTO) {
-        CommonPage<SmsKolPromoConfig> page = kolPromoService.page(kolSearchDTO.getCurrentPage(), kolSearchDTO.getPageSize());
+    public CommonResult<CommonPage<KOLInfoDTO>> list(@RequestBody KOLSearchDTO kolSearchDTO) {
+        CommonPage<KOLInfoDTO> page = kolPromoService.page(kolSearchDTO.getPageNum(), kolSearchDTO.getPageSize(), kolSearchDTO.getKolName(), kolSearchDTO.getKolId(), kolSearchDTO.getStartTime(), kolSearchDTO.getEndTime());
         return CommonResult.success(page);
     }
 }

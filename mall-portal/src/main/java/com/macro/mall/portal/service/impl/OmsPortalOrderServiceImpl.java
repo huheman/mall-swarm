@@ -222,6 +222,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setStatus(0);
         //订单类型：0->正常订单；1->秒杀订单
         order.setOrderType(0);
+        order.setKolId(orderParam.getKolId());
         //收货人信息：姓名、电话、邮编、地址
         String receiverName = "";
         String receiverPostCode = "";
@@ -256,7 +257,6 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         jsonObject.put("payerPhone", currentMember.getPhone());
         jsonObject.put("attr", String.join("-", attrValues));
         jsonObject.put("title", StringUtils.trimToEmpty(orderParam.getTitle()));
-        jsonObject.put("kolId",StringUtils.trimToEmpty(orderParam.getKolId()));
         Long productCategoryId = cartPromotionItemList.get(0).getProductCategoryId();
         PmsProductCategory pmsProductCategory = categoryMapper.selectByPrimaryKey(productCategoryId);
         jsonObject.put("gameName", pmsProductCategory.getName());

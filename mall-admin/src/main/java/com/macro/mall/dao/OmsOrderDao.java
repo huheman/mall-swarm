@@ -3,9 +3,11 @@ package com.macro.mall.dao;
 import com.macro.mall.dto.OmsOrderDeliveryParam;
 import com.macro.mall.dto.OmsOrderDetail;
 import com.macro.mall.dto.OmsOrderQueryParam;
+import com.macro.mall.dto.OrderInfoDTO;
 import com.macro.mall.model.OmsOrder;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,4 +29,6 @@ public interface OmsOrderDao {
      * 获取订单详情
      */
     OmsOrderDetail getDetail(@Param("id") Long id);
+
+    List<OrderInfoDTO> getCount(@Param("kolIds")List<String> kolIds,@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 }

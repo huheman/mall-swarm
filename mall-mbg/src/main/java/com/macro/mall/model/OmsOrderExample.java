@@ -2985,6 +2985,76 @@ public class OmsOrderExample {
             addCriterion("more_info not between", value1, value2, "moreInfo");
             return (Criteria) this;
         }
+
+        public Criteria andKolIdIsNull() {
+            addCriterion("kol_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdIsNotNull() {
+            addCriterion("kol_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdEqualTo(String value) {
+            addCriterion("kol_id =", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdNotEqualTo(String value) {
+            addCriterion("kol_id <>", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdGreaterThan(String value) {
+            addCriterion("kol_id >", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdGreaterThanOrEqualTo(String value) {
+            addCriterion("kol_id >=", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdLessThan(String value) {
+            addCriterion("kol_id <", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdLessThanOrEqualTo(String value) {
+            addCriterion("kol_id <=", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdLike(String value) {
+            addCriterion("kol_id like", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdNotLike(String value) {
+            addCriterion("kol_id not like", value, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdIn(List<String> values) {
+            addCriterion("kol_id in", values, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdNotIn(List<String> values) {
+            addCriterion("kol_id not in", values, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdBetween(String value1, String value2) {
+            addCriterion("kol_id between", value1, value2, "kolId");
+            return (Criteria) this;
+        }
+
+        public Criteria andKolIdNotBetween(String value1, String value2) {
+            addCriterion("kol_id not between", value1, value2, "kolId");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {
