@@ -221,7 +221,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 tmp.add(StringUtils.trimToEmpty(formatDateTime(omsOrderWithDirectCharge.getDeliveryTime())));
                 tmp.add("=\"" + (omsOrderWithDirectCharge.getOrderSn() + '"'));
                 tmp.add(formatSourceType(omsOrderWithDirectCharge.getSourceType()));
-                tmp.add(omsOrderWithDirectCharge.getKolId());
+                tmp.add(StringUtils.trimToEmpty(omsOrderWithDirectCharge.getKolId()));
                 outputStream.write(String.join(",", tmp) + "\n");
             }
             if (list.getTotal() <= (long) currentPage * pageSize) {
