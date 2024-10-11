@@ -49,7 +49,7 @@ public class OmsOrder implements Serializable {
     @Schema(title = "支付方式：0->未支付；1->支付宝；2->微信")
     private Integer payType;
 
-    @Schema(title = "订单来源：0->PC订单；1->app订单")
+    @Schema(title = "订单来源：0:网页订单；1->微信小程序订单，2: 微信H5订单")
     private Integer sourceType;
 
     @Schema(title = "订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单；6->退款中；7-> 已退款")

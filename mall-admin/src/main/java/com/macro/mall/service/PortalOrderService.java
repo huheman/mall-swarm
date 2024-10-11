@@ -1,14 +1,8 @@
 package com.macro.mall.service;
 
 import com.macro.mall.common.api.CommonResult;
-import com.macro.mall.common.exception.ApiException;
-import com.macro.mall.dto.OmsOrderDeliveryParam;
-import com.macro.mall.model.UmsMember;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @FeignClient("mall-portal")
 public interface PortalOrderService {
@@ -26,4 +20,8 @@ public interface PortalOrderService {
 
     @RequestMapping(value = "/member/coupon/addByApi", method = RequestMethod.POST)
     CommonResult addByApi(@RequestParam Long couponId, @RequestParam String phone);
+
+
+    @GetMapping("/wxpay/qrcode")
+    CommonResult<String> qrcode(@RequestParam String kolId);
 }

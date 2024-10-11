@@ -20,4 +20,6 @@ public interface WxPayService {
     void refund(OmsOrder omsOrder);
 
     RefundNotification notifyRefund(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
+
+    byte[] qrCodePic(String scene);
 }

@@ -3,9 +3,9 @@ package com.macro.mall.portal.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
+import com.macro.mall.common.exception.ApiException;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.model.OmsOrder;
-import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.service.WxPayService;
 import com.macro.mall.portal.service.bo.OpenIdBO;
 import com.wechat.pay.java.core.notification.NotificationConfig;
@@ -51,6 +51,9 @@ public class WxPayServiceImpl implements WxPayService {
      */
     @Value("${wx.merchantSerialNumber}")
     public String merchantSerialNumber;
+
+    @Value("${wx.env.version}")
+    private String version;
     /**
      * 商户APIV3密钥
      */
@@ -215,6 +218,46 @@ public class WxPayServiceImpl implements WxPayService {
         log.info("微信退款回调生效" + JSON.toJSONString(transaction));
         return transaction;
 
+    }
+
+    @Override
+    public byte[] qrCodePic(String scene) {
+        // 获取 access token
+        String accessToken = getAccessToken();
+
+        // 微信小程序码API的URL
+        String url = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" + accessToken;
+
+        // 创建请求体，包括 env_version 参数
+        String jsonPayload = String.format(
+                "{\"page\":\"%s\", \"scene\":\"%s\", \"env_version\":\"%s\"}",
+                "pages/index/index", scene, version
+        );
+
+        // 构建请求
+        RequestBody body = RequestBody.create(
+                jsonPayload,
+                MediaType.parse("application/json; charset=utf-8")
+        );
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        // 执行请求并获取响应
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                // 返回二维码图片的字节数组
+                return response.body().bytes();
+            } else {
+                // 处理错误，返回空字节数组或抛出异常
+                throw new ApiException("Failed to generate QR code: " + response.message());
+            }
+        } catch (Exception e) {
+            // 处理异常
+            throw new ApiException("Error while generating QR code", e);
+        }
     }
 
     @Override

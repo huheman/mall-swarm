@@ -18,4 +18,7 @@ public interface OssService {
      * oss上传成功回调
      */
     OssCallbackResult callback(HttpServletRequest request);
+
+
+    String upload(byte[] img);
 }

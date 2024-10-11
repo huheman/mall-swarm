@@ -25,5 +25,9 @@ public class OrderParam {
     private List<Long> cartIds;
     @Schema(title = "订单的标题")
     private String title;
+    @Schema(title = "订单来源：0:网页订单；1->小程序订单，2: 微信H5订单")
+    private Integer sourceType;
+    @Schema(title = "kol来源")
+    private String kolId;
 
 }

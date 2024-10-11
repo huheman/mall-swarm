@@ -12,4 +12,8 @@ public interface FeignAdminService {
 
     @PostMapping(value = "/order/update/delivery")
     CommonResult delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList);
+
+    @PostMapping("/aliyun/oss/upload")
+    @ResponseBody
+    CommonResult<String> upload(@RequestBody byte[] file);
 }

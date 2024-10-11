@@ -217,7 +217,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         //支付方式：0->未支付；1->支付宝；2->微信
         order.setPayType(0);
         //订单来源：0->PC订单；1->app订单
-        order.setSourceType(1);
+        order.setSourceType(order.getSourceType() == null ? 1 : order.getSourceType());
         //订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单
         order.setStatus(0);
         //订单类型：0->正常订单；1->秒杀订单
@@ -276,7 +276,6 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         if (CollUtil.isNotEmpty(orderSettings)) {
             order.setAutoConfirmDay(orderSettings.get(0).getConfirmOvertime());
         }
-        // TODO: 2018/9/3 bill_*,delivery_*
         //插入order表和order_item表
         orderMapper.insert(order);
         for (OmsOrderItem orderItem : orderItemList) {

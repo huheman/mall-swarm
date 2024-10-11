@@ -5,10 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.portal.component.SmsSender;
 import com.macro.mall.portal.domain.OmsOrderDetail;
-import com.macro.mall.portal.service.DirectChargeService;
-import com.macro.mall.portal.service.OmsPortalOrderService;
-import com.macro.mall.portal.service.UmsMemberService;
-import com.macro.mall.portal.service.WxPayService;
+import com.macro.mall.portal.service.*;
 import com.macro.mall.portal.service.bo.OpenIdBO;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import com.wechat.pay.java.service.payments.model.Transaction;
@@ -19,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +45,8 @@ public class WxpayController {
     private SmsSender smsSender;
     @Value("${sms.shipId}")
     private String smsShipId;
+    @Autowired
+    private FeignAdminService feignAdminService;
 
 
     /*微信下单分为两步。第一步获取replay_id，小程序通过repay_id调起小程序支付模块进行付款*/
@@ -93,6 +91,14 @@ public class WxpayController {
         OpenIdBO openId = wxPayService.getOpenId(code);
         // 拼接微信接口的 URL
         return CommonResult.success(openId);
+    }
+
+    @GetMapping("qrcode")
+    public CommonResult<String> qrcode(@RequestParam String kolId){
+        Assert.notEmpty(kolId, "kolId不能为空");
+        byte[] bytes = wxPayService.qrCodePic("kol_id:"+kolId);
+        CommonResult<String> upload = feignAdminService.upload(bytes);
+        return CommonResult.success(upload.getData());
     }
 
     @GetMapping("/ship")

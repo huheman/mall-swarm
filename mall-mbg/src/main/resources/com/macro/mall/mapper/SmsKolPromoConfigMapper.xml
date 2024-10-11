@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.macro.mall.mapper.SmsKolPromoConfigMapper">
+  <resultMap id="BaseResultMap" type="com.macro.mall.model.SmsKolPromoConfig">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="kol_name" jdbcType="VARCHAR" property="kolName" />
+    <result column="kol_id" jdbcType="VARCHAR" property="kolId" />
+    <result column="kol_qr_code" jdbcType="VARCHAR" property="kolQrCode" />
+    <result column="kol_h5_link" jdbcType="VARCHAR" property="kolH5Link" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, kol_name, kol_id, kol_qr_code, kol_h5_link, create_time
+  </sql>
+  <select id="selectByExample" parameterType="com.macro.mall.model.SmsKolPromoConfigExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from sms_kol_promo_config
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from sms_kol_promo_config
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from sms_kol_promo_config
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.macro.mall.model.SmsKolPromoConfigExample">
+    delete from sms_kol_promo_config
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.macro.mall.model.SmsKolPromoConfig">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_kol_promo_config (kol_name, kol_id, kol_qr_code, 
+      kol_h5_link, create_time)
+    values (#{kolName,jdbcType=VARCHAR}, #{kolId,jdbcType=VARCHAR}, #{kolQrCode,jdbcType=VARCHAR}, 
+      #{kolH5Link,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.macro.mall.model.SmsKolPromoConfig">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_kol_promo_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="kolName != null">
+        kol_name,
+      </if>
+      <if test="kolId != null">
+        kol_id,
+      </if>
+      <if test="kolQrCode != null">
+        kol_qr_code,
+      </if>
+      <if test="kolH5Link != null">
+        kol_h5_link,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="kolName != null">
+        #{kolName,jdbcType=VARCHAR},
+      </if>
+      <if test="kolId != null">
+        #{kolId,jdbcType=VARCHAR},
+      </if>
+      <if test="kolQrCode != null">
+        #{kolQrCode,jdbcType=VARCHAR},
+      </if>
+      <if test="kolH5Link != null">
+        #{kolH5Link,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.macro.mall.model.SmsKolPromoConfigExample" resultType="java.lang.Long">
+    select count(*) from sms_kol_promo_config
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update sms_kol_promo_config
+    <set>
+      <if test="row.id != null">
+        id = #{row.id,jdbcType=BIGINT},
+      </if>
+      <if test="row.kolName != null">
+        kol_name = #{row.kolName,jdbcType=VARCHAR},
+      </if>
+      <if test="row.kolId != null">
+        kol_id = #{row.kolId,jdbcType=VARCHAR},
+      </if>
+      <if test="row.kolQrCode != null">
+        kol_qr_code = #{row.kolQrCode,jdbcType=VARCHAR},
+      </if>
+      <if test="row.kolH5Link != null">
+        kol_h5_link = #{row.kolH5Link,jdbcType=VARCHAR},
+      </if>
+      <if test="row.createTime != null">
+        create_time = #{row.createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update sms_kol_promo_config
+    set id = #{row.id,jdbcType=BIGINT},
+      kol_name = #{row.kolName,jdbcType=VARCHAR},
+      kol_id = #{row.kolId,jdbcType=VARCHAR},
+      kol_qr_code = #{row.kolQrCode,jdbcType=VARCHAR},
+      kol_h5_link = #{row.kolH5Link,jdbcType=VARCHAR},
+      create_time = #{row.createTime,jdbcType=TIMESTAMP}
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.macro.mall.model.SmsKolPromoConfig">
+    update sms_kol_promo_config
+    <set>
+      <if test="kolName != null">
+        kol_name = #{kolName,jdbcType=VARCHAR},
+      </if>
+      <if test="kolId != null">
+        kol_id = #{kolId,jdbcType=VARCHAR},
+      </if>
+      <if test="kolQrCode != null">
+        kol_qr_code = #{kolQrCode,jdbcType=VARCHAR},
+      </if>
+      <if test="kolH5Link != null">
+        kol_h5_link = #{kolH5Link,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.macro.mall.model.SmsKolPromoConfig">
+    update sms_kol_promo_config
+    set kol_name = #{kolName,jdbcType=VARCHAR},
+      kol_id = #{kolId,jdbcType=VARCHAR},
+      kol_qr_code = #{kolQrCode,jdbcType=VARCHAR},
+      kol_h5_link = #{kolH5Link,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
