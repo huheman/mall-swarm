@@ -311,6 +311,9 @@ public class WxPayServiceImpl implements WxPayService {
     private String getAccessToken() {
         String accessToken = (String) redisService.get("accessToken");
         if (StringUtils.isEmpty(accessToken)) {
+            if (!StringUtils.equals(version, "release")) {
+                throw new ApiException("当前环境不能获取accessToken，请从生产环境复制下来");
+            }
             String url = String.format("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appId, appSecret);
             Request request = new Request.Builder().url(url).build();
             try (Response response = okHttpClient.newCall(request).execute()) {
