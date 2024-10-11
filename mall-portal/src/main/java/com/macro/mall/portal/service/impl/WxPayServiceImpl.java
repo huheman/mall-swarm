@@ -296,9 +296,10 @@ public class WxPayServiceImpl implements WxPayService {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
-            log.info("get Phone response{}",response);
+            String string = response.body().string();
+            log.info("get Phone response{}",string);
             // 获取响应体内容
-            JSONObject entries = new JSONObject(response.body().string());
+            JSONObject entries = new JSONObject(string);
             return entries.getJSONObject("phone_info").getStr("purePhoneNumber");
         } catch (IOException e) {
             log.error("获取手机号失败", e);
