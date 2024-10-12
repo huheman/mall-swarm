@@ -43,10 +43,12 @@ public class YZJChargeServiceImpl implements YZJChargeService {
     private static final String CHARSET_NAME = "UTF-8";
 
     @Override
-    public void createOrder(Long goodsId, Integer buyNum, String gameArea, String gameServer, String chargeAccount, String userOrderId) throws Exception {
+    public void createOrder(Long goodsId, Integer buyNum, String gameArea, String gameServer, String chargeAccount, Integer buyCount, String userOrderId) throws Exception {
         // 获取当前时间
         String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-
+        if (buyCount != null && buyCount > 0) {
+            buyNum = buyNum * buyCount;
+        }
         // 创建订单的data参数内容
         Map<String, Object> data = new HashMap<>();
         data.put("time", currentTime);

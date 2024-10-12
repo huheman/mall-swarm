@@ -12,13 +12,15 @@ import com.macro.mall.portal.service.*;
 import com.macro.mall.portal.service.bo.OmsOrderDeliveryParam;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @Slf4j
@@ -103,10 +105,11 @@ public class DirectChargeServiceImpl implements DirectChargeService {
                         productAttrMap.get("server"),
                         productAttrMap.get("username"), omsOrderItem.getOrderSn());
             } else if (prefix.equals(PRE_FIX_YZJ)) {
+                String buyCount = productAttrMap.get("buyCount");
                 yzjChargeService.createOrder(Long.valueOf(chargeId), omsOrderItem.getProductQuantity(),
                         productAttrMap.get("areaServer"),
                         productAttrMap.get("server"),
-                        productAttrMap.get("username"), omsOrderItem.getOrderSn());
+                        productAttrMap.get("username"), extractNumber(buyCount), omsOrderItem.getOrderSn());
             }
         } catch (Exception e) {
             log.error("直充失败了", e);
@@ -116,6 +119,17 @@ public class DirectChargeServiceImpl implements DirectChargeService {
 
     }
 
+    private Integer extractNumber(String input) {
+        if (StringUtils.isEmpty(input)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return null;
+    }
 
     @Override
     @SneakyThrows
