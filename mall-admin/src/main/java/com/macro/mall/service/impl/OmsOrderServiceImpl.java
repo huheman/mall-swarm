@@ -41,7 +41,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
     @Autowired
     private DirectChargeMapper directChargeMapper;
-    private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间", "发货时间", "订单编号","订单来源","订单kol");
+    private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间",
+            "发货时间", "订单编号","订单来源","订单kol","操作系统");
 
     @Override
     public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -196,6 +197,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 JSONObject moreInfo = new JSONObject(omsOrderWithDirectCharge.getMoreInfo());
                 String title = omsOrderWithDirectCharge.getTitle();
                 String chargeType = "";
+                String platform = "";
                 String payerPhone = "=\"" + omsOrderWithDirectCharge.getPayerPhone() + "\"";
                 String payWay = formatPayWay(omsOrderWithDirectCharge.getPayType());
                 String orderStatus = formatStatus(omsOrderWithDirectCharge.getStatus());
@@ -207,6 +209,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                     if (StringUtils.indexOf(attr, "代充") >= 0) {
                         chargeType = "代充";
                     }
+
+                    platform = StringUtils.trimToEmpty(moreInfo.getStr("platform"));
+
                 }
 
                 tmp.add(title);
@@ -222,6 +227,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 tmp.add("=\"" + (omsOrderWithDirectCharge.getOrderSn() + '"'));
                 tmp.add(formatSourceType(omsOrderWithDirectCharge.getSourceType()));
                 tmp.add(StringUtils.trimToEmpty(omsOrderWithDirectCharge.getKolId()));
+                tmp.add(platform);
                 outputStream.write(String.join(",", tmp) + "\n");
             }
             if (list.getTotal() <= (long) currentPage * pageSize) {
