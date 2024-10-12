@@ -1,9 +1,7 @@
 package com.macro.mall.service;
 
+import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.dto.SmsCouponHistoryDTO;
-import com.macro.mall.model.SmsCouponHistory;
-
-import java.util.List;
 
 /**
  * 优惠券领取记录管理Service
@@ -16,5 +14,5 @@ public interface SmsCouponHistoryService {
      * @param useStatus 使用状态
      * @param orderSn 使用订单号码
      */
-    List<SmsCouponHistoryDTO> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum);
+    CommonPage<SmsCouponHistoryDTO> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum);
 }

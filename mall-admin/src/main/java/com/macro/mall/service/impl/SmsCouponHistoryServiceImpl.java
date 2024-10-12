@@ -1,6 +1,9 @@
 package com.macro.mall.service.impl;
 
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.dto.SmsCouponHistoryDTO;
 import com.macro.mall.mapper.SmsCouponHistoryMapper;
 import com.macro.mall.mapper.UmsMemberMapper;
@@ -31,8 +34,7 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
     private UmsMemberMapper memberMapper;
 
     @Override
-    public List<SmsCouponHistoryDTO> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+    public CommonPage<SmsCouponHistoryDTO> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
         SmsCouponHistoryExample example = new SmsCouponHistoryExample();
         SmsCouponHistoryExample.Criteria criteria = example.createCriteria();
         if (couponId != null) {
@@ -44,9 +46,16 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
         if (!StringUtils.isEmpty(orderSn)) {
             criteria.andOrderSnEqualTo(orderSn);
         }
-        List<SmsCouponHistory> smsCouponHistories = historyMapper.selectByExample(example);
+
+        Page<SmsCouponHistory> objects = PageHelper.startPage(pageNum, pageSize).doSelectPage(new ISelect() {
+            @Override
+            public void doSelect() {
+                historyMapper.selectByExample(example);
+            }
+        });
+        List<SmsCouponHistory> smsCouponHistories = objects.getResult();
         if (smsCouponHistories == null || smsCouponHistories.isEmpty()) {
-            return new ArrayList<>();
+            return CommonPage.restPage(new ArrayList<>(), 0L);
         }
 
         List<Long> memberIds = smsCouponHistories.stream().map(SmsCouponHistory::getMemberId).toList();
@@ -54,7 +63,7 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
         umsMemberExample.createCriteria().andIdIn(memberIds);
         Map<Long, UmsMember> collect = memberMapper.selectByExample(umsMemberExample).stream().collect(Collectors.toMap(UmsMember::getId, umsMember -> umsMember));
 
-        return smsCouponHistories.stream().map(smsCouponHistory -> {
+        List<SmsCouponHistoryDTO> list = smsCouponHistories.stream().map(smsCouponHistory -> {
             SmsCouponHistoryDTO smsCouponHistoryDTO = new SmsCouponHistoryDTO();
             BeanUtils.copyProperties(smsCouponHistory, smsCouponHistoryDTO);
             UmsMember umsMember = collect.get(smsCouponHistory.getMemberId());
@@ -63,5 +72,6 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
             }
             return smsCouponHistoryDTO;
         }).toList();
+        return CommonPage.restPage(list, objects.getTotal());
     }
 }

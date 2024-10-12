@@ -34,8 +34,8 @@ public class SmsCouponHistoryController {
                                                               @RequestParam(value = "orderSn", required = false) String orderSn,
                                                               @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsCouponHistoryDTO> historyList = historyService.list(couponId, useStatus, orderSn, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(historyList));
+        CommonPage<SmsCouponHistoryDTO> historyList = historyService.list(couponId, useStatus, orderSn, pageSize, pageNum);
+        return CommonResult.success(historyList);
     }
 
     @Operation(summary = "手工赠券")
