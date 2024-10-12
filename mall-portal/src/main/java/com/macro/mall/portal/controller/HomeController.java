@@ -7,6 +7,7 @@ import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.portal.config.AppConfig;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.service.HomeService;
 import com.macro.mall.portal.service.UmsMemberService;
@@ -35,6 +36,15 @@ public class HomeController {
     private UmsMemberService memberService;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private AppConfig appConfig;
+
+    @GetMapping("/blockIOS")
+    @ResponseBody
+    public CommonResult<Boolean> blockIOS() {
+        Boolean blockIOS = appConfig.getBlockIOS();
+        return CommonResult.success(blockIOS);
+    }
 
     @Operation(summary = "首页内容页信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)
