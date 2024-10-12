@@ -29,5 +29,7 @@ public class OrderParam {
     private Integer sourceType;
     @Schema(title = "kol来源")
     private String kolId;
+    @Schema(title = "使用平台")
+    private String platform;
 
 }

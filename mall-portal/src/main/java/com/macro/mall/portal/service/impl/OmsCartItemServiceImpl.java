@@ -18,7 +18,6 @@ import com.macro.mall.portal.service.OmsCartItemService;
 import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.CartAttributeBO;
-import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +45,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private UmsMemberService memberService;
     @Autowired
     private PmsSkuStockMapper skuStockMapper;
-    @Autowired
-    private OkHttpClient httpClient;
 
     public int updateAttribute(Long cartId, List<CartAttributeBO> cartAttributeBOList) {
         OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(cartId);
