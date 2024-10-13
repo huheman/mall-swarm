@@ -85,7 +85,6 @@ public class AlipayController {
 
         if ("TRADE_SUCCESS".equals(tradStatus)) {
             omsPortalOrderService.paySuccessByOrderSn(outTradeNo, 1);
-            directChargeService.directCharge(outTradeNo);
         }
         return CommonResult.success(tradStatus);
     }

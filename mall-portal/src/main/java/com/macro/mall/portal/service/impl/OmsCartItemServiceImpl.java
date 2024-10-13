@@ -1,7 +1,6 @@
 package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -134,10 +133,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
 
     @Override
     public int updateQuantity(Long id, Long memberId, Integer quantity) {
-        OmsCartItem omsCartItem = cartItemMapper.selectByPrimaryKey(id);
-        if (omsCartItem.getProductCategoryId() == 57 && omsCartItem.getProductAttr().contains("直充") && omsCartItem.getProductAttr().contains("UC")) {
-            Assert.state(quantity == 1, "该商品暂时只支持购买单个，请分开多次购买");
-        }
         OmsCartItem cartItem = new OmsCartItem();
         cartItem.setQuantity(quantity);
         OmsCartItemExample example = new OmsCartItemExample();

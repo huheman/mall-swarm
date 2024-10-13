@@ -23,6 +23,8 @@ public class DirectCharge implements Serializable {
     @Schema(title = "失败的原因")
     private String failReason;
 
+    private String moreInfo;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -73,6 +75,14 @@ public class DirectCharge implements Serializable {
         this.failReason = failReason;
     }
 
+    public String getMoreInfo() {
+        return moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -85,6 +95,7 @@ public class DirectCharge implements Serializable {
         sb.append(", createTime=").append(createTime);
         sb.append(", orderId=").append(orderId);
         sb.append(", failReason=").append(failReason);
+        sb.append(", moreInfo=").append(moreInfo);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

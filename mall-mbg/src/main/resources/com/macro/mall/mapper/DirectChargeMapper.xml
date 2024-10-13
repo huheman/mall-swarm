@@ -8,6 +8,7 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="order_id" jdbcType="BIGINT" property="orderId" />
     <result column="fail_reason" jdbcType="VARCHAR" property="failReason" />
+    <result column="more_info" jdbcType="VARCHAR" property="moreInfo" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -68,7 +69,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, order_sn, charge_status, create_time, order_id, fail_reason
+    id, order_sn, charge_status, create_time, order_id, fail_reason, more_info
   </sql>
   <select id="selectByExample" parameterType="com.macro.mall.model.DirectChargeExample" resultMap="BaseResultMap">
     select
@@ -105,9 +106,11 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into direct_charge (order_sn, charge_status, create_time, 
-      order_id, fail_reason)
+      order_id, fail_reason, more_info
+      )
     values (#{orderSn,jdbcType=VARCHAR}, #{chargeStatus,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{orderId,jdbcType=BIGINT}, #{failReason,jdbcType=VARCHAR})
+      #{orderId,jdbcType=BIGINT}, #{failReason,jdbcType=VARCHAR}, #{moreInfo,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.macro.mall.model.DirectCharge">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
@@ -130,6 +133,9 @@
       <if test="failReason != null">
         fail_reason,
       </if>
+      <if test="moreInfo != null">
+        more_info,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="orderSn != null">
@@ -146,6 +152,9 @@
       </if>
       <if test="failReason != null">
         #{failReason,jdbcType=VARCHAR},
+      </if>
+      <if test="moreInfo != null">
+        #{moreInfo,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -176,6 +185,9 @@
       <if test="row.failReason != null">
         fail_reason = #{row.failReason,jdbcType=VARCHAR},
       </if>
+      <if test="row.moreInfo != null">
+        more_info = #{row.moreInfo,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="example != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -188,7 +200,8 @@
       charge_status = #{row.chargeStatus,jdbcType=INTEGER},
       create_time = #{row.createTime,jdbcType=TIMESTAMP},
       order_id = #{row.orderId,jdbcType=BIGINT},
-      fail_reason = #{row.failReason,jdbcType=VARCHAR}
+      fail_reason = #{row.failReason,jdbcType=VARCHAR},
+      more_info = #{row.moreInfo,jdbcType=VARCHAR}
     <if test="example != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -211,6 +224,9 @@
       <if test="failReason != null">
         fail_reason = #{failReason,jdbcType=VARCHAR},
       </if>
+      <if test="moreInfo != null">
+        more_info = #{moreInfo,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -220,7 +236,8 @@
       charge_status = #{chargeStatus,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       order_id = #{orderId,jdbcType=BIGINT},
-      fail_reason = #{failReason,jdbcType=VARCHAR}
+      fail_reason = #{failReason,jdbcType=VARCHAR},
+      more_info = #{moreInfo,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>
