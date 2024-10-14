@@ -8,7 +8,7 @@ public interface DirectChargeService {
 
     void directCharge(String orderSN);
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     void chargeSuccess(JSONObject callback) throws Exception;
 
     String chargeStatus(String orderSN);
