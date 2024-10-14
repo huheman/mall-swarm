@@ -3,7 +3,6 @@ package com.macro.mall.common.service.impl;
 import com.macro.mall.common.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -194,5 +193,37 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Long lRemove(String key, long count, Object value) {
         return redisTemplate.opsForList().remove(key, count, value);
+    }
+
+    // 获取分布式锁
+    public boolean acquireLock(String lockKey, long expireTime, long waitTime) {
+        long startTime = System.currentTimeMillis();
+
+        while (true) {
+            // 尝试获取锁
+            Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", expireTime, TimeUnit.SECONDS);
+            if (Boolean.TRUE.equals(success)) {
+                return true; // 成功获取锁
+            }
+
+            // 检查是否超过了最大等待时间
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            if (elapsedTime >= waitTime * 1000) { // 将waitTime从秒转换为毫秒
+                return false; // 超时，获取锁失败
+            }
+
+            // 等待一段时间后重试
+            try {
+                Thread.sleep(100); // 每次重试前等待100毫秒
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 恢复中断状态
+                return false; // 在等待过程中被打断，获取锁失败
+            }
+        }
+    }
+
+    // 释放分布式锁
+    public void releaseLock(String lockKey) {
+        redisTemplate.delete(lockKey);
     }
 }

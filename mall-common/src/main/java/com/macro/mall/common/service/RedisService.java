@@ -179,4 +179,10 @@ public interface RedisService {
      * 从List结构中移除属性
      */
     Long lRemove(String key, long count, Object value);
+
+    // 获取分布式锁
+    boolean acquireLock(String lockKey, long expireTime, long waitTime);
+
+    // 释放分布式锁
+    void releaseLock(String lockKey) ;
 }

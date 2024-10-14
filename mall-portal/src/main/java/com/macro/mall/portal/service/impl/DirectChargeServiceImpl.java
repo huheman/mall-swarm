@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.macro.mall.common.exception.ApiException;
+import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.DirectChargeMapper;
 import com.macro.mall.model.DirectCharge;
 import com.macro.mall.model.DirectChargeExample;
@@ -38,6 +39,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     private WYTDChargeService wytdChargeService;
     @Autowired
     private YZJChargeService yzjChargeService;
+    @Autowired
+    private RedisService redisService;
 
     @Autowired
     private SmsSender smsSender;
@@ -175,6 +178,13 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         Integer status = callback.getInteger("Status");
         String oriOrderSN = callback.getString("UserOrderId");
         String orderSN = oriOrderSN.substring(0, oriOrderSN.indexOf("-"));
+        // 在这里通过redis做一个分布式锁
+        String lockKey = "chargeSuccess:lock:order:" + orderSN;
+        boolean lockAcquired = redisService.acquireLock(lockKey, 20, 30);
+        if (!lockAcquired) {
+            log.warn("无法获取锁，订单 {} 可能正在处理", orderSN);
+            throw new RuntimeException("当前订单正在处理，请稍后再试");
+        }
         DirectCharge directCharge = selectByOrderSN(orderSN);
         try {
             String wytdOrderId = callback.getString("OrderId");
@@ -185,10 +195,10 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             Assert.state(status == 1, callback + "充值回调状态不为成功");
             onWytdSuccess(directCharge, oriOrderSN);
         } catch (Exception e) {
-            onWytdFail(directCharge, oriOrderSN, e.getMessage());
             log.error("直充回调失败了", e);
-            onDirectChargeFail(e.getMessage(), directCharge);
-            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
+            onWytdFail(directCharge, oriOrderSN, e.getMessage());
+        } finally {
+            redisService.releaseLock(lockKey);
         }
     }
 
