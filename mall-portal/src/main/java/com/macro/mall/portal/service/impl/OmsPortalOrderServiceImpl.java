@@ -575,6 +575,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     public void recordCards(String orderSN, String cardInfo) {
+        OmsOrder order = getByOrderSn(orderSN);
+        String moreInfo = order.getMoreInfo();
+        JSONObject jsonObject = JSONObject.parseObject(moreInfo);
+        cardInfo = StringUtils.trimToEmpty(jsonObject.getString("cards")) + "|" + cardInfo;
         updateMoreInfo(orderSN, "cards", cardInfo);
     }
 
