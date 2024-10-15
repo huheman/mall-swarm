@@ -578,7 +578,16 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrder order = getByOrderSn(orderSN);
         String moreInfo = order.getMoreInfo();
         JSONObject jsonObject = JSONObject.parseObject(moreInfo);
-        cardInfo = StringUtils.trimToEmpty(jsonObject.getString("cards")) + "|" + cardInfo;
+        String originCards = StringUtils.trimToEmpty(jsonObject.getString("cards"));
+        List<String> cardList = new ArrayList<>();
+
+        if (!originCards.isEmpty()) {
+            cardList.addAll(Arrays.stream(originCards.split("\\|")).toList());
+        }
+        if (StringUtils.isNotBlank(cardInfo)) {
+            cardList.addAll(Arrays.asList(cardInfo.split("\\|")));
+        }
+        cardInfo = String.join("|", cardList);
         updateMoreInfo(orderSN, "cards", cardInfo);
     }
 
