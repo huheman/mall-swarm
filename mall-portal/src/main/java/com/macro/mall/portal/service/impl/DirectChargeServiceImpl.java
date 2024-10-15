@@ -228,7 +228,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             }
         }
         if (allGood) {
-            CompletableFuture.runAsync(() -> onChargeSuccess(directCharge));
+            onChargeSuccess(directCharge);
         }
     }
 
@@ -273,19 +273,18 @@ public class DirectChargeServiceImpl implements DirectChargeService {
                 123,456,2020-01-01|321,654,2020-01-01|666,777,2021-01-01
                 */
     private void onChargeSuccess(DirectCharge directCharge) {
-
+        // 记录状态成功
+        directCharge.setChargeStatus(2);
+        directCharge.setFailReason("");
+        directChargeMapper.updateByPrimaryKeySelective(directCharge);
 
         //发货
         OmsOrderDeliveryParam param = new OmsOrderDeliveryParam();
         param.setOrderId(directCharge.getOrderId());
         param.setDeliverySn(directCharge.getOrderSn());
         param.setDeliveryCompany("");
-        feignAdminService.delivery(Arrays.asList(param));
+        CompletableFuture.runAsync(() -> feignAdminService.delivery(Arrays.asList(param)));
 
-        // 记录状态成功
-        directCharge.setChargeStatus(2);
-        directCharge.setFailReason("");
-        directChargeMapper.updateByPrimaryKeySelective(directCharge);
     }
 
     @Override
