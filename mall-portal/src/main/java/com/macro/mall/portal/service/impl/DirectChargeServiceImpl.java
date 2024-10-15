@@ -23,6 +23,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -227,7 +228,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             }
         }
         if (allGood) {
-            onChargeSuccess(directCharge);
+            CompletableFuture.runAsync(() -> onChargeSuccess(directCharge));
         }
     }
 
