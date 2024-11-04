@@ -50,6 +50,15 @@
         select count(id) from oms_order
         where status = #{status}
     </select>
+    <select id="findHistory" resultType="com.macro.mall.portal.service.bo.SkuCodeBO">
+        select o.member_id as userId,oi.product_sku_code as skuCode,oi.product_attr as attrInfo
+        from oms_order o
+        join oms_order_item oi on o.id = oi.order_id
+        where o.status = 3
+        and o.member_id = #{userId}
+        and oi.product_id=#{productId}
+        limit 3
+    </select>
 
     <update id="updateSkuStock">
         UPDATE pms_sku_stock

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 前台订单管理Service
@@ -89,4 +90,6 @@ public interface OmsPortalOrderService {
     String refund(Long id,String reason);
 
     void refundSuccess(String orderSN);
+
+    Map<String, Set<String>> historyProperties(Long userId, Long productId);
 }

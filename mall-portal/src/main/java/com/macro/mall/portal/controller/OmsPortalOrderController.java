@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 订单管理Controller
@@ -112,6 +113,12 @@ public class OmsPortalOrderController {
             log.error("refund error", e);
             return CommonResult.failed(e.getMessage());
         }
+    }
+
+    @GetMapping("/historyProperties")
+    @ResponseBody
+    public CommonResult<Map<String, Set<String>>> historyProperties(@RequestParam("productId")Long productId) {
+        return CommonResult.success(portalOrderService.historyProperties(memberService.getCurrentMember().getId(), productId));
     }
 
     @Operation(summary = "根据购物车信息生成确认单信息")

@@ -2,6 +2,7 @@ package com.macro.mall.portal.dao;
 
 import com.macro.mall.model.OmsOrderItem;
 import com.macro.mall.portal.domain.OmsOrderDetail;
+import com.macro.mall.portal.service.bo.SkuCodeBO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -38,4 +39,6 @@ public interface PortalOrderDao {
     int releaseSkuStockLock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
     Long count(@Param("status") Integer status);
+
+    List<SkuCodeBO> findHistory(@Param("userId") Long userId,@Param("productId") Long productId);
 }

@@ -18,6 +18,7 @@ import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
 import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.*;
+import com.macro.mall.portal.service.bo.SkuCodeBO;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -637,6 +638,19 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         operateHistoryMapper.insert(history);
         // 发送退款消息
         smsSender.send(Arrays.asList(order.getPayerPhone()), Arrays.asList(order.getTitle(), order.getNote()), "2278027");
+    }
+
+    @Override
+    public Map<String, Set<String>> historyProperties(Long userId, Long productId) {
+        List<SkuCodeBO> attrInfo = portalOrderDao.findHistory(userId, productId);
+        List<Map<String, String>> list = attrInfo.stream().map(SkuCodeBO::getAttrMap).toList();
+        Map<String, Set<String>> result = new HashMap<>();
+        for (Map<String, String> stringStringMap : list) {
+            for (Map.Entry<String, String> stringStringEntry : stringStringMap.entrySet()) {
+                result.computeIfAbsent(stringStringEntry.getKey(), k -> new HashSet<>()).add(stringStringEntry.getValue());
+            }
+        }
+        return result;
     }
 
     /**
