@@ -115,6 +115,8 @@ public class OmsPortalOrderController {
         }
     }
 
+
+    @Operation(summary = "获取历史商品属性的值")
     @GetMapping("/historyProperties")
     @ResponseBody
     public CommonResult<Map<String, Set<String>>> historyProperties(@RequestParam("productId")Long productId) {
