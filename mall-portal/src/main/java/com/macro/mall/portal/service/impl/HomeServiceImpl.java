@@ -148,7 +148,7 @@ public class HomeServiceImpl implements HomeService {
 
     private Long getOrderCount() {
 
-        Long count = portalOrderDao.count(3);
+        Long count = portalOrderDao.count(3, null);
         if (fakeOrderCount != null && fakeOrderCount > 0) {
             count += fakeOrderCount;
         }

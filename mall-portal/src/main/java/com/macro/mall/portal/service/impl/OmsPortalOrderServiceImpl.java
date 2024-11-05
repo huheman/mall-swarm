@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -395,19 +396,29 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setReceiveTime(new Date());
         orderMapper.updateByPrimaryKey(order);
         Long inviteUserId = order.getInviteUserId();
-        if (inviteUserId != null && inviteUserId.compareTo(order.getMemberId())!=0) {
-            tryGiveInviteCoupon(inviteUserId);
-        }
+        CompletableFuture.runAsync(() -> tryGiveInviteCoupon(inviteUserId, order.getMemberId()));
+
     }
 
-    private void tryGiveInviteCoupon(Long inviteUserId) {
-        if (inviteUserId == null) {
+    private void tryGiveInviteCoupon(Long inviteUserId, Long buyer) {
+
+        if (inviteUserId == null || buyer == null) {
             return;
         }
+        if (inviteUserId.equals(buyer)) {
+            return;
+        }
+        // 不是第一张订单不买
+        Long count = portalOrderDao.count(3, buyer);
+        if (count > 1) {
+            return;
+        }
+
         List<SmsCoupon> smsCoupons = memberCouponService.listByMember(inviteUserId, 4);
         if (smsCoupons.isEmpty()) {
             return;
         }
+        // 一次只能领1张
         SmsCoupon inviteCoupon = smsCoupons.get(0);
         memberCouponService.add(inviteCoupon.getId(), inviteUserId, 3);
     }
