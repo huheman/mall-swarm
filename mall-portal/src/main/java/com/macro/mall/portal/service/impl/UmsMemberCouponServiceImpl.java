@@ -73,7 +73,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         couponHistory.setCreateTime(now);
         couponHistory.setMemberId(currentMember.getId());
         couponHistory.setMemberNickname(currentMember.getNickname());
-        //主动领取
+        //主动领取，人工赠券，邀请赠券
         couponHistory.setGetType(addType);
         //未使用
         couponHistory.setUseStatus(0);

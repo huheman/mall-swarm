@@ -146,6 +146,13 @@ public class OmsOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
+    public Long getInviteUserId() {
+        if (StringUtils.isNoneEmpty(moreInfo)) {
+            JSONObject entries = new JSONObject(moreInfo);
+            return entries.getLong("inviteUserId");
+        }
+        return null;
+    }
     public String getTitle() {
         if (StringUtils.isNoneEmpty(moreInfo)) {
             JSONObject entries = new JSONObject(moreInfo);

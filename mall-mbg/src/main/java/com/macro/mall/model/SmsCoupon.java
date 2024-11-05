@@ -8,7 +8,7 @@ import java.util.Date;
 public class SmsCoupon implements Serializable {
     private Long id;
 
-    @Schema(title = "优惠券类型；0->全场赠券；1->会员赠券；2->购物赠券；3->注册赠券")
+    @Schema(title = "优惠券类型；0->全场赠券；1->会员赠券；2->购物赠券；3->注册赠券,4->邀请赠券")
     private Integer type;
 
     private String name;

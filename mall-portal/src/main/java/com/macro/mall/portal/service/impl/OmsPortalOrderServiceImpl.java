@@ -263,6 +263,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         jsonObject.put("gameName", pmsProductCategory.getName());
         jsonObject.put("userName", currentMember.getUsername());
         jsonObject.put("platform", orderParam.getPlatform());
+        jsonObject.put("inviteUserId", orderParam.getInviteUserId());
         order.setMoreInfo(jsonObject.toString());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
@@ -393,6 +394,22 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setConfirmStatus(1);
         order.setReceiveTime(new Date());
         orderMapper.updateByPrimaryKey(order);
+        Long inviteUserId = order.getInviteUserId();
+        if (inviteUserId != null && inviteUserId.compareTo(order.getMemberId())!=0) {
+            tryGiveInviteCoupon(inviteUserId);
+        }
+    }
+
+    private void tryGiveInviteCoupon(Long inviteUserId) {
+        if (inviteUserId == null) {
+            return;
+        }
+        List<SmsCoupon> smsCoupons = memberCouponService.listByMember(inviteUserId, 4);
+        if (smsCoupons.isEmpty()) {
+            return;
+        }
+        SmsCoupon inviteCoupon = smsCoupons.get(0);
+        memberCouponService.add(inviteCoupon.getId(), inviteUserId, 3);
     }
 
     @Override

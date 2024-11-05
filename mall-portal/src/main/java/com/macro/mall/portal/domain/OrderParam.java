@@ -31,5 +31,7 @@ public class OrderParam {
     private String kolId;
     @Schema(title = "使用平台")
     private String platform;
+    @Schema(title = "邀请用户id")
+    private Long inviteUserId;
 
 }
