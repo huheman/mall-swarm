@@ -214,7 +214,6 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         }
         SmsCouponExample couponExample = new SmsCouponExample();
         couponExample.createCriteria()
-                .andStartTimeLessThan(new Date())
                 .andNoteNotEqualTo("已失效")
                 // 全场赠券
                 .andTypeEqualTo(type)
