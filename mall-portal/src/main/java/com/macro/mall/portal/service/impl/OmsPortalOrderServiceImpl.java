@@ -401,7 +401,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     private void tryGiveInviteCoupon(Long inviteUserId, Long buyer) {
-
+        log.info("尝试发优惠券:{},{}",inviteUserId, buyer);
         if (inviteUserId == null || buyer == null) {
             return;
         }
