@@ -401,7 +401,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     private void tryGiveInviteCoupon(Long inviteUserId, Long buyer) {
-        log.info("尝试发优惠券:{},{}",inviteUserId, buyer);
+        log.info("尝试发优惠券:{},{}", inviteUserId, buyer);
         if (inviteUserId == null || buyer == null) {
             return;
         }
@@ -410,11 +410,13 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
         // 不是第一张订单不买
         Long count = portalOrderDao.count(3, buyer);
+        log.info("这是第{}单", count);
         if (count > 1) {
             return;
         }
 
         List<SmsCoupon> smsCoupons = memberCouponService.listByMember(inviteUserId, 4);
+        log.info("查到优惠券信息{}", smsCoupons);
         if (smsCoupons.isEmpty()) {
             return;
         }
