@@ -217,6 +217,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 .andNoteNotEqualTo("已失效")
                 // 全场赠券
                 .andTypeEqualTo(type)
+                .andEndTimeGreaterThan(new Date())
                 .andEnableTimeLessThan(new Date());
         List<SmsCoupon> smsCoupons = couponMapper.selectByExample(couponExample);
         if (smsCoupons.isEmpty()) {
