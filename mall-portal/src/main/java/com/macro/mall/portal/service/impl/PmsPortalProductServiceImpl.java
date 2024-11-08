@@ -20,8 +20,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -177,6 +175,11 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
                         return hotGameBO;
                     }).findFirst().orElse(null);
         }
+    }
+
+    @Override
+    public PmsProductCategory categoryDetail(Long categoryId) {
+        return productCategoryMapper.selectByPrimaryKey(categoryId);
     }
 
     private ProductSkuBO asSkuBO(PmsProduct pmsProduct, List<PmsSkuStock> pmsSkuStocks) {

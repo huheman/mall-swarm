@@ -3,6 +3,7 @@ package com.macro.mall.portal.controller;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.PmsProduct;
+import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
 import com.macro.mall.portal.service.PmsPortalProductService;
@@ -54,6 +55,12 @@ public class PmsPortalProductController {
     public CommonResult<List<ProductSkuBO>> detailByCategory(@PathVariable Long categoryId) {
         List<ProductSkuBO> list = portalProductService.detailByCategory(categoryId);
         return CommonResult.success(list);
+    }
+
+    @GetMapping("categoryDetail/{categoryId}")
+    @ResponseBody
+    public CommonResult<PmsProductCategory> categoryDetail(@PathVariable Long categoryId) {
+        return CommonResult.success(portalProductService.categoryDetail(categoryId));
     }
 
     @Operation(summary = "以树形结构获取所有商品分类")
