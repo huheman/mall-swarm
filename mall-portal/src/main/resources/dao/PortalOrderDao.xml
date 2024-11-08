@@ -59,7 +59,7 @@
         join oms_order_item oi on o.id = oi.order_id
         where o.status = 3
         and o.member_id = #{userId}
-        and oi.product_id=#{productId}
+        and oi.product_category_id=#{categoryId}
         limit 3
     </select>
 

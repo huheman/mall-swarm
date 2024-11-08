@@ -40,5 +40,5 @@ public interface PortalOrderDao {
 
     Long count(@Param("status") Integer status,@Param("memberId")Long memberId);
 
-    List<SkuCodeBO> findHistory(@Param("userId") Long userId,@Param("productId") Long productId);
+    List<SkuCodeBO> findHistory(@Param("userId") Long userId,@Param("categoryId") Long categoryId);
 }

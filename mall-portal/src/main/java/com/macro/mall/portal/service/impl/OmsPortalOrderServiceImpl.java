@@ -83,6 +83,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private OmsOrderItemMapper orderItemMapper;
     @Autowired
     private OmsOrderOperateHistoryMapper operateHistoryMapper;
+    @Autowired
+    private PmsProductMapper productMapper;
+
     /*订单预计完成时间*/
     @Value("${order.hint.expectMinute}")
     private Integer expectMinute;
@@ -672,7 +675,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     public Map<String, Set<String>> historyProperties(Long userId, Long productId) {
-        List<SkuCodeBO> attrInfo = portalOrderDao.findHistory(userId, productId);
+        PmsProduct pmsProduct = productMapper.selectByPrimaryKey(productId);
+        List<SkuCodeBO> attrInfo = portalOrderDao.findHistory(userId, pmsProduct.getProductCategoryId());
         List<Map<String, String>> list = attrInfo.stream().map(SkuCodeBO::getAttrMap).toList();
         Map<String, Set<String>> result = new HashMap<>();
         for (Map<String, String> stringStringMap : list) {
