@@ -177,16 +177,19 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         String signature = wytdChargeService.generateSignature(callback);
         Assert.equals(signature, sign, "回调签名不正确");
         Integer status = callback.getInteger("Status");
-        String oriOrderSN = callback.getString("UserOrderId");
+        String userOrderId = callback.getString("UserOrderId");
+        String oriOrderSN = userOrderId;
         String orderSN = oriOrderSN.substring(0, oriOrderSN.indexOf("-"));
         // 在这里通过redis做一个分布式锁
         String lockKey = "chargeSuccess:lock:order:" + orderSN;
         boolean lockAcquired = redisService.acquireLock(lockKey, 20, 30);
+        log.info("userOrderId{} 获得了锁", userOrderId);
         if (!lockAcquired) {
             log.warn("无法获取锁，订单 {} 可能正在处理", orderSN);
             throw new RuntimeException("当前订单正在处理，请稍后再试");
         }
         DirectCharge directCharge = selectByOrderSN(orderSN);
+        log.info("通过userOrderId{}生成的orderSN查到的直充结果是{}", userOrderId, directCharge);
         try {
             String wytdOrderId = callback.getString("OrderId");
             cards = wytdChargeService.decryptCards(wytdOrderId, cards);
@@ -195,11 +198,14 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             }
             Assert.state(status == 1, callback + "充值回调状态不为成功");
             onWytdSuccess(directCharge, oriOrderSN);
+            log.info("userOrderId{}修改后的结果是{}", directCharge);
         } catch (Exception e) {
             log.error("直充回调失败了", e);
             onWytdFail(directCharge, oriOrderSN, e.getMessage());
         } finally {
             redisService.releaseLock(lockKey);
+            log.info("userOrderId{} 释放了锁", userOrderId);
+
         }
     }
 
