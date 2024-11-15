@@ -267,7 +267,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         jsonObject.put("gameName", pmsProductCategory.getName());
         jsonObject.put("userName", currentMember.getUsername());
         jsonObject.put("platform", orderParam.getPlatform());
-        jsonObject.put("inviteUserId", orderParam.getInviteUserId());
+        try {
+            String inviteUserId = orderParam.getInviteUserId();
+            if (StringUtils.isNoneEmpty(inviteUserId)) {
+                jsonObject.put("inviteUserId", Long.parseLong(inviteUserId));
+            }
+        } catch (Exception e) {
+
+        }
         order.setMoreInfo(jsonObject.toString());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
