@@ -71,7 +71,7 @@
   <sql id="Base_Column_List">
     id, order_sn, charge_status, create_time, order_id, fail_reason, more_info
   </sql>
-  <select id="selectByExample" parameterType="com.macro.mall.model.DirectChargeExample" resultMap="BaseResultMap" flushCache="true">
+  <select id="selectByExample" parameterType="com.macro.mall.model.DirectChargeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct

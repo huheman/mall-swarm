@@ -28,6 +28,9 @@ mybatis:
   mapper-locations:
     - classpath:dao/*.xml
     - classpath*:com/**/mapper/*.xml
+  configuration:
+    cache-enabled: false
+    local-cache-scope: statement
 management:
   endpoints:
     web:
