@@ -150,7 +150,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             orderItem.setGiftIntegration(cartPromotionItem.getIntegration());
             orderItem.setGiftGrowth(cartPromotionItem.getGrowth());
             PmsProductCategory pmsProductCategory = categoryMapper.selectByPrimaryKey(orderItem.getProductCategoryId());
-            String title = StringUtils.replacePattern(orderParam.getTitle(), ".*?/", pmsProductCategory.getName() + "/");
+            String title = StringUtils.replacePattern(orderParam.getTitle(), "$.*?/", pmsProductCategory.getName() + "/");
             orderParam.setTitle(title);
             orderItemList.add(orderItem);
         }
