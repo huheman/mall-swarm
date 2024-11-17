@@ -90,6 +90,11 @@ public class IdentityServiceImpl implements IdentityService {
         return false;
     }
 
+    public static void main(String[] args) {
+        String decrypt = AESUtil.decrypt("y/nsedzpdBCHhukaI8HXar9ziGXkIKyBFFMQtOHNnno=", ENCRITY_KEY);
+        System.out.printf(decrypt);
+    }
+
     @Override
     public IdentityResultBO identityIdNumber(Long memberId) {
         UmsMember umsMember = memberMapper.selectByPrimaryKey(memberId);
