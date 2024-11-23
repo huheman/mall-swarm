@@ -151,6 +151,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             directCharge.setChargeStatus(3);
             directCharge.setFailReason(StringUtils.substring(e.getMessage(), 0, 300));
             directChargeMapper.updateByPrimaryKey(directCharge);
+            smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
         }
 
     }
