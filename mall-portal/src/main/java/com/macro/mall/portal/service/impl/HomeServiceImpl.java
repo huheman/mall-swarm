@@ -1,6 +1,7 @@
 package com.macro.mall.portal.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
@@ -56,13 +57,13 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private OmsOrderMapper orderMapper;
 
-    @Value("${app.fake.order}")
+    @NacosValue(value = "${app.fake.order}",autoRefreshed = true)
     private Long fakeOrderCount;
 
-    @Value("${app.fake.user}")
+    @NacosValue(value = "${app.fake.user}",autoRefreshed = true)
     private Long fakeUserCount;
 
-    @Value("${app.fake.game}")
+    @NacosValue(value = "${app.fake.game}",autoRefreshed = true)
     private String fakeGames;
 
 
