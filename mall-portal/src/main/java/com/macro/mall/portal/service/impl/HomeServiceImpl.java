@@ -1,7 +1,6 @@
 package com.macro.mall.portal.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
@@ -17,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RefreshScope
 public class HomeServiceImpl implements HomeService {
     @Autowired
     private SmsHomeAdvertiseMapper advertiseMapper;
@@ -57,13 +58,13 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private OmsOrderMapper orderMapper;
 
-    @NacosValue(value = "${app.fake.order}",autoRefreshed = true)
+    @Value("${app.fake.order}")
     private Long fakeOrderCount;
 
-    @NacosValue(value = "${app.fake.user}",autoRefreshed = true)
+    @Value("${app.fake.user}")
     private Long fakeUserCount;
 
-    @NacosValue(value = "${app.fake.game}",autoRefreshed = true)
+    @Value("${app.fake.game}")
     private String fakeGames;
 
 
