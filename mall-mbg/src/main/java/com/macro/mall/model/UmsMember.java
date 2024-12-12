@@ -1,6 +1,9 @@
 package com.macro.mall.model;
 
+import cn.hutool.json.JSONObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -60,7 +63,28 @@ public class UmsMember implements Serializable {
     @Schema(title = "历史积分数量")
     private Integer historyIntegration;
 
+    @Schema(title = "详细信息，是一个json")
+    private String moreInfo;
+
     private static final long serialVersionUID = 1L;
+
+    public String getFirstInviteKol() {
+        if (StringUtils.isEmpty(moreInfo)) {
+            return "";
+        }
+        JSONObject properties = new JSONObject(moreInfo);
+        return properties.getStr("first_invite_kol");
+    }
+
+    public void setFirstInviteKol(String firstInviteKol) {
+        JSONObject properties;
+        if (StringUtils.isNotEmpty(firstInviteKol)) {
+            properties = new JSONObject(moreInfo);
+        } else {
+            properties = new JSONObject();
+        }
+        properties.set("first_invite_kol", firstInviteKol);
+    }
 
     public Long getId() {
         return id;
@@ -214,6 +238,14 @@ public class UmsMember implements Serializable {
         this.historyIntegration = historyIntegration;
     }
 
+    public String getMoreInfo() {
+        return moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -239,6 +271,7 @@ public class UmsMember implements Serializable {
         sb.append(", growth=").append(growth);
         sb.append(", luckeyCount=").append(luckeyCount);
         sb.append(", historyIntegration=").append(historyIntegration);
+        sb.append(", moreInfo=").append(moreInfo);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

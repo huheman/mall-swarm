@@ -234,6 +234,13 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         return memberMapper.selectByExample(umsMemberExample).stream().findFirst().orElse(null);
     }
 
+    @Override
+    public void markFirstInviteKol(Long id, String kolId) {
+        UmsMember umsMember = memberMapper.selectByPrimaryKey(id);
+        umsMember.setFirstInviteKol(kolId);
+        memberMapper.updateByPrimaryKeySelective(umsMember);
+    }
+
     /*https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/mp-access-token/getAccessToken.html*/
     //对输入的验证码进行校验
     private boolean verifyAuthCode(String authCode, String telephone) {

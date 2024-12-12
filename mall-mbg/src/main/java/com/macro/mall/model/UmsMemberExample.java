@@ -1351,6 +1351,76 @@ public class UmsMemberExample {
             addCriterion("history_integration not between", value1, value2, "historyIntegration");
             return (Criteria) this;
         }
+
+        public Criteria andMoreInfoIsNull() {
+            addCriterion("more_info is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoIsNotNull() {
+            addCriterion("more_info is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoEqualTo(String value) {
+            addCriterion("more_info =", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoNotEqualTo(String value) {
+            addCriterion("more_info <>", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoGreaterThan(String value) {
+            addCriterion("more_info >", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoGreaterThanOrEqualTo(String value) {
+            addCriterion("more_info >=", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoLessThan(String value) {
+            addCriterion("more_info <", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoLessThanOrEqualTo(String value) {
+            addCriterion("more_info <=", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoLike(String value) {
+            addCriterion("more_info like", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoNotLike(String value) {
+            addCriterion("more_info not like", value, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoIn(List<String> values) {
+            addCriterion("more_info in", values, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoNotIn(List<String> values) {
+            addCriterion("more_info not in", values, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoBetween(String value1, String value2) {
+            addCriterion("more_info between", value1, value2, "moreInfo");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoreInfoNotBetween(String value1, String value2) {
+            addCriterion("more_info not between", value1, value2, "moreInfo");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

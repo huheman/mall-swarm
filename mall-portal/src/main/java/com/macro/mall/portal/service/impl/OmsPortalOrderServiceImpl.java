@@ -150,7 +150,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             orderItem.setGiftIntegration(cartPromotionItem.getIntegration());
             orderItem.setGiftGrowth(cartPromotionItem.getGrowth());
             PmsProductCategory pmsProductCategory = categoryMapper.selectByPrimaryKey(orderItem.getProductCategoryId());
-            String title = StringUtils.replacePattern(orderParam.getTitle(), "$.*?/", pmsProductCategory.getName() + "/");
+            String title = StringUtils.replacePattern(orderParam.getTitle(), "^.*?/", pmsProductCategory.getName() + "/");
             orderParam.setTitle(title);
             orderItemList.add(orderItem);
         }
@@ -409,22 +409,40 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setReceiveTime(new Date());
         orderMapper.updateByPrimaryKey(order);
         Long inviteUserId = order.getInviteUserId();
-        CompletableFuture.runAsync(() -> tryGiveInviteCoupon(inviteUserId, order.getMemberId()));
+        CompletableFuture.runAsync(() -> doMoreForOrder(inviteUserId, order.getMemberId(),order.getKolId()));
 
     }
 
-    private void tryGiveInviteCoupon(Long inviteUserId, Long buyer) {
-        log.info("尝试发优惠券:{},{}", inviteUserId, buyer);
+    private void doMoreForOrder(Long inviteUserId, Long buyer,String kolId) {
+        log.info("尝试发优惠券:{},{}", inviteUserId, buyer,kolId);
+
+        // 不是第一张订单不买
+
+
+        Long count = portalOrderDao.count(3, buyer);
+        log.info("这是第{}单", count);
+        if (count > 1) {
+            return;
+        }
+        // 如果这是客户的第一单，那么要记下来
+        markFirstInviteKol(buyer, kolId);
+        // 发券
+        trySendCoupon(inviteUserId, buyer);
+
+    }
+
+    private void markFirstInviteKol(Long buyer, String kolId) {
+        if (buyer == null || StringUtils.isEmpty(kolId)) {
+            return;
+        }
+        memberService.markFirstInviteKol(buyer,kolId);
+    }
+
+    private void trySendCoupon(Long inviteUserId, Long buyer) {
         if (inviteUserId == null || buyer == null) {
             return;
         }
         if (inviteUserId.equals(buyer)) {
-            return;
-        }
-        // 不是第一张订单不买
-        Long count = portalOrderDao.count(3, buyer);
-        log.info("这是第{}单", count);
-        if (count > 1) {
             return;
         }
 

@@ -61,4 +61,6 @@ public interface UmsMemberService {
     SaTokenInfo loginByPhone(String phone);
 
     UmsMember getByPhone(String phone);
+
+    void markFirstInviteKol(Long id,String kolId);
 }
