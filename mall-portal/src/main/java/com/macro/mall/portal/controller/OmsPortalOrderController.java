@@ -119,15 +119,15 @@ public class OmsPortalOrderController {
     @Operation(summary = "获取历史商品属性的值")
     @GetMapping("/historyProperties")
     @ResponseBody
-    public CommonResult<Map<String, Set<String>>> historyProperties(@RequestParam("productId")Long productId) {
+    public CommonResult<Map<String, Set<String>>> historyProperties(@RequestParam("productId") Long productId) {
         return CommonResult.success(portalOrderService.historyProperties(memberService.getCurrentMember().getId(), productId));
     }
 
     @Operation(summary = "根据购物车信息生成确认单信息")
     @RequestMapping(value = "/generateConfirmOrder", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<ConfirmOrderResult> generateConfirmOrder(@RequestBody List<Long> cartIds) {
-        ConfirmOrderResult confirmOrderResult = portalOrderService.generateConfirmOrder(cartIds);
+    public CommonResult<ConfirmOrderResult> generateConfirmOrder(@RequestBody List<Long> cartIds, @RequestParam(value = "useRedeemCode", defaultValue = "false") Boolean useRedeemCode) {
+        ConfirmOrderResult confirmOrderResult = portalOrderService.generateConfirmOrder(cartIds, useRedeemCode);
         return CommonResult.success(confirmOrderResult);
     }
 

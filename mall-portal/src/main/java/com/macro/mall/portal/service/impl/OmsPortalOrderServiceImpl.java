@@ -95,7 +95,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private SmsSender smsSender;
 
     @Override
-    public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
+    public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds, Boolean useRedeemCode) {
         ConfirmOrderResult result = new ConfirmOrderResult();
         //获取购物车信息
         UmsMember currentMember = memberService.getCurrentMember();
@@ -116,6 +116,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         //计算总金额、活动优惠、应付金额
         ConfirmOrderResult.CalcAmount calcAmount = calcCartAmount(cartPromotionItemList);
         result.setCalcAmount(calcAmount);
+        /*如果是用兑换券，要禁用所有优惠券，以及价格要把付款价格设置为0*/
+        if (Boolean.TRUE.equals(useRedeemCode)) {
+            calcAmount.setPayAmount(BigDecimal.ZERO);
+            List<SmsCouponHistoryDetail> disableCouponHistoryDetailList = result.getDisableCouponHistoryDetailList();
+            disableCouponHistoryDetailList.addAll(result.getCouponHistoryDetailList());
+            result.setDisableCouponHistoryDetailList(disableCouponHistoryDetailList);
+            result.setCouponHistoryDetailList(new ArrayList<>());
+        }
         return result;
     }
 
@@ -279,6 +287,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
         }
         order.setMoreInfo(jsonObject.toString());
+        order.setRedeemCode(orderParam.getRedeemCode());
         //0->未确认；1->已确认
         order.setConfirmStatus(0);
         order.setDeleteStatus(0);
@@ -409,12 +418,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setReceiveTime(new Date());
         orderMapper.updateByPrimaryKey(order);
         Long inviteUserId = order.getInviteUserId();
-        CompletableFuture.runAsync(() -> doMoreForOrder(inviteUserId, order.getMemberId(),order.getKolId()));
+        CompletableFuture.runAsync(() -> doMoreForOrder(inviteUserId, order.getMemberId(), order.getKolId()));
 
     }
 
-    private void doMoreForOrder(Long inviteUserId, Long buyer,String kolId) {
-        log.info("尝试发优惠券:{},{}", inviteUserId, buyer,kolId);
+    private void doMoreForOrder(Long inviteUserId, Long buyer, String kolId) {
+        log.info("尝试发优惠券:{},{}", inviteUserId, buyer, kolId);
 
         // 不是第一张订单不处理
         Long count = portalOrderDao.count(3, buyer);
@@ -434,7 +443,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         if (buyer == null || StringUtils.isEmpty(kolId)) {
             return;
         }
-        memberService.markFirstInviteKol(buyer,kolId);
+        memberService.markFirstInviteKol(buyer, kolId);
     }
 
     private void trySendCoupon(Long inviteUserId, Long buyer) {

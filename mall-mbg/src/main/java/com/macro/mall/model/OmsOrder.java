@@ -153,6 +153,7 @@ public class OmsOrder implements Serializable {
         }
         return null;
     }
+
     public String getTitle() {
         if (StringUtils.isNoneEmpty(moreInfo)) {
             JSONObject entries = new JSONObject(moreInfo);
@@ -160,12 +161,31 @@ public class OmsOrder implements Serializable {
         }
         return "";
     }
+
     public String getPayerPhone() {
         if (StringUtils.isNoneEmpty(moreInfo)) {
             JSONObject entries = new JSONObject(moreInfo);
             return entries.getStr("payerPhone");
         }
         return "";
+    }
+
+    public String getRedeemCode() {
+        if (StringUtils.isNoneEmpty(moreInfo)) {
+            JSONObject entries = new JSONObject(moreInfo);
+            return entries.getStr("redeem_code");
+        }
+        return "";
+
+    }
+
+    public void setRedeemCode(String redeemCode) {
+        JSONObject entries = new JSONObject();
+        if (StringUtils.isNoneEmpty(moreInfo)) {
+            entries = new JSONObject(moreInfo);
+        }
+        entries.put("redeem_code", redeemCode);
+        moreInfo = entries.toString();
     }
 
     public Long getId() {

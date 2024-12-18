@@ -33,5 +33,6 @@ public class OrderParam {
     private String platform;
     @Schema(title = "邀请用户id")
     private String inviteUserId;
-
+    @Schema(title = "兑换码")
+    private String redeemCode;
 }

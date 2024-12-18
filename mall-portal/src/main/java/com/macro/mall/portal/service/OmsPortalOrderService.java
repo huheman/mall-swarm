@@ -20,7 +20,7 @@ public interface OmsPortalOrderService {
     /**
      * 根据用户购物车信息生成确认单信息
      */
-    ConfirmOrderResult generateConfirmOrder(List<Long> cartIds);
+    ConfirmOrderResult generateConfirmOrder(List<Long> cartIds,Boolean useRedeemCode);
 
     /**
      * 根据提交信息生成订单
