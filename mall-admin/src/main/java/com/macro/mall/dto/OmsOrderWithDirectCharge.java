@@ -7,4 +7,5 @@ import lombok.Data;
 public class OmsOrderWithDirectCharge extends OmsOrder {
     private Integer directChargeStatus;
     private String directChargeFailReason;
+    private String firstInviteKol;
 }

@@ -10,6 +10,7 @@ import com.macro.mall.dto.*;
 import com.macro.mall.mapper.DirectChargeMapper;
 import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
+import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.OmsOrderService;
 import lombok.SneakyThrows;
@@ -41,8 +42,11 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
     @Autowired
     private DirectChargeMapper directChargeMapper;
+    @Autowired
+    private UmsMemberMapper memberMapper;
+
     private List<String> csvHead = Arrays.asList("标号", "订单标题", "实付金额", "充值方式", "支付方式", "订单状态", "直充结果", "下单人手机号", "下单时间", "支付时间",
-            "发货时间", "订单编号","订单来源","订单kol","操作系统");
+            "发货时间", "订单编号","订单来源","订单kol","推荐首单kol","操作系统");
 
     @Override
     public CommonPage<OmsOrderWithDirectCharge> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -55,6 +59,11 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         DirectChargeExample directChargeExample = new DirectChargeExample();
         directChargeExample.createCriteria().andOrderIdIn(orderIds);
         Map<Long, DirectCharge> map = directChargeMapper.selectByExample(directChargeExample).stream().collect(Collectors.toMap(DirectCharge::getOrderId, directCharge -> directCharge));
+        Set<Long> memberIds = objects.stream().map(OmsOrder::getMemberId).collect(Collectors.toSet());
+        UmsMemberExample umsMemberExample = new UmsMemberExample();
+        umsMemberExample.createCriteria().andIdIn(new ArrayList<>(memberIds));
+        List<UmsMember> umsMembers = memberMapper.selectByExample(umsMemberExample);
+        Map<Long, UmsMember> memberMap = umsMembers.stream().collect(Collectors.toMap(UmsMember::getId, directCharge -> directCharge));
         List<OmsOrderWithDirectCharge> list = objects.parallelStream().map(omsOrder -> {
             OmsOrderWithDirectCharge omsOrderWithDirectCharge = new OmsOrderWithDirectCharge();
             BeanUtils.copyProperties(omsOrder, omsOrderWithDirectCharge);
@@ -62,6 +71,10 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             if (directCharge != null) {
                 omsOrderWithDirectCharge.setDirectChargeStatus(directCharge.getChargeStatus());
                 omsOrderWithDirectCharge.setDirectChargeFailReason(directCharge.getFailReason());
+            }
+            UmsMember umsMember = memberMap.get(omsOrder.getMemberId());
+            if (umsMember != null) {
+                omsOrderWithDirectCharge.setFirstInviteKol(umsMember.getFirstInviteKol());
             }
             return omsOrderWithDirectCharge;
         }).toList();
@@ -227,6 +240,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 tmp.add("=\"" + (omsOrderWithDirectCharge.getOrderSn() + '"'));
                 tmp.add(formatSourceType(omsOrderWithDirectCharge.getSourceType()));
                 tmp.add(StringUtils.trimToEmpty(omsOrderWithDirectCharge.getKolId()));
+                tmp.add(StringUtils.trimToEmpty(omsOrderWithDirectCharge.getFirstInviteKol()));
                 tmp.add(platform);
                 outputStream.write(String.join(",", tmp) + "\n");
             }
