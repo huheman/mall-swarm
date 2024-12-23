@@ -50,7 +50,7 @@ public class HomeController {
         return CommonResult.success(blockIOS);
     }
 
-    @GetMapping("redeemInfo")
+    @GetMapping("/redeemInfo")
     @ResponseBody
     public CommonResult<RedeemInfoVO> redeemInfo(String redeemCode) {
         try {
