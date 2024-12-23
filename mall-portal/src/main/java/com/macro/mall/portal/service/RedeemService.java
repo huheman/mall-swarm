@@ -27,6 +27,7 @@ public class RedeemService {
 
     public void useRedeem(String redeemCode, Long skuId, String usePhone, String orderSN) {
         RedeemCodeRecord redeemCodeRecord = find(redeemCode);
+        Assert.state("NOT_USED".equals(redeemCodeRecord.getUseStatus()),"此兑换券已经被使用过了");
         redeemCodeRecord.setUsePhone(usePhone);
         redeemCodeRecord.setSkuId(skuId);
         redeemCodeRecord.setUseStatus("HAS_USED");
@@ -45,6 +46,7 @@ public class RedeemService {
     public RedeemInfoVO info(String redeemCode) {
         RedeemCodeRecord redeemCodeRecord = find(redeemCode);
         Assert.notNull(redeemCodeRecord, "未找到此兑换码");
+        Assert.state("NOT_USED".equals(redeemCodeRecord.getUseStatus()),"此兑换券已经被使用过了");
         PmsSkuStock pmsSkuStock = skuStockMapper.selectByPrimaryKey(redeemCodeRecord.getSkuId());
         RedeemInfoVO redeemInfoVO = new RedeemInfoVO();
         redeemInfoVO.setRedeemCode(redeemCode);
