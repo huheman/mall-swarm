@@ -91,6 +91,8 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         //获取商品信息
         PmsProduct product = productMapper.selectByPrimaryKey(id);
         result.setProduct(product);
+        PmsProductCategory pmsProductCategory = productCategoryMapper.selectByPrimaryKey(product.getProductCategoryId());
+        result.setCategory(pmsProductCategory);
         //获取品牌信息
         PmsBrand brand = brandMapper.selectByPrimaryKey(product.getBrandId());
         result.setBrand(brand);

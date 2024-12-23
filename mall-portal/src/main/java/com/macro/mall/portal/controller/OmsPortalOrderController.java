@@ -126,8 +126,8 @@ public class OmsPortalOrderController {
     @Operation(summary = "根据购物车信息生成确认单信息")
     @RequestMapping(value = "/generateConfirmOrder", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<ConfirmOrderResult> generateConfirmOrder(@RequestBody List<Long> cartIds, @RequestParam(value = "useRedeemCode", defaultValue = "false") Boolean useRedeemCode) {
-        ConfirmOrderResult confirmOrderResult = portalOrderService.generateConfirmOrder(cartIds, useRedeemCode);
+    public CommonResult<ConfirmOrderResult> generateConfirmOrder(@RequestBody List<Long> cartIds) {
+        ConfirmOrderResult confirmOrderResult = portalOrderService.generateConfirmOrder(cartIds);
         return CommonResult.success(confirmOrderResult);
     }
 

@@ -1,5 +1,19 @@
 # mall-swarm
-
+CREATE TABLE redeem_code_record (
+id BIGINT AUTO_INCREMENT NOT NULL COMMENT '自增主键',
+redeem_code VARCHAR(100) NULL COMMENT '兑换码',
+sku_id BIGINT NULL COMMENT '兑换码对应的商品skuId',
+kol_id VARCHAR(100) NULL COMMENT '对应的kolId',
+create_time DATETIME NULL COMMENT '创建时间',
+use_status VARCHAR(100) NULL COMMENT 'NOT_USED:未使用;USED:已使用',
+use_phone VARCHAR(100) NULL COMMENT '使用人的手机号',
+use_order_sn VARCHAR(100) NULL COMMENT '使用此兑换码的订单id',
+PRIMARY KEY (id), -- 指定 id 为主键
+UNIQUE KEY uq_redeem_code (redeem_code) -- 为 redeem_code 添加唯一索引
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
 <p>
   <a href="#公众号"><img src="http://macro-oss.oss-cn-shenzhen.aliyuncs.com/mall/badge/%E5%85%AC%E4%BC%97%E5%8F%B7-macrozheng-blue.svg" alt="公众号"></a>
   <a href="#公众号"><img src="http://macro-oss.oss-cn-shenzhen.aliyuncs.com/mall/badge/%E4%BA%A4%E6%B5%81-%E5%BE%AE%E4%BF%A1%E7%BE%A4-2BA245.svg" alt="交流"></a>

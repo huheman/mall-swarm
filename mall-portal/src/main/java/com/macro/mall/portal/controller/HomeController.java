@@ -8,8 +8,10 @@ import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.config.AppConfig;
+import com.macro.mall.portal.controller.vo.RedeemInfoVO;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.service.HomeService;
+import com.macro.mall.portal.service.RedeemService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.portal.service.bo.MemberProductBO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +40,8 @@ public class HomeController {
     private RedisService redisService;
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private RedeemService redeemService;
 
     @GetMapping("/blockIOS")
     @ResponseBody
@@ -46,17 +50,28 @@ public class HomeController {
         return CommonResult.success(blockIOS);
     }
 
+    @GetMapping("redeemInfo")
+    @ResponseBody
+    public CommonResult<RedeemInfoVO> redeemInfo(String redeemCode) {
+        try {
+            RedeemInfoVO redeemInfoVO = redeemService.info(redeemCode);
+            return CommonResult.success(redeemInfoVO);
+        } catch (Exception e) {
+            return CommonResult.failed("兑换失败");
+        }
+    }
+
     @Operation(summary = "首页内容页信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<HomeContentResult> content() {
-        String homeContent =(String) redisService.get("homeContent");
+        String homeContent = (String) redisService.get("homeContent");
         HomeContentResult content;
         if (!StringUtils.hasLength(homeContent)) {
             content = homeService.content();
             String jsonString = JSON.toJSONString(content);
             redisService.set("homeContent", jsonString, 60);
-        }else{
+        } else {
             content = JSON.parseObject(homeContent, HomeContentResult.class);
         }
 
@@ -71,7 +86,7 @@ public class HomeController {
             UmsMember currentMember = memberService.getCurrentMember();
             userId = Optional.ofNullable(currentMember)
                     .map(UmsMember::getId).orElse(null);
-        }catch (Exception ignore){
+        } catch (Exception ignore) {
 
         }
 

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -85,6 +86,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private OmsOrderOperateHistoryMapper operateHistoryMapper;
     @Autowired
     private PmsProductMapper productMapper;
+    @Autowired
+    @Lazy
+    private DirectChargeService directChargeService;
+    @Autowired
+    private RedeemService redeemService;
 
     /*订单预计完成时间*/
     @Value("${order.hint.expectMinute}")
@@ -95,7 +101,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private SmsSender smsSender;
 
     @Override
-    public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds, Boolean useRedeemCode) {
+    public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
         ConfirmOrderResult result = new ConfirmOrderResult();
         //获取购物车信息
         UmsMember currentMember = memberService.getCurrentMember();
@@ -116,14 +122,6 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         //计算总金额、活动优惠、应付金额
         ConfirmOrderResult.CalcAmount calcAmount = calcCartAmount(cartPromotionItemList);
         result.setCalcAmount(calcAmount);
-        /*如果是用兑换券，要禁用所有优惠券，以及价格要把付款价格设置为0*/
-        if (Boolean.TRUE.equals(useRedeemCode)) {
-            calcAmount.setPayAmount(BigDecimal.ZERO);
-            List<SmsCouponHistoryDetail> disableCouponHistoryDetailList = result.getDisableCouponHistoryDetailList();
-            disableCouponHistoryDetailList.addAll(result.getCouponHistoryDetailList());
-            result.setDisableCouponHistoryDetailList(disableCouponHistoryDetailList);
-            result.setCouponHistoryDetailList(new ArrayList<>());
-        }
         return result;
     }
 
@@ -604,7 +602,29 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     public Map<String, Object> generateOrderWithAttribute(OrderParamWithAttribute orderParam) {
         cartItemService.updateAttribute(orderParam.getCartIds().get(0), orderParam.getAttributeBOS());
-        return generateOrder(orderParam);
+        Map<String, Object> stringObjectMap = generateOrder(orderParam);
+        OmsOrder order = (OmsOrder) stringObjectMap.get("order");
+        Assert.notNull(order, "未能成功创建订单");
+        String redeemCode = order.getRedeemCode();
+        List<OmsOrderItem> orderItemList = (List<OmsOrderItem>) stringObjectMap.get("orderItemList");
+        handleRedeemCode(redeemCode, order.getId(), order.getOrderSn(), orderItemList.get(0).getProductSkuId());
+        return stringObjectMap;
+    }
+
+    /*使用兑换码付款*/
+    private void handleRedeemCode(String redeemCode, Long orderId, String orderSn, Long skuId) {
+        OmsOrder order = orderMapper.selectByPrimaryKey(orderId);
+        redeemService.useRedeem(redeemCode, skuId, order.getPayerPhone(), orderSn);
+        paySuccess(orderId, 3);
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(2000L);
+                directChargeService.directCharge(orderSn);
+            } catch (Exception e) {
+                log.error("直充失败了", e);
+            }
+
+        });
     }
 
     @Override
