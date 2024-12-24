@@ -88,4 +88,9 @@ public class KOLPromoServiceImpl implements KOLPromoService {
     }
 
 
+    public List<SmsKolPromoConfig> allKol() {
+        SmsKolPromoConfigExample smsKolPromoConfigExample = new SmsKolPromoConfigExample();
+        smsKolPromoConfigExample.setOrderByClause("id desc");
+        return smsKolPromoConfigMapper.selectByExample(smsKolPromoConfigExample);
+    }
 }
