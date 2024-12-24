@@ -100,6 +100,9 @@ public class RedeemService {
             List<Long> list = skuStockMapper.selectByExample(pmsSkuStockExample).stream().map(PmsSkuStock::getId).toList();
             criteria.andSkuIdIn(list);
         }
+        if (redeemSearchVO.getSkuId() != null) {
+            criteria.andSkuIdEqualTo(redeemSearchVO.getSkuId());
+        }
         Page<RedeemCodeRecord> objects = PageHelper.startPage(redeemSearchVO.getPageNum(), redeemSearchVO.getPageSize())
                 .doSelectPage(() -> redeemCodeRecordMapper.selectByExample(redeemCodeRecordExample));
         return CommonPage.restPage(objects.getResult(), objects.getTotal());
