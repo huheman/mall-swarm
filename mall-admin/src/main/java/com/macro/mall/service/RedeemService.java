@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.io.OutputStreamWriter;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Function;
@@ -37,6 +38,7 @@ public class RedeemService {
     private PmsProductMapper productMapper;
     @Autowired
     private PmsProductCategoryMapper productCategoryMapper;
+    private static final List<String> csvHead = Arrays.asList("id","kol编码", "兑换码","使用状态", "所属游戏", "商品名称", "sku信息");
 
 
     // 可用的字符集，去掉了容易混淆的字符
@@ -161,5 +163,38 @@ public class RedeemService {
                 return dto;
             }
         }).toList();
+    }
+
+    @SneakyThrows
+    public void download(RedeemSearchVO queryParam, OutputStreamWriter outputStream) {
+        int currentPage = 1;
+        int pageSize = 100;
+        String head = String.join(",", csvHead) + "\n";
+        outputStream.write(head);
+        queryParam.setPageNum(currentPage);
+        queryParam.setPageSize(pageSize);
+        while (true) {
+            CommonPage<RedeemCodeRecord> list = page(queryParam);
+            List<FullRedeemCodeRecordDTO> transfer = transfer(list.getList());
+            for (FullRedeemCodeRecordDTO redeemCodeRecordDTO : transfer) {
+                List<String> tmp = new ArrayList<>();
+                tmp.add(redeemCodeRecordDTO.getId() + "");
+
+                tmp.add(redeemCodeRecordDTO.getKolId());
+                tmp.add(redeemCodeRecordDTO.getRedeemCode());
+                tmp.add(redeemCodeRecordDTO.getUseStatus());
+                tmp.add(redeemCodeRecordDTO.getGameName());
+                tmp.add(redeemCodeRecordDTO.getProductName());
+                tmp.add(redeemCodeRecordDTO.getSkuName());
+                outputStream.write(String.join(",", tmp) + "\n");
+            }
+            if (list.getTotal() <= (long) currentPage * pageSize) {
+                break;
+            } else {
+                currentPage++;
+                queryParam.setPageNum(currentPage);
+                queryParam.setPageSize(pageSize);
+            }
+        }
     }
 }
