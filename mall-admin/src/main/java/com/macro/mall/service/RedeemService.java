@@ -111,6 +111,9 @@ public class RedeemService {
     public List<FullRedeemCodeRecordDTO> transfer(List<RedeemCodeRecord> list) {
         Set<Long> skuIds = list.stream().map(RedeemCodeRecord::getSkuId).collect(Collectors.toSet());
         PmsSkuStockExample skuStockExample = new PmsSkuStockExample();
+        if (skuIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         skuStockExample.createCriteria().andIdIn(new ArrayList<>(skuIds));
         Map<Long, JSONObject> collect = skuStockMapper.selectByExample(skuStockExample).stream().collect(Collectors.toMap(new Function<PmsSkuStock, Long>() {
             @Override
