@@ -115,7 +115,7 @@ public class RedeemService {
             return Collections.emptyList();
         }
         skuStockExample.createCriteria().andIdIn(new ArrayList<>(skuIds));
-        Map<Long, JSONObject> collect = skuStockMapper.selectByExample(skuStockExample).stream().collect(Collectors.toMap(new Function<PmsSkuStock, Long>() {
+        Map<Long, JSONObject> collect = skuStockMapper.selectByExample(skuStockExample).parallelStream().collect(Collectors.toMap(new Function<PmsSkuStock, Long>() {
             @Override
             public Long apply(PmsSkuStock pmsSkuStock) {
                 return pmsSkuStock.getId();
