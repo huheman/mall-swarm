@@ -712,6 +712,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             // 如果是微信支付，就用微信退款方法
             wxPayClient.refund(omsOrder);
             return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
+        } else if (omsOrder.getPayType() == 3) {
+            // 如果是兑换码支付，就用兑换码退款方法
+            redeemService.refund(omsOrder.getOrderSn());
+            refundSuccess(omsOrder.getOrderSn());
+            return "已经把兑换码设置回未使用状态";
         }
         throw new IllegalArgumentException("订单付款方式错误，请联系管理员");
     }

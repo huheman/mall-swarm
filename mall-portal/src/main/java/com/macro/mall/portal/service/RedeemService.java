@@ -7,6 +7,7 @@ import com.macro.mall.model.RedeemCodeRecord;
 import com.macro.mall.model.RedeemCodeRecordExample;
 import com.macro.mall.portal.controller.vo.RedeemInfoVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -54,6 +55,20 @@ public class RedeemService {
         redeemInfoVO.setSkuId(redeemCodeRecord.getSkuId());
         redeemInfoVO.setKolId(redeemCodeRecord.getKolId());
         return redeemInfoVO;
+    }
+
+    public void refund(String orderSn) {
+        if (StringUtils.isEmpty(orderSn)) {
+            return;
+        }
+        RedeemCodeRecordExample recordExample = new RedeemCodeRecordExample();
+        recordExample.createCriteria().andUseOrderSnEqualTo(orderSn);
+        List<RedeemCodeRecord> redeemCodeRecords = redeemCodeRecordMapper.selectByExample(recordExample);
+        RedeemCodeRecord redeemCodeRecord = redeemCodeRecords.get(0);
+        redeemCodeRecord.setUseStatus("NOT_USED");
+        redeemCodeRecord.setUseOrderSn(null);
+        redeemCodeRecord.setUsePhone(null);
+        redeemCodeRecordMapper.updateByPrimaryKey(redeemCodeRecord);
     }
 }
 
