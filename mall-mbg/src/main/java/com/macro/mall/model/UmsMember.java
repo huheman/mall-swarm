@@ -84,6 +84,7 @@ public class UmsMember implements Serializable {
             properties = new JSONObject();
         }
         properties.set("first_invite_kol", firstInviteKol);
+        moreInfo = properties.toString();
     }
 
     public Long getId() {

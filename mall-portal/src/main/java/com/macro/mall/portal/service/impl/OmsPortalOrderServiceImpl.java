@@ -421,7 +421,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     private void doMoreForOrder(Long inviteUserId, Long buyer, String kolId) {
-        log.info("尝试发优惠券:{},{}", inviteUserId, buyer, kolId);
+        log.info("尝试发优惠券:{},{}，{}", inviteUserId, buyer, kolId);
 
         // 不是第一张订单不处理
         Long count = portalOrderDao.count(3, buyer);
