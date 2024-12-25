@@ -57,7 +57,7 @@ public class HomeController {
             RedeemInfoVO redeemInfoVO = redeemService.info(redeemCode);
             return CommonResult.success(redeemInfoVO);
         } catch (Exception e) {
-            return CommonResult.failed("兑换失败");
+            return CommonResult.failed(e.getMessage());
         }
     }
 
