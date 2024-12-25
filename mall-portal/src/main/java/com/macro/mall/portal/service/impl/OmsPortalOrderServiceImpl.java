@@ -606,13 +606,18 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrder order = (OmsOrder) stringObjectMap.get("order");
         Assert.notNull(order, "未能成功创建订单");
         String redeemCode = order.getRedeemCode();
-        List<OmsOrderItem> orderItemList = (List<OmsOrderItem>) stringObjectMap.get("orderItemList");
-        handleRedeemCode(redeemCode, order.getId(), order.getOrderSn(), orderItemList.get(0).getProductSkuId());
+        if (StringUtils.isNoneEmpty(redeemCode)) {
+            List<OmsOrderItem> orderItemList = (List<OmsOrderItem>) stringObjectMap.get("orderItemList");
+            handleRedeemCode(redeemCode, order.getId(), order.getOrderSn(), orderItemList.get(0).getProductSkuId());
+        }
         return stringObjectMap;
     }
 
     /*使用兑换码付款*/
     private void handleRedeemCode(String redeemCode, Long orderId, String orderSn, Long skuId) {
+        if (StringUtils.isEmpty(redeemCode)) {
+            return;
+        }
         OmsOrder order = orderMapper.selectByPrimaryKey(orderId);
         redeemService.useRedeem(redeemCode, skuId, order.getPayerPhone(), orderSn);
         paySuccess(orderId, 3);
