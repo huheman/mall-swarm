@@ -52,6 +52,7 @@ public class RedeemService {
         redeemInfoVO.setRedeemCode(redeemCode);
         redeemInfoVO.setProductId(pmsSkuStock.getProductId());
         redeemInfoVO.setSkuId(redeemCodeRecord.getSkuId());
+        redeemInfoVO.setKolId(redeemCodeRecord.getKolId());
         return redeemInfoVO;
     }
 }
