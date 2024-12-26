@@ -288,27 +288,39 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         DirectCharge directCharge = selectByOrderSN(orderSN);
         Assert.notNull(directCharge, "未找到编码未" + orderSN + "的直充记录");
         Assert.state(directCharge.getChargeStatus() == 3, "只能针对直充失败的进行重试");
-        Assert.state(org.apache.commons.lang3.StringUtils.startsWithAny(productSkuCode, PRE_FIX_WYTD), "只有charge开头的直充类型才需要重试");
+        Assert.state(org.apache.commons.lang3.StringUtils.startsWithAny(productSkuCode, PRE_FIX_WYTD, PRE_FIX_YZJ), "只有charge开头的直充类型才需要重试");
+        String prefix = productSkuCode.split("-")[0];
         String chargeId = productSkuCode.split("-")[1];
         String moreInfoSrr = directCharge.getMoreInfo();
         JSONObject moreInfo = JSON.parseObject(moreInfoSrr);
         Map<String, String> productAttrMap = asAttrMap(omsOrderItem.getProductAttr());
-        List<String> subOrderSns = new ArrayList<>();
-        for (String subOrderSN : moreInfo.keySet()) {
-            if (moreInfo.getString(subOrderSN).equals("waiting")) {
-                subOrderSns.add(subOrderSN);
-            }
-        }
-        Assert.notEmpty(subOrderSns, "没有需要重试的订单");
-        directCharge.setChargeStatus(1);
-        directCharge.setFailReason("");
-        directChargeMapper.updateByPrimaryKey(directCharge);
         try {
-            for (String subOrderSn : subOrderSns) {
-                wytdChargeService.createOrder(Long.valueOf(chargeId), 1,
+            if (prefix.equals(PRE_FIX_WYTD)) {
+                List<String> subOrderSns = new ArrayList<>();
+                for (String subOrderSN : moreInfo.keySet()) {
+                    if (moreInfo.getString(subOrderSN).equals("waiting")) {
+                        subOrderSns.add(subOrderSN);
+                    }
+                }
+                Assert.notEmpty(subOrderSns, "没有需要重试的订单");
+                directCharge.setChargeStatus(1);
+                directCharge.setFailReason("");
+                directChargeMapper.updateByPrimaryKey(directCharge);
+                for (String subOrderSn : subOrderSns) {
+                    wytdChargeService.createOrder(Long.valueOf(chargeId), 1,
+                            productAttrMap.get("areaServer"),
+                            productAttrMap.get("server"),
+                            productAttrMap.get("username"), subOrderSn);
+                }
+            } else if (prefix.equals(PRE_FIX_YZJ)) {
+                directCharge.setChargeStatus(1);
+                directCharge.setFailReason("");
+                directChargeMapper.updateByPrimaryKey(directCharge);
+                String buyCount = productAttrMap.get("buyCount");
+                yzjChargeService.createOrder(Long.valueOf(chargeId), omsOrderItem.getProductQuantity(),
                         productAttrMap.get("areaServer"),
                         productAttrMap.get("server"),
-                        productAttrMap.get("username"), subOrderSn);
+                        productAttrMap.get("username"), extractNumber(buyCount), omsOrderItem.getOrderSn());
             }
         } catch (Exception e) {
             log.error("尝试直充失败了", e);
