@@ -7,19 +7,22 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient("mall-portal")
 public interface PortalOrderService {
     @PostMapping(value = "/order/confirmReceiveOrder")
-    CommonResult confirmReceiveOrder(@RequestParam("orderId")Long orderId);
+    CommonResult confirmReceiveOrder(@RequestParam("orderId") Long orderId);
 
     @GetMapping("/wxpay/ship")
-    CommonResult<Boolean> ship(@RequestParam("orderId")Long orderId);
+    CommonResult<Boolean> ship(@RequestParam("orderId") Long orderId);
 
     @PostMapping("/order/refund")
-    CommonResult<String> refund(@RequestParam("orderId") Long id,@RequestParam("reason")String reason);
+    CommonResult<String> refund(@RequestParam("orderId") Long id, @RequestParam("reason") String reason);
 
     @PostMapping("/order/close")
     CommonResult<Integer> closeOrder(@RequestParam("orderId") Long orderId, @RequestParam("operator") String operator, @RequestParam("reason") String reason);
 
     @RequestMapping(value = "/member/coupon/addByApi", method = RequestMethod.POST)
     CommonResult addByApi(@RequestParam Long couponId, @RequestParam String phone);
+
+    @GetMapping("/directCharge/retry")
+    CommonResult<String> retry(@RequestParam String orderSN);
 
 
     @GetMapping("/wxpay/qrcode")

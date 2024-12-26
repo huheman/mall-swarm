@@ -11,4 +11,6 @@ public interface DirectChargeService {
     String chargeStatus(String orderSN);
 
     void yzjChargeSuccess(String data);
+
+    void retry(String orderSN);
 }

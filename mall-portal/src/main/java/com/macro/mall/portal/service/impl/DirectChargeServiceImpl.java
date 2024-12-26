@@ -100,28 +100,8 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             log.info("充值记录已经存在，且充值状态不是充值失败，不处理了{}", directCharge);
             return;
         }
-        String productAttr = omsOrderItem.getProductAttr();
-        // 如果有多个orderItem只取第一个
-        Map<String, String> productAttrMap = new HashMap<>();
-        JSONArray spData = JSON.parseArray(productAttr);
-        for (int i = 0; i < spData.size(); i++) {
-            JSONObject unit = spData.getJSONObject(i);
-            String value = unit.getString("value");
-            if (StringUtils.isNoneEmpty(value)) {
-                int idx = value.indexOf('-');
-                if (idx > 0 && value.length() - 1 > idx) {
-                    value = value.substring(idx + 1);
-                }
-                String key = unit.getString("key");
-                int keyIdx = key.indexOf('-');
-                if (keyIdx > 0 && key.length() - 1 > keyIdx) {
-                    productAttrMap.put(key.substring(0, keyIdx), value);
-                    productAttrMap.put(key.substring(keyIdx + 1), value);
-                } else {
-                    productAttrMap.put(key, value);
-                }
-            }
-        }
+        Map<String, String> productAttrMap = asAttrMap(omsOrderItem.getProductAttr());
+
         try {
             if (prefix.equals(PRE_FIX_WYTD)) {
                 JSONObject moreInfo = new JSONObject();
@@ -154,6 +134,31 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
         }
 
+    }
+
+    private Map<String, String> asAttrMap(String productAttr) {
+        // 如果有多个orderItem只取第一个
+        Map<String, String> productAttrMap = new HashMap<>();
+        JSONArray spData = JSON.parseArray(productAttr);
+        for (int i = 0; i < spData.size(); i++) {
+            JSONObject unit = spData.getJSONObject(i);
+            String value = unit.getString("value");
+            if (StringUtils.isNoneEmpty(value)) {
+                int idx = value.indexOf('-');
+                if (idx > 0 && value.length() - 1 > idx) {
+                    value = value.substring(idx + 1);
+                }
+                String key = unit.getString("key");
+                int keyIdx = key.indexOf('-');
+                if (keyIdx > 0 && key.length() - 1 > keyIdx) {
+                    productAttrMap.put(key.substring(0, keyIdx), value);
+                    productAttrMap.put(key.substring(keyIdx + 1), value);
+                } else {
+                    productAttrMap.put(key, value);
+                }
+            }
+        }
+        return productAttrMap;
     }
 
     private Integer extractNumber(String input) {
@@ -272,6 +277,48 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             log.error("咔之家直充失败了");
             onDirectChargeFail(e.getMessage(), directCharge);
         }
+    }
+
+    @Override
+    @SneakyThrows
+    public void retry(String orderSN) {
+        Assert.notEmpty(orderSN, "orderSN is null or empty");
+        OmsOrderItem omsOrderItem = omsPortalOrderService.selectOrderItemByOrderSN(orderSN);
+        String productSkuCode = omsOrderItem.getProductSkuCode();
+        DirectCharge directCharge = selectByOrderSN(orderSN);
+        Assert.notNull(directCharge, "未找到编码未" + orderSN + "的直充记录");
+        Assert.state(directCharge.getChargeStatus() == 3, "只能针对直充失败的进行重试");
+        Assert.state(org.apache.commons.lang3.StringUtils.startsWithAny(productSkuCode, PRE_FIX_WYTD), "只有charge开头的直充类型才需要重试");
+        String chargeId = productSkuCode.split("-")[1];
+        String moreInfoSrr = directCharge.getMoreInfo();
+        JSONObject moreInfo = JSON.parseObject(moreInfoSrr);
+        Map<String, String> productAttrMap = asAttrMap(omsOrderItem.getProductAttr());
+        List<String> subOrderSns = new ArrayList<>();
+        for (String subOrderSN : moreInfo.keySet()) {
+            if (moreInfo.getString(subOrderSN).equals("waiting")) {
+                subOrderSns.add(subOrderSN);
+            }
+        }
+        Assert.notEmpty(subOrderSns, "没有需要重试的订单");
+        directCharge.setChargeStatus(1);
+        directCharge.setFailReason("");
+        directChargeMapper.updateByPrimaryKey(directCharge);
+        try {
+            for (String subOrderSn : subOrderSns) {
+                wytdChargeService.createOrder(Long.valueOf(chargeId), 1,
+                        productAttrMap.get("areaServer"),
+                        productAttrMap.get("server"),
+                        productAttrMap.get("username"), subOrderSn);
+            }
+        } catch (Exception e) {
+            log.error("尝试直充失败了", e);
+            directCharge.setChargeStatus(3);
+            directCharge.setFailReason(StringUtils.substring(e.getMessage(), 0, 300));
+            directChargeMapper.updateByPrimaryKey(directCharge);
+            throw e;
+        }
+
+
     }
 
 

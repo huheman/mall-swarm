@@ -17,10 +17,15 @@ public class DirectChargeController {
     @Autowired
     private DirectChargeService directChargeService;
 
-    // @GetMapping("/retry")
+    @GetMapping("/retry")
     public CommonResult<String> retry(String orderSN) throws Exception {
-        directChargeService.directCharge(orderSN);
-        return CommonResult.success("ok");
+        try {
+            directChargeService.retry(orderSN);
+            return CommonResult.success("ok");
+        } catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
+        }
+
     }
 
 

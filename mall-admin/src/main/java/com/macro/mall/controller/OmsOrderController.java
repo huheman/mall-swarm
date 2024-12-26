@@ -71,6 +71,13 @@ public class OmsOrderController {
         return portalOrderService.refund(orderId, reason);
     }
 
+    @Operation(summary = "重试直充")
+    @PostMapping("/retry/{orderSN}")
+    @ResponseBody
+    public CommonResult<String> retry(@PathVariable("orderSN") String orderSN) {
+        return portalOrderService.retry(orderSN);
+    }
+
     @Operation(summary = "批量发货")
     @RequestMapping(value = "/update/delivery", method = RequestMethod.POST)
     @ResponseBody
