@@ -302,7 +302,9 @@ public class DirectChargeServiceImpl implements DirectChargeService {
                         subOrderSns.add(subOrderSN);
                     }
                 }
-                Assert.notEmpty(subOrderSns, "没有需要重试的订单");
+                if (subOrderSns.isEmpty()) {
+                    return;
+                }
                 directCharge.setChargeStatus(1);
                 directCharge.setFailReason("");
                 directChargeMapper.updateByPrimaryKey(directCharge);
