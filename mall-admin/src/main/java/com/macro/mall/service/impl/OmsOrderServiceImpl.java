@@ -71,6 +71,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             if (directCharge != null) {
                 omsOrderWithDirectCharge.setDirectChargeStatus(directCharge.getChargeStatus());
                 omsOrderWithDirectCharge.setDirectChargeFailReason(directCharge.getFailReason());
+                omsOrderWithDirectCharge.setDirectChargeDetail(directCharge.getMoreInfo());
             }
             UmsMember umsMember = memberMap.get(omsOrder.getMemberId());
             if (umsMember != null) {

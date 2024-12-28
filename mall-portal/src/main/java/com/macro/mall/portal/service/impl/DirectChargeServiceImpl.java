@@ -96,7 +96,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             directCharge.setChargeStatus(1);
             directCharge.setCreateTime(new Date());
             directChargeMapper.insert(directCharge);
-        } else if (directCharge.getChargeStatus() != 3) {
+        } else {
             log.info("充值记录已经存在，且充值状态不是充值失败，不处理了{}", directCharge);
             return;
         }
@@ -207,7 +207,7 @@ public class DirectChargeServiceImpl implements DirectChargeService {
             log.info("userOrderId{}修改后的结果是{}", directCharge);
         } catch (Exception e) {
             log.error("直充回调失败了", e);
-            onWytdFail(directCharge, oriOrderSN, e.getMessage());
+            onWytdFail(directCharge, oriOrderSN);
         } finally {
             redisService.releaseLock(lockKey);
             log.info("userOrderId{} 释放了锁", userOrderId);
@@ -215,10 +215,10 @@ public class DirectChargeServiceImpl implements DirectChargeService {
         }
     }
 
-    private void onWytdFail(DirectCharge directCharge, String oriOrderSN, String message) {
+    private void onWytdFail(DirectCharge directCharge, String oriOrderSN) {
         String moreInfo = directCharge.getMoreInfo();
         JSONObject moreInfoJson = JSON.parseObject(moreInfo);
-        moreInfoJson.put(oriOrderSN, "fail:" + StringUtils.substring(message, 0, 30));
+        moreInfoJson.put(oriOrderSN, "fail");
         directCharge.setMoreInfo(moreInfoJson.toJSONString());
         directChargeMapper.updateByPrimaryKey(directCharge);
         String failReason = StringUtils.trimToEmpty(directCharge.getFailReason()) + "订单" + oriOrderSN + "充值失败。";
@@ -245,10 +245,12 @@ public class DirectChargeServiceImpl implements DirectChargeService {
     }
 
     private void onDirectChargeFail(String failReason, DirectCharge directCharge) {
+        if (directCharge.getChargeStatus() != 3) {
+            CompletableFuture.runAsync(() -> smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId));
+        }
         directCharge.setChargeStatus(3);
         directCharge.setFailReason(StringUtils.substring(failReason, 0, 300));
         directChargeMapper.updateByPrimaryKey(directCharge);
-        smsSender.send(Arrays.stream(adminPhones.split(",")).toList(), Collections.EMPTY_LIST, directChargeFailId);
     }
 
     public void yzjChargeSuccess(String data) {

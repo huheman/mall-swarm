@@ -688,7 +688,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     @SneakyThrows
-    public String refund(Long orderId, String reason) {
+    public String refund(Long orderId, String reason,Double amount) {
         OmsOrder omsOrder = orderMapper.selectByPrimaryKey(orderId);
         Assert.notNull(omsOrder.getStatus() == 1, "只有待发货的订单可以发起退款");
         DirectChargeDomain directCharge = directChargeDao.selectByOrderSN(omsOrder.getOrderSn());
@@ -705,12 +705,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         // 如果是支付宝退款，就用支付宝退款方法
         if (omsOrder.getPayType() == 1) {
             // 支付宝是同步退款的
-            alipayClient.refund(omsOrder);
+            alipayClient.refund(omsOrder,amount);
             refundSuccess(omsOrder.getOrderSn());
             return "支付宝退款成功";
         } else if (omsOrder.getPayType() == 2) {
             // 如果是微信支付，就用微信退款方法
-            wxPayClient.refund(omsOrder);
+            wxPayClient.refund(omsOrder,amount);
             return "微信退款发起成功，在退款完成后，此订单会变为已退款状态";
         } else if (omsOrder.getPayType() == 3) {
             // 如果是兑换码支付，就用兑换码退款方法

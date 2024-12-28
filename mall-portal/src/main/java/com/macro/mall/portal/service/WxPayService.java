@@ -17,7 +17,7 @@ public interface WxPayService {
 
     void uploadShipping(OmsOrder orderId);
 
-    void refund(OmsOrder omsOrder);
+    void refund(OmsOrder omsOrder,Double amount);
 
     RefundNotification notifyRefund(String requestBody, String signature, String serial, String nonc, String wechatTimestamp, String signType);
 

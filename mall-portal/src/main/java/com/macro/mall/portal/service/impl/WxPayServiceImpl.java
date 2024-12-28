@@ -183,16 +183,23 @@ public class WxPayServiceImpl implements WxPayService {
 
     /*https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_9.shtml*/
     @Override
-    public void refund(OmsOrder omsOrder) {
+    public void refund(OmsOrder omsOrder, Double amount) {
         CreateRequest createRequest = new CreateRequest();
         createRequest.setOutTradeNo(omsOrder.getOrderSn());
         createRequest.setOutRefundNo(omsOrder.getOrderSn());
         createRequest.setNotifyUrl(refundNotifyUrl);
         long payAmount = omsOrder.getPayAmount().multiply(new BigDecimal("100")).longValue();
+
+        BigDecimal refundAmount = omsOrder.getPayAmount();
+        if (amount != null) {
+            Assert.state(new BigDecimal(amount).compareTo(refundAmount) <= 0, "退款金额不能大于订单金额");
+            refundAmount = new BigDecimal(amount);
+        }
+        long refundAmountL = refundAmount.multiply(new BigDecimal("100")).longValue();
         AmountReq amountReq = new AmountReq();
         amountReq.setTotal(payAmount);
         amountReq.setCurrency("CNY");
-        amountReq.setRefund(payAmount);
+        amountReq.setRefund(refundAmountL);
         createRequest.setAmount(amountReq);
         Refund refund = refundService.create(createRequest);
         Assert.state(refund.getStatus() == Status.SUCCESS || refund.getStatus() == Status.PROCESSING, "当前订单状态为" + refund.getStatus());
@@ -297,7 +304,7 @@ public class WxPayServiceImpl implements WxPayService {
                 throw new IOException("Unexpected code " + response);
             }
             String string = response.body().string();
-            log.info("get Phone response{}",string);
+            log.info("get Phone response{}", string);
             // 获取响应体内容
             JSONObject entries = new JSONObject(string);
             return entries.getJSONObject("phone_info").getStr("purePhoneNumber");

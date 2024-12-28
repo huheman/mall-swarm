@@ -13,7 +13,7 @@ public interface PortalOrderService {
     CommonResult<Boolean> ship(@RequestParam("orderId") Long orderId);
 
     @PostMapping("/order/refund")
-    CommonResult<String> refund(@RequestParam("orderId") Long id, @RequestParam("reason") String reason);
+    CommonResult<String> refund(@RequestParam("orderId") Long id, @RequestParam("reason") String reason,@RequestParam(value = "amount", required = false) Double amount);
 
     @PostMapping("/order/close")
     CommonResult<Integer> closeOrder(@RequestParam("orderId") Long orderId, @RequestParam("operator") String operator, @RequestParam("reason") String reason);

@@ -32,5 +32,5 @@ public interface AlipayService {
      */
     String webPay(AliPayParam aliPayParam,OmsOrder order) throws Exception;
 
-    void refund(OmsOrder order) throws Exception;
+    void refund(OmsOrder order,Double amount) throws Exception;
 }

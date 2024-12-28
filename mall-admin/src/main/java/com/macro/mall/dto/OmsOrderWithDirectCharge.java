@@ -8,4 +8,5 @@ public class OmsOrderWithDirectCharge extends OmsOrder {
     private Integer directChargeStatus;
     private String directChargeFailReason;
     private String firstInviteKol;
+    private String directChargeDetail;
 }

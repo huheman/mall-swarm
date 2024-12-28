@@ -13,18 +13,15 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
-import com.macro.mall.mapper.OmsOrderMapper;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.portal.config.AlipayConfig;
 import com.macro.mall.portal.domain.AliPayParam;
 import com.macro.mall.portal.service.AlipayService;
-import com.macro.mall.portal.service.DirectChargeService;
-import com.macro.mall.portal.service.OmsPortalOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -55,7 +52,7 @@ public class AlipayServiceImpl implements AlipayService {
         log.info("回调签名详情:{}", params);
         if ("TRADE_SUCCESS".equals(params.get("trade_status"))) {
             return params.get("out_trade_no");
-        }else{
+        } else {
             log.info("支付宝支付失败{}", params);
             // 如果不是支付成功，就不返回了
             return "";
@@ -86,7 +83,7 @@ public class AlipayServiceImpl implements AlipayService {
             log.error("查询支付宝账单异常！", e);
             throw e;
         }
-         Assert.state(response.isSuccess(), "查询支付宝账单失败！" + response.getMsg());
+        Assert.state(response.isSuccess(), "查询支付宝账单失败！" + response.getMsg());
         return response.getTradeStatus();
     }
 
@@ -126,7 +123,7 @@ public class AlipayServiceImpl implements AlipayService {
 
 
     /*https://opendocs.alipay.com/open/4b7cc5db_alipay.trade.refund?scene=common&pathHash=d98b006d*/
-    public void refund(OmsOrder order) throws Exception {
+    public void refund(OmsOrder order, Double amount) throws Exception {
         // 构造请求参数以调用接口
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         AlipayTradeRefundModel model = new AlipayTradeRefundModel();
@@ -136,7 +133,12 @@ public class AlipayServiceImpl implements AlipayService {
 
 
         // 设置退款金额
-        model.setRefundAmount(order.getPayAmount().stripTrailingZeros().toPlainString());
+        BigDecimal payAmount = order.getPayAmount();
+        if (amount != null) {
+            Assert.state(new BigDecimal(amount).compareTo(payAmount) <= 0, "退款金额不能大于订单金额");
+            payAmount = new BigDecimal(amount);
+        }
+        model.setRefundAmount(payAmount.stripTrailingZeros().toPlainString());
 
         // 设置退款原因说明
         model.setRefundReason("正常退款");

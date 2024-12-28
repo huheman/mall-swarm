@@ -87,7 +87,7 @@ public interface OmsPortalOrderService {
     void recordCards(String orderSN,String cardInfo);
 
     @Transactional
-    String refund(Long id,String reason);
+    String refund(Long id,String reason,Double amount);
 
     void refundSuccess(String orderSN);
 
